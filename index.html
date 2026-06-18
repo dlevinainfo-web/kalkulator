@@ -17,7 +17,9 @@
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; min-height: 100vh; padding: 2rem 1rem 4rem; }
   .page { max-width: 760px; margin: 0 auto; }
   .header { margin-bottom: 1.5rem; }
-  .header-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: .5rem; }
+  .header-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: .5rem; display: inline-block; text-decoration: none; cursor: pointer; }
+  .header-eyebrow:hover { text-decoration: underline; }
+  .header-eyebrow.disabled { cursor: default; opacity: .55; pointer-events: none; text-transform: none; letter-spacing: normal; font-weight: 500; }
   .header h1 { font-size: 26px; font-weight: 600; color: var(--text); letter-spacing: -.01em; }
 
   /* Tabs */
@@ -28,6 +30,10 @@
   /* Status bar */
   .status-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .6rem 1rem; margin-bottom: 1rem; font-size: 13px; flex-wrap: wrap; }
   .status-left { display: flex; align-items: center; gap: 8px; color: var(--text2); }
+  .status-right { display: flex; align-items: center; gap: 8px; }
+  .btn-save-manual { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; font-size: 12px; font-family: inherit; background: var(--surface); color: var(--text2); border: 1px solid var(--border2); border-radius: var(--radius-sm); cursor: pointer; transition: background .15s; white-space: nowrap; }
+  .btn-save-manual:hover { background: var(--surface2); }
+  .btn-save-manual:disabled { opacity: .6; cursor: default; }
   .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
   .status-dot.green { background: #2d7a4f; }
   .status-dot.yellow { background: #d97706; }
@@ -97,6 +103,11 @@
   .comp-high   { background: #fee2e2; color: #991b1b; }
   .comp-xhigh  { background: #fce7f3; color: #9d174d; }
 
+  .row-counter { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  .row-counter button { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border2); background: var(--surface2); color: var(--text); font-size: 13px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .15s; }
+  .row-counter button:hover { background: var(--accent-light); border-color: var(--accent); }
+  .row-counter button:disabled { opacity: .3; cursor: default; }
+  .row-counter span { font-size: 13px; font-weight: 500; min-width: 14px; text-align: center; color: var(--text); }
   .row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
   .row:last-child { border-bottom: none; }
   .row-check { width: 18px; height: 18px; flex-shrink: 0; accent-color: var(--accent); cursor: pointer; }
@@ -106,23 +117,92 @@
 
   .tip-btn { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--border2); background: var(--surface2); color: var(--text3); font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: border-color .15s, color .15s; line-height: 1; }
   .tip-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .tip-popup { display: none; position: absolute; z-index: 100; background: var(--text); color: #fff; font-size: 13px; line-height: 1.55; padding: 10px 13px; border-radius: var(--radius-sm); max-width: 320px; box-shadow: 0 4px 16px rgba(0,0,0,.18); pointer-events: none; white-space: pre-line; }
+  .tip-popup { display: none; position: absolute; z-index: 100; background: var(--text); color: #fff; font-size: 13px; line-height: 1.55; padding: 10px 13px; border-radius: var(--radius-sm); max-width: 320px; box-shadow: 0 4px 16px rgba(0,0,0,.18); pointer-events: none; white-space: pre-line; right: 0; top: 28px; left: auto; }
   .tip-popup.visible { display: block; }
-  .tip-popup::before { content: ''; position: absolute; top: -5px; left: 12px; width: 10px; height: 10px; background: var(--text); transform: rotate(45deg); border-radius: 2px; }
+  .tip-popup::before { content: ''; position: absolute; top: -5px; right: 8px; left: auto; width: 10px; height: 10px; background: var(--text); transform: rotate(45deg); border-radius: 2px; }
   .row-wrap { position: relative; }
 
   .total-box { background: var(--accent-light); border: 1px solid #c9c4f0; border-radius: var(--radius-sm); padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
   .total-box-label { font-size: 13px; color: var(--accent-text); }
   .total-box-value { font-size: 24px; font-weight: 700; color: var(--accent-text); }
 
-  .actions { display: flex; gap: 10px; flex-wrap: wrap; }
-  .btn-save { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; font-size: 14px; font-weight: 500; font-family: inherit; background: var(--accent); color: #fff; border: none; border-radius: var(--radius-sm); cursor: pointer; transition: opacity .15s; }
-  .btn-save:hover { opacity: .88; }
-  .btn-save:disabled { opacity: .5; cursor: default; }
+  .staff-banner { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .85rem 1rem; margin-bottom: 1.1rem; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .staff-banner-text { min-width: 180px; }
+  .staff-banner-label { display: block; font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer; }
+  .staff-banner-hint { font-size: 11.5px; color: var(--text3); margin-top: 2px; }
+  .staff-banner input { width: 70px; height: 40px; font-size: 15px; font-weight: 600; text-align: center; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); outline: none; transition: border-color .15s; flex-shrink: 0; }
+  .staff-banner input:focus { border-color: var(--accent); }
+
   .btn-smeta { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; font-size: 14px; font-weight: 500; font-family: inherit; background: var(--surface); color: var(--text); border: 1px solid var(--border2); border-radius: var(--radius-sm); cursor: pointer; transition: background .15s; }
   .btn-smeta:hover { background: var(--surface2); }
 
-  /* Массовый result cards */
+  /* Кастомные поля */
+  .custom-row { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .custom-row-inner { display: grid; grid-template-columns: 1fr 140px; gap: 8px; margin-bottom: 4px; }
+  .custom-row-inner input { height: 36px; font-size: 13px; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 0 10px; outline: none; background: var(--surface); color: var(--text); transition: border-color .15s; }
+  .custom-row-inner input:focus { border-color: var(--accent); }
+  .custom-row-inner input::placeholder { color: var(--text3); }
+
+  /* Раздел менеджера */
+  .manager-section { margin-top: 1.5rem; }
+  .manager-section-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); margin-bottom: 1rem; padding: .6rem 1rem; background: var(--accent-light); border-radius: var(--radius-sm); border-left: 3px solid var(--accent); }
+  .tariff-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; margin-bottom: 1rem; }
+  @media (max-width: 700px) { .tariff-cards { grid-template-columns: 1fr; } }
+  .tariff-card-sel { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: .9rem 1rem; cursor: pointer; transition: border-color .15s, background .15s; position: relative; }
+  .tariff-card-sel:hover { border-color: var(--border2); }
+  .tariff-card-sel.sel-green { border-color: #a8d9bc; background: #f0faf4; }
+  .tariff-card-sel.sel-blue  { border-color: #93c5fd; background: #eff6ff; }
+  .tariff-card-sel.sel-purple{ border-color: #c4b5fd; background: #f5f3ff; }
+  .tariff-card-sel.selected  { box-shadow: 0 0 0 2px var(--accent); }
+  .tariff-card-sel input[type=radio] { position: absolute; opacity: 0; width: 0; height: 0; }
+  .tc-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; }
+  .tc-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+  .sel-green .tc-badge { background: #d1fae5; color: #065f46; }
+  .sel-blue  .tc-badge { background: #dbeafe; color: #1e40af; }
+  .sel-purple.tc-badge, .sel-purple .tc-badge { background: #ede9fe; color: #5b21b6; }
+  .tc-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .tc-detail { font-size: 11.5px; color: var(--text2); line-height: 1.5; }
+  .tc-detail .sep { color: var(--text3); margin: 0 1px; }
+  .tc-restriction { display: inline-block; margin-top: 7px; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: var(--radius-sm); background: #fdf0ee; border: 1px solid #f5c6c0; color: #c0392b; }
+  .tariff-card-sel.tc-locked { opacity: .45; cursor: not-allowed; pointer-events: none; }
+
+
+  .discount-section { margin-bottom: 1rem; }
+  .discount-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: .75rem; }
+  @media (max-width: 500px) { .discount-grid { grid-template-columns: 1fr; } }
+  .discount-card { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .75rem 1rem; }
+  .discount-card label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px; }
+  .discount-card select { width: 100%; height: 36px; font-size: 13px; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 0 8px; outline: none; background: var(--surface); color: var(--text); cursor: pointer; }
+  .discount-custom-wrap { border: 1px solid #f5c6c0; border-radius: var(--radius-sm); padding: .75rem 1rem; background: #fdf0ee; }
+  .discount-custom-wrap label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px; }
+  .discount-custom-row { display: grid; grid-template-columns: 80px 1fr; gap: 8px; align-items: center; }
+  .discount-custom-row input { height: 36px; font-size: 14px; font-weight: 500; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 0 10px; outline: none; background: var(--surface); color: var(--text); }
+  .discount-custom-warn { font-size: 11px; color: #c0392b; margin-top: 5px; }
+
+  /* Смета менеджера */
+  .pay-parts { display: grid; grid-template-columns: repeat(3,1fr); gap: .75rem; margin-bottom: 1rem; }
+  .pay-parts.cols-4 { grid-template-columns: repeat(4,1fr); }
+  @media (max-width: 700px) { .pay-parts.cols-4 { grid-template-columns: repeat(2,1fr); } }
+  @media (max-width: 500px) { .pay-parts, .pay-parts.cols-4 { grid-template-columns: 1fr; } }
+  .pay-part { border-radius: var(--radius-sm); padding: .9rem 1rem; }
+  .pay-part.pp-green  { background: #f0faf4; border: 1.5px solid #a8d9bc; }
+  .pay-part.pp-blue   { background: #eff6ff; border: 1.5px solid #93c5fd; }
+  .pay-part.pp-purple { background: #f5f3ff; border: 1.5px solid #c4b5fd; }
+  .pay-part.pp-gray   { background: var(--surface2); border: 1px solid var(--border); opacity: .45; }
+  .pay-part.pp-total  { background: var(--surface2); border: 1px solid var(--border2); }
+  .pp-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text2); margin-bottom: 6px; }
+  .pp-amount { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .pp-green .pp-amount { color: #065f46; }
+  .pp-blue  .pp-amount { color: #1e40af; }
+  .pp-purple .pp-amount { color: #5b21b6; }
+  .pp-sub { font-size: 11.5px; color: var(--text2); }
+  .pp-note { font-size: 10.5px; color: var(--text3); margin-top: 6px; line-height: 1.4; }
+  .smeta-pay-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); margin-bottom: .75rem; margin-top: 1.25rem; }
+  .smeta-discount-note { font-size: 11.5px; color: var(--text3); margin: -8px 0 12px; }
+  .btn-magic { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; font-size: 12px; font-family: inherit; background: #eff6ff; color: #1e40af; border: 1px solid #93c5fd; border-radius: var(--radius-sm); cursor: pointer; margin-top: 6px; transition: background .15s; }
+  .btn-magic:hover { background: #dbeafe; }
+  .manager-total-row { display: flex; justify-content: space-between; font-size: 14px; padding: 4px 0; color: var(--text2); }
+  .manager-total-row.final { font-size: 17px; font-weight: 700; color: var(--text); border-top: 1px solid var(--border); padding-top: 8px; margin-top: 4px; }
   .mass-result { display: none; margin-top: 1rem; }
   .mass-result.visible { display: block; }
   .mass-cards { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
@@ -145,8 +225,7 @@
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   /* СМЕТА */
-  .smeta { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-top: 1.25rem; box-shadow: var(--shadow); overflow: hidden; }
-  .smeta.visible { display: block; }
+  .smeta { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-top: 1.25rem; box-shadow: var(--shadow); overflow: hidden; }
   .smeta-top { background: var(--text); color: #fff; padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
   .smeta-top-title { font-size: 16px; font-weight: 600; line-height: 1.3; }
   .smeta-top-date { font-size: 12px; opacity: .55; margin-top: 3px; }
@@ -161,6 +240,9 @@
   .smeta-item-price.free { color: var(--green); }
   .smeta-divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
   .smeta-subtotal { display: flex; justify-content: space-between; align-items: center; background: var(--surface2); border-radius: var(--radius-sm); padding: .9rem 1.1rem; margin-bottom: 1.5rem; }
+  .smeta-subtotal.final { background: var(--accent-light); margin-bottom: 0; }
+  .smeta-subtotal.final .smeta-subtotal-value { color: var(--accent-text); font-size: 20px; }
+  .smeta-subtotal.final .smeta-subtotal-label { color: var(--accent-text); font-weight: 600; }
   .smeta-subtotal-label { font-size: 14px; color: var(--text2); }
   .smeta-subtotal-value { font-size: 18px; font-weight: 700; color: var(--text); }
   .smeta-tariffs-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); margin-bottom: .75rem; }
@@ -186,6 +268,9 @@
   .st-disc-row .dlbl { color: var(--text2); }
   .st-disc-row .dval { color: var(--text); font-weight: 500; font-size: 11px; text-align: right; }
   .st-note { font-size: 11px; color: var(--text3); margin-top: 6px; font-style: italic; }
+  .st-list-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text3); margin-bottom: 3px; margin-top: 6px; }
+  .st-list { font-size: 11px; color: var(--text2); margin: 0; padding-left: 14px; line-height: 1.5; }
+  .st-list li { margin-bottom: 2px; }
   .smeta-hint { font-size: 11.5px; color: var(--text3); padding-top: .75rem; border-top: 1px solid var(--border); text-align: center; line-height: 1.5; }
 
   @media print {
@@ -200,7 +285,7 @@
 <body>
 <div class="page">
   <div class="header">
-    <div class="header-eyebrow">Рекрутинговое агентство</div>
+    <a class="header-eyebrow disabled" id="header-link" target="_blank" rel="noopener">Ссылка появится после сохранения</a>
     <h1>Калькулятор подбора</h1>
   </div>
 
@@ -218,10 +303,13 @@
       <span id="status-text">Новый расчёт</span>
       <span class="status-id" id="status-id"></span>
     </div>
-    <button class="btn-copy-link" id="btn-copy-link" onclick="copyLink()" style="display:none">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-      Скопировать ссылку
-    </button>
+    <div class="status-right">
+      <button class="btn-save-manual" id="btn-save-manual" onclick="saveData()">Сохранить вручную</button>
+      <button class="btn-copy-link" id="btn-copy-link" onclick="copyLink()" style="display:none">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Скопировать ссылку
+      </button>
+    </div>
   </div>
 
   <!-- ===================== ЭКСПЕРТИЗА ===================== -->
@@ -230,7 +318,7 @@
     <div class="card">
       <div class="card-title">Название вакансии</div>
       <div class="field-wrap" style="margin-bottom:0">
-        <input type="text" id="exp-vname" placeholder="Например: Менеджер по продажам" oninput="expEdit()">
+        <input type="text" id="exp-vname" placeholder="Например: Менеджер по продажам" oninput="capitalizeFirst(this); expEdit()">
         <div class="field-hint">Официальное название или то, как называет вакансию клиент</div>
       </div>
     </div>
@@ -328,15 +416,6 @@
         <textarea id="exp-extra" placeholder="Любые дополнительные сведения о вакансии или клиенте, которые стоит учесть при работе..." oninput="expEdit()"></textarea>
       </div>
     </div>
-
-    <div class="card">
-      <div class="actions">
-        <button class="btn-save" id="exp-btn-save" onclick="saveData()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-          Сохранить
-        </button>
-      </div>
-    </div>
   </div>
 
   <!-- ===================== ТОЧЕЧНЫЙ ===================== -->
@@ -347,7 +426,7 @@
           <div class="card-title">Базовая стоимость позиции</div>
           <button class="tip-btn" onclick="toggleSectionTip('tip-base')" type="button">?</button>
         </div>
-        <div class="tip-popup" id="tip-base">Стоимость нашей работы — сюда входит подготовка к подбору с созданием воронки найма, работа по поиску кандидатов и стоимость переданных кандидатов.</div>
+        <div class="tip-popup" id="tip-base">Стоимость нашей работы — сюда входит подготовка к подбору (с созданием воронки найма), маркетинг вакансии (публикации вакансий, покупки баз резюме и иное), работа по поиску кандидатов и работа по подбору кандидатов.</div>
         <div id="base-list"></div>
       </div>
 
@@ -358,6 +437,13 @@
         </div>
         <div class="tip-popup" id="tip-crit">Некоторые усложняющие критерии можно указать в портрете кандидата как «желательные» — в этом случае доплата не требуется.</div>
         <div id="crit-list"></div>
+        <div class="custom-row" id="crit-custom">
+          <div class="custom-row-inner">
+            <input type="text" id="crit-custom-name" placeholder="Индивидуальная особенность" oninput="calcTotal()">
+            <input type="number" id="crit-custom-price" placeholder="Стоимость, ₽" oninput="calcTotal()">
+          </div>
+          <div class="field-hint">Для нестандартных усложняющих критериев — например, узкий регион или очень плохая репутация работодателя</div>
+        </div>
       </div>
 
       <div class="card">
@@ -367,6 +453,13 @@
         </div>
         <div class="tip-popup" id="tip-extra">Дополнительные услуги — это процессы, увеличивающие нашу работу в процессе подбора: то, что усложняет воронку найма.</div>
         <div id="extra-list"></div>
+        <div class="custom-row" id="extra-custom">
+          <div class="custom-row-inner">
+            <input type="text" id="extra-custom-name" placeholder="Дополнительная услуга" oninput="calcTotal()">
+            <input type="number" id="extra-custom-price" placeholder="Стоимость, ₽" oninput="calcTotal()">
+          </div>
+          <div class="field-hint">Для индивидуальных услуг, не входящих в стандартный список</div>
+        </div>
       </div>
 
       <div class="card">
@@ -374,15 +467,106 @@
           <div class="total-box-label">Итоговая стоимость</div>
           <div class="total-box-value" id="total-final">0 ₽</div>
         </div>
-        <div class="actions">
-          <button class="btn-save" id="btn-save" onclick="saveData()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-            Сохранить
-          </button>
-          <button class="btn-smeta" onclick="toggleSmeta()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            <span id="smeta-btn-text">Сформировать смету</span>
-          </button>
+      </div>
+
+      <!-- РАЗДЕЛ МЕНЕДЖЕРА -->
+      <div class="card manager-section">
+        <div class="manager-section-title">Раздел менеджера — тарифы и скидки</div>
+
+        <div class="staff-banner">
+          <div class="staff-banner-text">
+            <label class="staff-banner-label" for="pt-staff">Кол-во сотрудников, которых требуется нанять</label>
+            <div class="staff-banner-hint">Влияет на скидку за объём</div>
+          </div>
+          <input type="number" id="pt-staff" min="1" value="1" oninput="onStaffCountChange()">
+        </div>
+
+        <div style="margin-bottom:1rem">
+          <div class="card-title" style="margin-bottom:.75rem">Тариф оплаты</div>
+          <div class="tariff-cards">
+            <label class="tariff-card-sel sel-green" id="tc-max" onclick="selectManagerTariff('max')">
+              <input type="radio" name="mgr-tariff" value="max">
+              <div class="tc-head">
+                <div class="tc-badge">Максимальный</div>
+                <button class="tip-btn" type="button" onclick="event.stopPropagation(); toggleSectionTip('tip-tc-max')">?</button>
+              </div>
+              <div class="tc-name">100% предоплата</div>
+              <div class="tc-detail">Гарантия 365 дней<span class="sep"> · </span>Доп. скидка −5%<span class="sep"> · </span>Вся услуга бесплатно, если не найдём кандидатов за 30 дней</div>
+              <div class="tip-popup" id="tip-tc-max">Условия:
+• Оплата вносится одним платежом перед началом оказания услуг
+
+Преимущества:
+• 365 дней гарантии
+• Дополнительная скидка −5%
+• Самая высокая скорость подбора
+• Вся услуга — бесплатно, если не найдём подходящих кандидатов за 30 дней</div>
+            </label>
+            <label class="tariff-card-sel sel-blue selected" id="tc-mid" onclick="selectManagerTariff('mid')">
+              <input type="radio" name="mgr-tariff" value="mid" checked>
+              <div class="tc-head">
+                <div class="tc-badge">Средний</div>
+                <button class="tip-btn" type="button" onclick="event.stopPropagation(); toggleSectionTip('tip-tc-mid')">?</button>
+              </div>
+              <div class="tc-name">70% / 30%</div>
+              <div class="tc-detail">Гарантия 150 дней<span class="sep"> · </span>Вторая часть оплаты после завершения подбора</div>
+              <div class="tip-popup" id="tip-tc-mid">Условия:
+• Вторая часть вносится равными частями после подбора каждого сотрудника
+
+Преимущества:
+• 150 дней гарантии
+• Стандартная скорость подбора</div>
+            </label>
+            <label class="tariff-card-sel sel-purple" id="tc-min" onclick="selectManagerTariff('min')">
+              <input type="radio" name="mgr-tariff" value="min">
+              <div class="tc-head">
+                <div class="tc-badge">Минимальный</div>
+                <button class="tip-btn" type="button" onclick="event.stopPropagation(); toggleSectionTip('tip-tc-min')">?</button>
+              </div>
+              <div class="tc-name">50% / 50%</div>
+              <div class="tc-detail">Гарантия 100 дней<span class="sep"> · </span>Вторая часть оплаты после завершения подбора</div>
+              <div class="tc-restriction" id="tc-min-restriction">Только при подборе от 2-х сотрудников</div>
+              <div class="tip-popup" id="tip-tc-min">Условия:
+• Тариф доступен ТОЛЬКО при подборе от 2-х сотрудников по одной вакансии
+• Вторая часть вносится равными частями после подбора каждого сотрудника
+
+Преимущества:
+• 100 дней гарантии
+• Стандартная скорость подбора</div>
+            </label>
+          </div>
+        </div>
+
+        <div class="discount-section">
+          <div class="card-title" style="margin-bottom:.75rem">Скидки</div>
+          <div class="discount-grid">
+            <div class="discount-card">
+              <label>За кол-во сотрудников</label>
+              <select id="mgr-disc-staff" onchange="onDiscountChange()">
+                <option value="0">1 сотрудник — без скидки</option>
+                <option value="10">2 сотрудника — −10%</option>
+                <option value="15">3 сотрудника — −15%</option>
+                <option value="20">4 сотрудника — −20%</option>
+                <option value="25">5+ сотрудников — −25%</option>
+              </select>
+            </div>
+            <div class="discount-card">
+              <label>За кол-во вакансий</label>
+              <select id="mgr-disc-vac" onchange="onDiscountChange()">
+                <option value="0">1 вакансия — без скидки</option>
+                <option value="5">2 вакансии — −5%</option>
+                <option value="10">3 вакансии — −10%</option>
+                <option value="15">4 вакансии — −15%</option>
+                <option value="20">5+ вакансий — −20%</option>
+              </select>
+            </div>
+          </div>
+          <div class="discount-custom-wrap">
+            <label>Итоговый процент скидки</label>
+            <div class="discount-custom-row">
+              <input type="number" id="mgr-disc-custom" min="0" max="50" placeholder="0" oninput="calcTotal()">
+              <span style="font-size:13px;color:var(--text2)">% — можно снизить вручную</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -402,6 +586,14 @@
   <!-- ===================== МАССОВЫЙ ===================== -->
   <div id="section-massovy" style="display:none">
     <div class="calc-section">
+      <div class="staff-banner">
+        <div class="staff-banner-text">
+          <label class="staff-banner-label" for="m-staff">Кол-во сотрудников, которых требуется нанять</label>
+          <div class="staff-banner-hint">Используется для расчёта рекомендуемого кол-ва кандидатов</div>
+        </div>
+        <input type="number" id="m-staff" min="0" placeholder="0" oninput="massCalc()">
+      </div>
+
       <div class="card">
         <div class="card-title">Шаг 1 — Параметры заказа</div>
         <div class="field-wrap">
@@ -411,16 +603,12 @@
             <option value="5-8">5–8 требований к кандидату</option>
           </select>
         </div>
-        <div class="field-wrap">
+        <div class="field-wrap" style="margin-bottom:0">
           <label for="m-tariff">Тариф</label>
           <select id="m-tariff" onchange="massCalc()">
             <option value="search">Поиск и подбор</option>
             <option value="full">Поиск и подбор + администрирование найма</option>
           </select>
-        </div>
-        <div class="field-wrap" style="margin-bottom:0">
-          <label for="m-staff">Сколько сотрудников нужно нанять</label>
-          <input type="number" id="m-staff" min="0" placeholder="0" oninput="massCalc()">
         </div>
       </div>
 
@@ -437,19 +625,6 @@
         <div id="mass-error" class="mass-error" style="display:none"></div>
         <div id="mass-cards" class="mass-cards"></div>
         <div class="mass-hint" id="mass-hint"></div>
-      </div>
-
-      <div class="card" style="margin-top:1rem">
-        <div class="actions">
-          <button class="btn-save" id="m-btn-save" onclick="saveData()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-            Сохранить
-          </button>
-          <button class="btn-smeta" onclick="toggleMassSmeta()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            <span id="m-smeta-btn-text">Сформировать смету</span>
-          </button>
-        </div>
       </div>
     </div>
 
@@ -474,7 +649,7 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwTB9CsIjNYLH1HD6sSU
 // ==================== ДАННЫЕ ТОЧЕЧНОГО ====================
 const BASE = [
   {name:"Рабочая позиция", price:35000, tip:"Сотрудники, выполняющие простые физические или вспомогательные работы, как правило без необходимости общения с клиентами и наличия специальных навыков.\n\nПримеры: грузчики, разнорабочие, подсобные рабочие, уборщики, дворники, сортировщики, фасовщики."},
-  {name:"Линейная позиция", price:40000, tip:"Сотрудники, выполняющие регулярные операционные задачи.\n\nПримеры: продавцы-консультанты, администраторы, кладовщики, операторы производства."},
+  {name:"Линейная позиция", price:40000, tip:"Сотрудники, выполняющие регулярные операционные задачи. Как правило, не требуют узкой специализации, но предполагают взаимодействие с клиентами, коллегами или документацией.\n\nПримеры: продавцы-консультанты, администраторы, диспетчеры, охранники.\n\nВажно: если у позиции есть план продаж или KPI по привлечению клиентов — это продающая позиция. Если требуется профессиональный диплом или узкая экспертиза — профильная."},
   {name:"Профильная позиция", price:40000, tip:"Сотрудники, выполняющие профессиональные, административные или профильные функции, требующие специальных знаний, навыков или подготовки.\n\nПримеры: бухгалтеры, HR-специалисты, маркетологи, юристы, инженеры, экономисты, проектировщики, специалисты в бьюти-сфере."},
   {name:"Продающая позиция", price:45000, tip:"Сотрудники, отвечающие за привлечение клиентов, развитие продаж и выполнение коммерческих показателей.\n\nПримеры: менеджеры по продажам, торговые представители, менеджеры по развитию бизнеса, аккаунт-менеджеры."},
   {name:"Автомобильная позиция", price:45000, tip:"Специалисты в сфере эксплуатации, обслуживания и ремонта транспортных средств.\n\nПримеры: водители, механики, автослесари, автоэлектрики, мастера-приёмщики, диагносты."},
@@ -488,11 +663,11 @@ const CRIT = [
   {name:"Опыт работы на аналогичной должности от 2 лет", price:5000, tip:"Опыт работы в сфере вакансии от 2 лет."},
   {name:"Опыт работы на аналогичной должности от 3 лет", price:7000, tip:"Опыт работы в сфере вакансии от 3 лет."},
   {name:"Опыт работы на аналогичной должности от 5 лет", price:10000, tip:"Опыт работы в сфере вакансии от 5 лет."},
-  {name:"Высшее образование", price:5000, tip:"Проставляется в том случае, если у кандидата должно быть высшее образование (любое). КРОМЕ специалистов, которые не могут работать без наличия высшего образования."},
-  {name:"Узкопрофильное образование", price:5000, tip:"Например: образование конкретно в нефтехимической области."},
+  {name:"Высшее образование", price:5000, tip:"Проставляется, если вакансия требует наличия высшего образования в любой области."},
+  {name:"Узкопрофильное образование (высшее или среднее)", price:10000, tip:"Проставляется, если вакансия требует высшего или среднего образования в конкретной узкой области — например, химическая технология, нефтегазовое дело, ядерная физика, биотехнологии.\n\nЕсли требуется просто «техническое» или просто «юридическое образование» — это не является узкой сферой."},
   {name:"Холодные продажи", price:5000, tip:"По большей части касается специалистов в сфере продаж, которым нужно самостоятельно искать клиентов."},
-  {name:"Знание иностранного языка (1 шт.)", price:5000, tip:"Оплачивается дополнительно, если данное требование не касается учителей иностранных языков и переводчиков."},
-  {name:"Наличие водительских прав", price:5000, tip:"Касается всех, кто хочет, чтобы сотрудник имел водительские права. КРОМЕ водителей и персонала для автомастерских."},
+  {name:"Знание иностранного языка (1 шт.)", price:5000, tip:"Проставляется, если знание иностранного языка является требованием по данной вакансии. Можно включить до 3 языков — каждый учитывается отдельно.", counter:true, maxCount:3},
+  {name:"Наличие водительских прав", price:5000, tip:"Проставляется, если наличие водительских прав является требованием по данной вакансии."},
   {name:"Собственный автомобиль", price:5000, tip:"Проставляется в том случае, если сотрудник должен иметь собственный автомобиль."},
   {name:"Менее 500 кандидатов на вакансию (в открытом доступе)", price:5000, tip:"Проставляется если на рынке труда менее 500 кандидатов на данную вакансию.\n\nЕсли во время аудита окажется, что кандидатов более 500, стоимость скорректируется в меньшую сторону."},
   {name:"Менее 300 кандидатов на вакансию (в открытом доступе)", price:10000, tip:"Проставляется если на рынке труда менее 300 кандидатов на данную вакансию.\n\nЕсли во время аудита окажется, что кандидатов более 300, стоимость скорректируется в меньшую сторону."},
@@ -756,7 +931,6 @@ function getExpState() {
     vname:       document.getElementById('exp-vname')?.value || '',
     coType:      document.getElementById('exp-co-type')?.value || '',
     coName:      document.getElementById('exp-co-name')?.value || '',
-    coExtra:     document.getElementById('exp-co-extra')?.value || '',
     region:      document.getElementById('exp-region')?.value || '',
     candidates:  document.getElementById('exp-candidates')?.value || '',
     competition: document.getElementById('exp-competition')?.value || '',
@@ -772,7 +946,6 @@ function setExpState(s) {
   if (s.vname !== undefined)      document.getElementById('exp-vname').value       = s.vname;
   if (s.coType)                   document.getElementById('exp-co-type').value     = s.coType;
   if (s.coName !== undefined)     document.getElementById('exp-co-name').value     = s.coName;
-  if (s.coExtra !== undefined)    document.getElementById('exp-co-extra').value    = s.coExtra;
   if (s.region !== undefined)     document.getElementById('exp-region').value      = s.region;
   if (s.candidates !== undefined) document.getElementById('exp-candidates').value  = s.candidates;
   if (s.competition)              document.getElementById('exp-competition').value = s.competition;
@@ -800,8 +973,6 @@ function showTip(id, btn) {
   if (activeTip && activeTip !== p) activeTip.classList.remove('visible');
   p.classList.add('visible');
   activeTip = p;
-  p.style.top = (btn.offsetTop + btn.offsetHeight + 6) + 'px';
-  p.style.left = '0px';
 }
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.tip-btn') && !e.target.closest('.tip-popup')) {
@@ -819,11 +990,14 @@ function buildList(arr, prefix, containerId) {
     const div = document.createElement('div');
     div.className = 'row';
     const tipHtml = item.tip ? `<button class="tip-btn" type="button" onclick="event.stopPropagation(); showTip('tip-${prefix}-${i}', this)">?</button>` : '';
-    div.innerHTML = `
-      <input type="checkbox" class="row-check" id="${prefix}-${i}" onchange="onEdit()" ${item.checked ? 'checked' : ''}>
-      <label for="${prefix}-${i}" class="row-name">${item.name}</label>
-      ${tipHtml}
-      <span class="row-price${item.free?' free':''}">${item.free ? 'Бесплатно' : fmt(item.price)}</span>`;
+
+    if (item.counter) {
+      // Counter row (e.g. languages)
+      div.innerHTML = `<input type="checkbox" class="row-check" id="${prefix}-${i}" onchange="onEdit()" ${item.checked ? 'checked' : ''}><label for="${prefix}-${i}" class="row-name">${item.name.replace('(1 шт.)','').trim()} <div class="row-counter" style="display:inline-flex;vertical-align:middle;margin-left:6px"><button type="button" onclick="changeCounter('${prefix}',${i},-1)" id="${prefix}-${i}-minus" disabled>−</button><span id="${prefix}-${i}-label" style="font-size:12px;color:var(--text3);min-width:28px;text-align:center">1 шт.</span><button type="button" onclick="changeCounter('${prefix}',${i},1)" id="${prefix}-${i}-plus">+</button></div></label><span class="row-price" id="${prefix}-${i}-price">${fmt(item.price)}</span>${tipHtml}`;
+    } else {
+      div.innerHTML = `<input type="checkbox" class="row-check" id="${prefix}-${i}" onchange="onEdit()" ${item.checked ? 'checked' : ''}><label for="${prefix}-${i}" class="row-name">${item.name}</label><span class="row-price${item.free?' free':''}">${item.free ? 'Бесплатно' : fmt(item.price)}</span>${tipHtml}`;
+    }
+
     wrap.appendChild(div);
     if (item.tip) {
       const popup = document.createElement('div');
@@ -835,6 +1009,29 @@ function buildList(arr, prefix, containerId) {
     container.appendChild(wrap);
   });
 }
+
+function changeCounter(prefix, i, delta) {
+  const item = prefix === 'b' ? BASE[i] : prefix === 'c' ? CRIT[i] : EXTRA[i];
+  const labelEl  = document.getElementById(`${prefix}-${i}-label`);
+  const minusBtn = document.getElementById(`${prefix}-${i}-minus`);
+  const plusBtn  = document.getElementById(`${prefix}-${i}-plus`);
+  const priceEl  = document.getElementById(`${prefix}-${i}-price`);
+  const checkbox = document.getElementById(`${prefix}-${i}`);
+  const currentCount = labelEl ? parseInt(labelEl.textContent) : 1;
+  let count = currentCount + delta;
+  count = Math.max(1, Math.min(item.maxCount || 3, count));
+  if (labelEl) labelEl.textContent = count + ' шт.';
+  minusBtn.disabled = count <= 1;
+  plusBtn.disabled  = count >= (item.maxCount || 3);
+  if (priceEl) priceEl.textContent = fmt(item.price * count);
+  if (count > 1) checkbox.checked = true;
+  onEdit();
+}
+
+function getCounterValue(prefix, i) {
+  const el = document.getElementById(`${prefix}-${i}-label`);
+  return el ? parseInt(el.textContent) : 1;
+}
 buildList(BASE,  'b', 'base-list');
 buildList(CRIT,  'c', 'crit-list');
 buildList(EXTRA, 'e', 'extra-list');
@@ -844,6 +1041,7 @@ function getChecked(arr, prefix) { return arr.filter((_, i) => document.getEleme
 function getState() {
   return {
     exp:   getExpState(),
+    ptStaff: document.getElementById('pt-staff')?.value || '1',
     base:  BASE.map((_,i)  => document.getElementById(`b-${i}`)?.checked ? 1 : 0),
     crit:  CRIT.map((_,i)  => document.getElementById(`c-${i}`)?.checked ? 1 : 0),
     extra: EXTRA.map((_,i) => document.getElementById(`e-${i}`)?.checked ? 1 : 0),
@@ -855,6 +1053,7 @@ function getState() {
 function setState(state) {
   if (!state) return;
   if (state.exp) setExpState(state.exp);
+  if (state.ptStaff !== undefined) { document.getElementById('pt-staff').value = state.ptStaff || '1'; onStaffCountChange(); }
   (state.base  || []).forEach((v,i) => { const el = document.getElementById(`b-${i}`);  if(el) el.checked = !!v; });
   (state.crit  || []).forEach((v,i) => { const el = document.getElementById(`c-${i}`);  if(el) el.checked = !!v; });
   (state.extra || []).forEach((v,i) => { const el = document.getElementById(`e-${i}`);  if(el) el.checked = !!v; });
@@ -866,17 +1065,114 @@ function setState(state) {
   }
 }
 
+
 function calcTotal() {
   const bases  = getChecked(BASE,  'b');
   const crits  = getChecked(CRIT,  'c');
   const extras = getChecked(EXTRA, 'e');
-  const subtotal = bases.reduce((s,x)=>s+x.price,0) + crits.reduce((s,x)=>s+x.price,0) + extras.filter(x=>!x.free).reduce((s,x)=>s+x.price,0);
+  const baseSum  = bases.reduce((s,x) => s + x.price, 0);
+  const critSum  = crits.reduce((s,x) => {
+    const i = CRIT.indexOf(x);
+    const count = x.counter ? getCounterValue('c', i) : 1;
+    return s + x.price * count;
+  }, 0);
+  const extraSum = extras.filter(x=>!x.free).reduce((s,x) => s + x.price, 0);
+  const critCustom  = parseFloat(document.getElementById('crit-custom-price')?.value)  || 0;
+  const extraCustom = parseFloat(document.getElementById('extra-custom-price')?.value) || 0;
+  const subtotal = baseSum + critSum + extraSum + critCustom + extraCustom;
   document.getElementById('total-final').textContent = fmt(subtotal);
   renderSmeta(bases, crits, extras, subtotal);
   return subtotal;
 }
 
 function onEdit() { setStatus('yellow', 'Есть несохранённые изменения'); calcTotal(); }
+
+// ==================== МЕНЕДЖЕР ====================
+let mgrTariff = 'mid';
+let mgrMagicP1 = null;
+
+function selectManagerTariff(t) {
+  mgrTariff = t;
+  mgrMagicP1 = null;
+  ['max','mid','min'].forEach(id => {
+    const el = document.getElementById('tc-' + id);
+    if (el) el.classList.toggle('selected', id === t);
+  });
+  onDiscountChange();
+}
+
+function getStdDiscount() {
+  const discStaff  = parseInt(document.getElementById('mgr-disc-staff')?.value)  || 0;
+  const discVac    = parseInt(document.getElementById('mgr-disc-vac')?.value)    || 0;
+  const volDisc    = Math.max(discStaff, discVac);
+  const tariffDisc = mgrTariff === 'max' ? 5 : 0;
+  return { volDisc, tariffDisc, total: Math.min(volDisc + tariffDisc, 50) };
+}
+
+function getDiscountLabel(volDisc, tariffDisc) {
+  const parts = [];
+  if (tariffDisc > 0) parts.push('скидка тарифа −' + tariffDisc + '%');
+  if (volDisc > 0) {
+    const staffVal = parseInt(document.getElementById('mgr-disc-staff')?.value) || 0;
+    const vacVal   = parseInt(document.getElementById('mgr-disc-vac')?.value)   || 0;
+    if (staffVal >= vacVal && staffVal > 0) parts.push('скидка за кол-во сотрудников −' + staffVal + '%');
+    else if (vacVal > 0) parts.push('скидка за кол-во вакансий −' + vacVal + '%');
+  }
+  return parts.length ? parts.join(' + ') : 'без скидки';
+}
+
+function onDiscountChange() {
+  const std = getStdDiscount();
+  const input = document.getElementById('mgr-disc-custom');
+  if (input) input.value = std.total > 0 ? std.total : '';
+  calcTotal();
+}
+
+function staffCountToTier(n) {
+  if (n >= 5) return 25;
+  if (n === 4) return 20;
+  if (n === 3) return 15;
+  if (n === 2) return 10;
+  return 0;
+}
+
+function updateMinTariffAvailability(n) {
+  const available = n >= 2;
+  const card  = document.getElementById('tc-min');
+  const badge = document.getElementById('tc-min-restriction');
+  const radio = card ? card.querySelector('input[type=radio]') : null;
+  if (card)  card.classList.toggle('tc-locked', !available);
+  if (badge) badge.style.display = available ? 'none' : 'inline-block';
+  if (radio) radio.disabled = !available;
+  if (!available && mgrTariff === 'min') selectManagerTariff('mid');
+}
+
+function onStaffCountChange() {
+  const n = parseInt(document.getElementById('pt-staff')?.value) || 1;
+  const sel = document.getElementById('mgr-disc-staff');
+  if (sel) sel.value = String(staffCountToTier(n));
+  updateMinTariffAvailability(n);
+  onDiscountChange();
+}
+
+function beautifyMid(total) {
+  const p1raw = Math.round(total * 0.7);
+  mgrMagicP1 = Math.round(p1raw / 50) * 50;
+  calcTotal();
+}
+
+function beautifyMax(total) {
+  const rem = total % 1000;
+  mgrMagicP1 = rem > 0 ? total - rem : total;
+  calcTotal();
+}
+
+function beautifyMin(total) {
+  const rem = total % 1000;
+  const nice = rem > 0 ? total - rem : total;
+  mgrMagicP1 = Math.round(nice * 0.5);
+  calcTotal();
+}
 
 // ==================== МАССОВЫЙ ====================
 function massCalc() {
@@ -906,39 +1202,12 @@ function massCalc() {
 }
 
 // ==================== СМЕТА ТОЧЕЧНЫЙ ====================
-function tariffCard(color, badge, name, subtotal, prepayRatio, guarantee, speed, extraDisc, minNote) {
-  let discRows = '<div class="st-disc-title">За кол-во сотрудников</div>';
-  DISC_STAFF.forEach(d => {
-    if (minNote && d.disc === 0) return;
-    const td = Math.min(d.disc + extraDisc, 35);
-    const fa = Math.round(subtotal * (1 - td / 100));
-    const p1 = Math.round(fa * prepayRatio), p2 = fa - p1;
-    const payStr = prepayRatio === 1 ? fmt(fa) : `${fmt(p1)} + ${fmt(p2)}`;
-    discRows += `<div class="st-disc-row"><span class="dlbl">${d.label}</span><span class="dval">${td>0?`−${td}%`:'—'} → ${payStr}</span></div>`;
-  });
-  discRows += '<div class="st-disc-title" style="margin-top:6px">За кол-во вакансий</div>';
-  DISC_VAC.forEach(d => {
-    const td = Math.min(d.disc + extraDisc, 35);
-    const fa = Math.round(subtotal * (1 - td / 100));
-    const p1 = Math.round(fa * prepayRatio), p2 = fa - p1;
-    discRows += `<div class="st-disc-row"><span class="dlbl">${d.label} (−${d.disc+extraDisc}%)</span><span class="dval">${prepayRatio===1?fmt(fa):`${fmt(p1)} + ${fmt(p2)}`}</span></div>`;
-  });
-  const bf = Math.round(subtotal*(1-extraDisc/100)), bp1=Math.round(bf*prepayRatio), bp2=bf-bp1;
-  return `<div class="st-card ${color}${minNote?' disabled':''}">
-    <div class="st-badge">${badge}</div><div class="st-name">${name}</div>
-    <div class="st-row"><span class="lbl">Гарантия</span><span class="val">${guarantee}</span></div>
-    <div class="st-row"><span class="lbl">Скорость</span><span class="val">${speed}</span></div>
-    <div class="st-divider"></div>
-    <div class="st-row" style="margin-bottom:4px"><span class="lbl">Без скидки</span><span class="val">${prepayRatio===1?fmt(bf):`${fmt(bp1)} + ${fmt(bp2)}`}</span></div>
-    ${discRows}${minNote?`<div class="st-note">${minNote}</div>`:''}
-  </div>`;
-}
-
 function renderSmeta(bases, crits, extras, subtotal) {
   const exp = getExpState();
   const vname = exp.vname || 'Смета по вакансии';
   document.getElementById('smeta-title').textContent = `Смета — ${vname}`;
   document.getElementById('smeta-date').textContent = new Date().toLocaleDateString('ru-RU', {day:'2-digit', month:'long', year:'numeric'});
+  const staffCount = parseInt(document.getElementById('pt-staff')?.value) || 1;
   let html = '';
   // Экспертиза в смете
   const coResult = document.getElementById('exp-co-result')?.textContent;
@@ -947,6 +1216,7 @@ function renderSmeta(bases, crits, extras, subtotal) {
     if (exp.vname) html += `<div class="smeta-item"><span class="smeta-item-name">Название</span><span class="smeta-item-price">${exp.vname}</span></div>`;
     if (coResult && coResult !== '—') html += `<div class="smeta-item"><span class="smeta-item-name">Компания</span><span class="smeta-item-price">${coResult}</span></div>`;
     if (exp.region) html += `<div class="smeta-item"><span class="smeta-item-name">Регион</span><span class="smeta-item-price">${exp.region}</span></div>`;
+    html += `<div class="smeta-item"><span class="smeta-item-name">Кол-во сотрудников</span><span class="smeta-item-price">${staffCount}</span></div>`;
     html += `</div>`;
   }
   if (bases.length) {
@@ -967,15 +1237,96 @@ function renderSmeta(bases, crits, extras, subtotal) {
     html += `</div>`;
   }
   html += `<hr class="smeta-divider">`;
-  html += `<div class="smeta-subtotal"><span class="smeta-subtotal-label">Итого без скидок</span><span class="smeta-subtotal-value">${fmt(subtotal)}</span></div>`;
-  html += `<div class="smeta-tariffs-label">Тарифы и варианты скидок — для менеджера</div>`;
-  html += `<div class="smeta-tariffs-grid">`;
-  html += tariffCard('green',  'Максимальный', '100% предоплата', subtotal, 1,   '365 дней', 'Максимальная', 5, null);
-  html += tariffCard('blue',   'Средний',      '70% предоплата',  subtotal, 0.7, '150 дней', 'Стандартная',  0, null);
-  html += tariffCard('purple', 'Минимальный',  '50% предоплата',  subtotal, 0.5, '100 дней', 'Стандартная',  0, 'Доступен от 2 сотрудников на вакансию');
-  html += `</div>`;
-  html += `<p class="smeta-hint">Скидки за сотрудников и вакансии не суммируются — берётся наибольшая. Скидка максимального тарифа (−5%) суммируется с любой из них.</p>`;
+
+  // Стоимость до скидки = цена за 1 сотрудника × кол-во сотрудников
+  const subtotalBeforeDiscount = Math.round(subtotal * staffCount);
+  const beforeLabel = staffCount > 1 ? `Стоимость до скидки (× ${staffCount} сотр.)` : 'Стоимость до скидки';
+  html += `<div class="smeta-subtotal"><span class="smeta-subtotal-label">${beforeLabel}</span><span class="smeta-subtotal-value">${fmt(subtotalBeforeDiscount)}</span></div>`;
+
+  // Расчёт скидки
+  const std = getStdDiscount();
+  const customInput = document.getElementById('mgr-disc-custom');
+  const customVal = customInput && customInput.value !== '' ? parseFloat(customInput.value) : std.total;
+  const usedDisc = isNaN(customVal) ? std.total : customVal;
+  const discLabel = getDiscountLabel(std.volDisc, std.tariffDisc);
+  const discStatus = usedDisc > std.total ? 'custom' : usedDisc < std.total ? 'lowered' : 'std';
+
+  if (usedDisc > 0) {
+    html += `<div class="smeta-item"><span class="smeta-item-name">Скидка −${usedDisc}%</span><span class="smeta-item-price">−${fmt(Math.round(subtotalBeforeDiscount * usedDisc / 100))}</span></div>`;
+    if (discStatus === 'custom')  html += `<div class="smeta-discount-note" style="color:#c0392b">⚠ Нестандартная скидка — согласование с руководством</div>`;
+    else if (discStatus === 'lowered') html += `<div class="smeta-discount-note" style="color:#d97706">⚠ Скидка снижена вручную — скорректируйте слайд в КП</div>`;
+    else html += `<div class="smeta-discount-note">${discLabel}</div>`;
+  }
+
+  // Итого к оплате
+  const finalPrice = Math.round(subtotalBeforeDiscount * (1 - usedDisc / 100));
+  html += `<div class="smeta-subtotal final"><span class="smeta-subtotal-label">Итого к оплате</span><span class="smeta-subtotal-value">${fmt(finalPrice)}</span></div>`;
+
+  // Разделение платежей
+  html += renderPaymentSplit(finalPrice, staffCount);
+
   document.getElementById('smeta-body').innerHTML = html;
+}
+
+function renderPaymentSplit(finalPrice, staffCount) {
+  let parts = '';
+  let guaranteeDays = '150';
+
+  if (mgrTariff === 'max') {
+    guaranteeDays = '365';
+    const p1 = mgrMagicP1 !== null ? mgrMagicP1 : finalPrice;
+    const rem = finalPrice % 1000;
+    const nicePrice = rem > 0 ? finalPrice - rem : finalPrice;
+    const canBeautify = mgrMagicP1 === null && finalPrice !== nicePrice;
+    parts += `<div class="pay-part pp-green">
+        <div class="pp-label">100% предоплата</div>
+        <div class="pp-amount" id="sm-p1">${fmt(p1)}</div>
+        <div class="pp-sub">До начала оказания услуг</div>
+        ${canBeautify ? `<button class="btn-magic" onclick="beautifyMax(${finalPrice})">✨ Сделать красиво → ${fmt(nicePrice)}</button>` : ''}
+      </div>`;
+  } else {
+    const mid = mgrTariff === 'mid';
+    guaranteeDays = mid ? '150' : '100';
+    const ratio = mid ? 0.7 : 0.5;
+    const pctLabel1 = mid ? '70%' : '50%';
+    const pctLabel2 = mid ? '30%' : '50%';
+    const colorClass = mid ? 'pp-blue' : 'pp-purple';
+    const p1 = mgrMagicP1 !== null ? mgrMagicP1 : Math.round(finalPrice * ratio);
+    const p2 = finalPrice - p1;
+    const needMagic = mgrMagicP1 === null && p1 % 50 !== 0;
+
+    parts += `<div class="pay-part pp-total">
+        <div class="pp-label">Общая стоимость</div>
+        <div class="pp-amount">${fmt(finalPrice)}</div>
+      </div>`;
+    parts += `<div class="pay-part ${colorClass}">
+        <div class="pp-label">1-я часть (${pctLabel1})</div>
+        <div class="pp-amount" id="sm-p1">${fmt(p1)}</div>
+        <div class="pp-sub">Предоплата</div>
+        ${needMagic ? `<button class="btn-magic" onclick="beautify${mid ? 'Mid' : 'Min'}(${finalPrice})">✨ Сделать красиво</button>` : ''}
+      </div>`;
+
+    if (staffCount > 1) {
+      const perEmployee = Math.round(p2 / staffCount);
+      parts += `<div class="pay-part ${colorClass}">
+          <div class="pp-label">2-я часть (${pctLabel2})</div>
+          <div class="pp-amount" id="sm-p2">${fmt(perEmployee)}</div>
+          <div class="pp-sub">После подбора каждого сотрудника</div>
+          <div class="pp-note">Общая сумма 2-й части: ${fmt(p2)} (без разделения на платежи)</div>
+        </div>`;
+    } else {
+      parts += `<div class="pay-part ${colorClass}">
+          <div class="pp-label">2-я часть (${pctLabel2})</div>
+          <div class="pp-amount" id="sm-p2">${fmt(p2)}</div>
+          <div class="pp-sub">После завершения подбора</div>
+        </div>`;
+    }
+  }
+
+  parts += `<div class="pay-part pp-gray"><div class="pp-label">Гарантия</div><div class="pp-amount" style="font-size:15px">${guaranteeDays} дней</div></div>`;
+
+  const colsClass = mgrTariff === 'max' ? '' : ' cols-4';
+  return `<div class="smeta-pay-label">Разделение платежей</div><div class="pay-parts${colsClass}">${parts}</div>`;
 }
 
 let smetaVisible = false;
@@ -1030,10 +1381,18 @@ function showToast(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
 }
+let autoSaveTimer = null;
+function scheduleAutoSave() {
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => saveData(true), 3000);
+}
 function setStatus(color, text, id) {
   document.getElementById('status-dot').className = 'status-dot' + (color ? ' ' + color : '');
   document.getElementById('status-text').textContent = text;
   document.getElementById('status-id').textContent = id ? `#${id}` : '';
+  const saveBtn = document.getElementById('btn-save-manual');
+  if (saveBtn) saveBtn.style.display = color === 'green' ? 'none' : 'inline-flex';
+  if (color === 'yellow') scheduleAutoSave();
 }
 
 // ==================== API ====================
@@ -1043,9 +1402,9 @@ async function api(params) {
   return res.json();
 }
 
-async function saveData() {
-  const btns = ['exp-btn-save','btn-save','m-btn-save'].map(id => document.getElementById(id)).filter(Boolean);
-  btns.forEach(b => { b.disabled = true; b.textContent = 'Сохранение...'; });
+async function saveData(silent) {
+  const btn = document.getElementById('btn-save-manual');
+  if (!silent && btn) { btn.disabled = true; btn.textContent = 'Сохранение...'; }
   const exp = getExpState();
   const vacancy = exp.vname || 'Без названия';
   const data = JSON.stringify(getState());
@@ -1062,13 +1421,19 @@ async function saveData() {
       }
     }
     if (result.success) {
-      setStatus('green', 'Сохранено', currentId);
-      showToast('✓ Сохранено');
-      btns.forEach(b => { b.textContent = 'Сохранено ✓'; setTimeout(() => { b.textContent = 'Сохранить'; b.disabled = false; }, 2000); });
+      updateHeaderLink();
+      setStatus('green', silent ? 'Автосохранено' : 'Сохранено', currentId);
+      if (!silent) showToast('✓ Сохранено');
     } else throw new Error(result.error);
   } catch(e) {
-    showToast('Ошибка сохранения');
-    btns.forEach(b => { b.textContent = 'Сохранить'; b.disabled = false; });
+    if (silent) {
+      setStatus('yellow', 'Не удалось автосохранить — сохраните вручную');
+    } else {
+      showToast('Ошибка сохранения');
+      setStatus('yellow', 'Ошибка сохранения — попробуйте снова');
+    }
+  } finally {
+    if (!silent && btn) { btn.disabled = false; btn.textContent = 'Сохранить вручную'; }
   }
 }
 
@@ -1080,6 +1445,21 @@ function copyLink() {
     btn.textContent = '✓ Ссылка скопирована';
     setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Скопировать ссылку'; }, 2000);
   });
+}
+
+function updateHeaderLink() {
+  const el = document.getElementById('header-link');
+  if (!el) return;
+  if (currentId) {
+    const url = location.href.split('?')[0] + '?id=' + currentId;
+    el.href = url;
+    el.textContent = url.replace(/^https?:\/\//, '');
+    el.classList.remove('disabled');
+  } else {
+    el.removeAttribute('href');
+    el.textContent = 'Ссылка появится после сохранения';
+    el.classList.add('disabled');
+  }
 }
 
 // ==================== INIT ====================
@@ -1097,6 +1477,7 @@ async function loadData(id) {
       }
       calcTotal();
       massCalc();
+      updateHeaderLink();
       setStatus('green', `Изменено: ${result.modified}`, currentId);
       document.getElementById('btn-copy-link').style.display = 'inline-flex';
       history.replaceState(null, '', '?id=' + currentId);
@@ -1113,6 +1494,7 @@ async function loadData(id) {
 // Init salary with one empty entry
 addSalaryEntry();
 attachBlurListeners();
+onStaffCountChange();
 
 const urlId = new URLSearchParams(location.search).get('id');
 if (urlId) {
