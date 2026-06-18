@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Калькулятор точечного подбора</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f7f6f3; --surface: #ffffff; --surface2: #f2f1ee;
+    --border: #e4e2dd; --border2: #d0cec8;
+    --text: #1c1b18; --text2: #6b6860; --text3: #9c9a94;
+    --accent: #4a3fc7; --accent-light: #eeecfb; --accent-text: #3530a0;
+    --green: #2d7a4f; --radius: 10px; --radius-sm: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; min-height: 100vh; padding: 2rem 1rem 4rem; }
+  .page { max-width: 760px; margin: 0 auto; }
+  .header { margin-bottom: 2rem; }
+  .header-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: .5rem; }
+  .header h1 { font-size: 26px; font-weight: 600; color: var(--text); letter-spacing: -.01em; }
+  .header-sub { font-size: 14px; color: var(--text2); margin-top: .4rem; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 1rem; box-shadow: var(--shadow); }
+  .card-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--text3); margin-bottom: 1rem; padding-bottom: .6rem; border-bottom: 1px solid var(--border); }
+  .card-title-wrap { display: flex; align-items: center; gap: 6px; margin-bottom: 1rem; padding-bottom: .6rem; border-bottom: 1px solid var(--border); }
+  .card-title-wrap .card-title { margin: 0; padding: 0; border: none; }
+
+  .vname-wrap { margin-bottom: 1.5rem; }
+  .vname-wrap label { display: block; font-size: 13px; color: var(--text2); margin-bottom: 5px; }
+  .vname-wrap input { width: 100%; height: 40px; padding: 0 12px; font-size: 15px; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); outline: none; transition: border-color .15s; }
+  .vname-wrap input:focus { border-color: var(--accent); }
+
+  .row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .row:last-child { border-bottom: none; }
+  .row-check { width: 18px; height: 18px; flex-shrink: 0; accent-color: var(--accent); cursor: pointer; }
+  .row-name { flex: 1; font-size: 14px; color: var(--text); cursor: pointer; user-select: none; }
+  .row-price { font-size: 13px; color: var(--text2); white-space: nowrap; min-width: 80px; text-align: right; }
+  .row-price.free { color: var(--green); }
+
+  .tip-btn { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--border2); background: var(--surface2); color: var(--text3); font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: border-color .15s, color .15s; line-height: 1; }
+  .tip-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .tip-popup { display: none; position: absolute; z-index: 100; background: var(--text); color: #fff; font-size: 13px; line-height: 1.55; padding: 10px 13px; border-radius: var(--radius-sm); max-width: 320px; box-shadow: 0 4px 16px rgba(0,0,0,.18); pointer-events: none; white-space: pre-line; }
+  .tip-popup.visible { display: block; }
+  .tip-popup::before { content: ''; position: absolute; top: -5px; left: 12px; width: 10px; height: 10px; background: var(--text); transform: rotate(45deg); border-radius: 2px; }
+  .row-wrap { position: relative; }
+
+  .total-box { background: var(--accent-light); border: 1px solid #c9c4f0; border-radius: var(--radius-sm); padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+  .total-box-label { font-size: 13px; color: var(--accent-text); }
+  .total-box-value { font-size: 24px; font-weight: 700; color: var(--accent-text); }
+
+  .btn-smeta { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; font-size: 14px; font-weight: 500; font-family: inherit; background: var(--surface); color: var(--text); border: 1px solid var(--border2); border-radius: var(--radius-sm); cursor: pointer; transition: background .15s; }
+  .btn-smeta:hover { background: var(--surface2); }
+
+  /* СМЕТА */
+  .smeta { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-top: 1.25rem; box-shadow: var(--shadow); overflow: hidden; }
+  .smeta.visible { display: block; }
+  .smeta-top { background: var(--text); color: #fff; padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+  .smeta-top-title { font-size: 16px; font-weight: 600; line-height: 1.3; }
+  .smeta-top-date { font-size: 12px; opacity: .55; margin-top: 3px; }
+  .smeta-top-badge { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; background: rgba(255,255,255,.15); padding: 4px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; align-self: flex-start; }
+  .smeta-body { padding: 1.25rem 1.5rem; }
+  .smeta-section { margin-bottom: 1.25rem; }
+  .smeta-sec-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); margin-bottom: .5rem; }
+  .smeta-item { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; }
+  .smeta-item:last-child { border-bottom: none; }
+  .smeta-item-name { color: var(--text); flex: 1; padding-right: 12px; }
+  .smeta-item-price { color: var(--text2); white-space: nowrap; }
+  .smeta-item-price.free { color: var(--green); }
+  .smeta-divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+
+  .smeta-subtotal { display: flex; justify-content: space-between; align-items: center; background: var(--surface2); border-radius: var(--radius-sm); padding: .9rem 1.1rem; margin-bottom: 1.5rem; }
+  .smeta-subtotal-label { font-size: 14px; color: var(--text2); }
+  .smeta-subtotal-value { font-size: 18px; font-weight: 700; color: var(--text); }
+
+  /* Тарифные карточки */
+  .smeta-tariffs-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); margin-bottom: .75rem; }
+  .smeta-tariffs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; margin-bottom: 1.25rem; }
+  @media (max-width: 540px) { .smeta-tariffs-grid { grid-template-columns: 1fr; } }
+
+  .st-card { border-radius: var(--radius-sm); padding: .9rem 1rem; border: 1.5px solid transparent; }
+  .st-card.green  { background: #f0faf4; border-color: #a8d9bc; }
+  .st-card.blue   { background: #eff6ff; border-color: #93c5fd; }
+  .st-card.purple { background: #f5f3ff; border-color: #c4b5fd; }
+  .st-card.purple.disabled { opacity: .45; }
+
+  .st-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin-bottom: 5px; }
+  .green  .st-badge { background: #d1fae5; color: #065f46; }
+  .blue   .st-badge { background: #dbeafe; color: #1e40af; }
+  .purple .st-badge { background: #ede9fe; color: #5b21b6; }
+
+  .st-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+
+  .st-row { display: flex; justify-content: space-between; font-size: 12px; padding: 2px 0; }
+  .st-row .lbl { color: var(--text2); }
+  .st-row .val { color: var(--text); font-weight: 500; }
+
+  .st-divider { border: none; border-top: 1px solid rgba(0,0,0,.08); margin: 7px 0; }
+
+  /* Таблица скидок внутри карточки */
+  .st-disc-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text3); margin-bottom: 4px; margin-top: 4px; }
+  .st-disc-row { display: flex; justify-content: space-between; font-size: 11.5px; padding: 2px 0; border-bottom: 1px solid rgba(0,0,0,.06); }
+  .st-disc-row:last-child { border-bottom: none; }
+  .st-disc-row .dlbl { color: var(--text2); }
+  .st-disc-row .dval { color: var(--text); font-weight: 500; font-size: 11px; text-align: right; }
+
+  .st-total { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; padding-top: 8px; margin-top: 6px; border-top: 1.5px solid rgba(0,0,0,.1); }
+  .green  .st-total .val { color: #065f46; }
+  .blue   .st-total .val { color: #1e40af; }
+  .purple .st-total .val { color: #5b21b6; }
+
+  .st-note { font-size: 11px; color: var(--text3); margin-top: 6px; font-style: italic; }
+
+  .smeta-hint { font-size: 11.5px; color: var(--text3); padding-top: .75rem; border-top: 1px solid var(--border); text-align: center; line-height: 1.5; }
+
+  @media print {
+    body { background: white; padding: 0; }
+    .calc-section { display: none !important; }
+    .smeta { display: block !important; box-shadow: none; border: 1px solid #ccc; }
+    .smeta-top { background: #1c1b18 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .st-card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="header-eyebrow">Рекрутинговое агентство</div>
+    <h1>Калькулятор точечного подбора</h1>
+    <p class="header-sub">Выберите параметры вакансии — смета сформируется автоматически</p>
+  </div>
+
+  <div class="calc-section">
+    <div class="card vname-wrap">
+      <label for="vname">Название вакансии</label>
+      <input type="text" id="vname" placeholder="Например: Менеджер по продажам" oninput="calcTotal()">
+    </div>
+
+    <div class="card">
+      <div class="card-title-wrap">
+        <div class="card-title">Базовая стоимость позиции</div>
+        <button class="tip-btn" onclick="toggleSectionTip('tip-base', this)" type="button">?</button>
+      </div>
+      <div class="tip-popup" id="tip-base">Стоимость нашей работы — сюда входит подготовка к подбору с созданием воронки найма, работа по поиску кандидатов и стоимость переданных кандидатов.</div>
+      <div id="base-list"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title-wrap">
+        <div class="card-title">Усложняющие критерии поиска</div>
+        <button class="tip-btn" onclick="toggleSectionTip('tip-crit', this)" type="button">?</button>
+      </div>
+      <div class="tip-popup" id="tip-crit">Некоторые усложняющие критерии можно указать в портрете кандидата как «желательные» — в этом случае доплата не требуется. Подбор будет вестись с приоритетом по данным критериям, однако они не будут считаться основными.</div>
+      <div id="crit-list"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title-wrap">
+        <div class="card-title">Дополнительные услуги</div>
+        <button class="tip-btn" onclick="toggleSectionTip('tip-extra', this)" type="button">?</button>
+      </div>
+      <div class="tip-popup" id="tip-extra">Дополнительные услуги — это процессы, увеличивающие нашу работу в процессе подбора: то, что усложняет воронку найма.</div>
+      <div id="extra-list"></div>
+    </div>
+
+    <div class="card">
+      <div class="total-box">
+        <div class="total-box-label">Итоговая стоимость</div>
+        <div class="total-box-value" id="total-final">0 ₽</div>
+      </div>
+      <button class="btn-smeta" onclick="toggleSmeta()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span id="smeta-btn-text">Сформировать смету</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="smeta" id="smeta-block">
+    <div class="smeta-top">
+      <div>
+        <div class="smeta-top-title" id="smeta-title">Смета</div>
+        <div class="smeta-top-date" id="smeta-date"></div>
+      </div>
+      <div class="smeta-top-badge">Точечный подбор</div>
+    </div>
+    <div class="smeta-body" id="smeta-body"></div>
+  </div>
+</div>
+
+<script>
+const BASE = [
+  {name:"Рабочая позиция", price:35000, tip:"Сотрудники, выполняющие простые физические или вспомогательные работы, как правило без необходимости общения с клиентами и наличия специальных навыков.\n\nПримеры: грузчики, разнорабочие, подсобные рабочие, уборщики, дворники, сортировщики, фасовщики."},
+  {name:"Линейная позиция", price:40000, tip:"Сотрудники, выполняющие регулярные операционные задачи.\n\nПримеры: продавцы-консультанты, администраторы, кладовщики, операторы производства."},
+  {name:"Профильная позиция", price:40000, tip:"Сотрудники, выполняющие профессиональные, административные или профильные функции, требующие специальных знаний, навыков или подготовки.\n\nПримеры: бухгалтеры, HR-специалисты, маркетологи, юристы, инженеры, экономисты, проектировщики, специалисты в бьюти-сфере."},
+  {name:"Продающая позиция", price:45000, tip:"Сотрудники, отвечающие за привлечение клиентов, развитие продаж и выполнение коммерческих показателей.\n\nПримеры: менеджеры по продажам, торговые представители, менеджеры по развитию бизнеса, аккаунт-менеджеры."},
+  {name:"Автомобильная позиция", price:45000, tip:"Специалисты в сфере эксплуатации, обслуживания и ремонта транспортных средств.\n\nПримеры: водители, механики, автослесари, автоэлектрики, мастера-приёмщики, диагносты."},
+  {name:"Медицинская позиция", price:50000, tip:"Специалисты, осуществляющие медицинскую деятельность и имеющие соответствующее образование и допуски.\n\nПримеры: врачи, медицинские сёстры, фельдшеры, фармацевты, лаборанты, стоматологи. КРОМЕ администраторов на ресепшен и прочего обслуживающего персонала в больницы/клиники."},
+  {name:"IT позиция", price:50000, tip:"Специалисты в области разработки, сопровождения и внедрения информационных технологий.\n\nПримеры: разработчики, тестировщики, системные администраторы, аналитики, DevOps-инженеры, специалисты по информационной безопасности."},
+  {name:"Руководящая позиция", price:50000, tip:"Сотрудники, отвечающие за управление подразделением, направлением деятельности или организацией в целом.\n\nПримеры: руководители отделов, начальники подразделений, управляющие, коммерческие директора, операционные директора, генеральные директора."},
+];
+const CRIT = [
+  {name:"Узкопрофильный опыт работы", price:5000, tip:"Опыт работы в узкой сфере. Например, нужен маркетолог с опытом работы на пищевом производстве."},
+  {name:"Опыт работы на аналогичной должности от 6 месяцев", price:3000, tip:"Опыт работы в сфере вакансии от 6 месяцев."},
+  {name:"Опыт работы на аналогичной должности от 2 лет", price:5000, tip:"Опыт работы в сфере вакансии от 2 лет."},
+  {name:"Опыт работы на аналогичной должности от 3 лет", price:7000, tip:"Опыт работы в сфере вакансии от 3 лет."},
+  {name:"Опыт работы на аналогичной должности от 5 лет", price:10000, tip:"Опыт работы в сфере вакансии от 5 лет."},
+  {name:"Высшее образование", price:5000, tip:"Проставляется в том случае, если у кандидата должно быть высшее образование (любое). КРОМЕ специалистов, которые не могут работать без наличия высшего образования."},
+  {name:"Узкопрофильное образование", price:5000, tip:"Например: образование конкретно в нефтехимической области."},
+  {name:"Холодные продажи", price:5000, tip:"По большей части касается специалистов в сфере продаж, которым нужно самостоятельно искать клиентов."},
+  {name:"Знание иностранного языка (1 шт.)", price:5000, tip:"Оплачивается дополнительно, если данное требование не касается учителей иностранных языков и переводчиков."},
+  {name:"Наличие водительских прав", price:5000, tip:"Касается всех, кто хочет, чтобы сотрудник имел водительские права. КРОМЕ водителей и персонала для автомастерских."},
+  {name:"Собственный автомобиль", price:5000, tip:"Проставляется в том случае, если сотрудник должен иметь собственный автомобиль."},
+  {name:"Менее 500 кандидатов на вакансию (в открытом доступе)", price:5000, tip:"Проставляется если на рынке труда менее 500 кандидатов на данную вакансию.\n\nНа этапе аудита мы проверяем кол-во потенциальных кандидатов в данном регионе. Если кандидатов мало — требуются дополнительные средства на привлечение и холодный поиск.\n\nЕсли во время аудита окажется, что кандидатов более 500, стоимость скорректируется в меньшую сторону."},
+  {name:"Менее 300 кандидатов на вакансию (в открытом доступе)", price:10000, tip:"Проставляется если на рынке труда менее 300 кандидатов на данную вакансию.\n\nНа этапе аудита мы проверяем кол-во потенциальных кандидатов в данном регионе. Если кандидатов мало — требуются дополнительные средства на привлечение и холодный поиск.\n\nЕсли во время аудита окажется, что кандидатов более 300, стоимость скорректируется в меньшую сторону."},
+  {name:"В вакансии от 20 до 30 требований", price:7000, tip:"Проставляется, если в вакансии от 20 до 30 формальных требований к кандидату. Большое число требований сужает выборку и увеличивает объём работы."},
+];
+const EXTRA = [
+  {name:"Внесение корректировок в «портрет кандидата» во время подбора (1 раз)", price:0, free:true, checked:true, tip:"В том случае, если заказчику требуется проводить стажировку/тест кандидатов, подбор не будет остановлен даже после выхода одного из кандидатов на работу.\n\nЕсли один из кандидатов проработает более 7 календарных дней, подбор будет завершён."},
+  {name:"Тест кандидата на рабочем месте до 7 календарных дней", price:0, free:true, tip:"Если заказчику потребуется провести стажировку/тест кандидата на рабочем месте перед принятием на работу, выход кандидата на первый рабочий день не будет означать завершение подбора.\n\nПодбор завершится, если с момента выхода кандидата на работу пройдёт более 7 дней."},
+  {name:"Тест кандидата на рабочем месте от 7 до 14 календарных дней", price:10000, tip:"Если заказчику потребуется провести стажировку/тест кандидата, мы замедлим либо остановим подбор (по возможности).\n\nЕсли один из кандидатов проработает более 14 дней, подбор будет завершён.\n\nДополнительная оплата закладывается заранее, так как приостановка процесса поиска требует дополнительных средств."},
+  {name:"Ускоренный поиск и подбор кандидатов", price:15000, tip:"Для срочных, «горящих» вакансий. Вакансия получает высокий приоритет, подключается дополнительный рекрутер.\n\nДля ускорения также рекомендуется приобрести дополнительные ресурсы для поиска кандидатов.\n\nВ данном случае можем указать максимальный срок подбора в договоре (по согласованию с HRD)."},
+  {name:"Проведение профильных тестовых заданий (все кандидаты)", price:15000, tip:"Проверка практических навыков кандидатов через выполнение тестовых заданий, имитирующих рабочие задачи."},
+  {name:"Проведение внутренних собеседований в видео-формате", price:10000, tip:"По стандарту интервью проводится в аудио-формате. С данной опцией оно будет проводиться в видео-формате."},
+  {name:"Проверка кандидатов СБ (до 5 кандидатов на выбор заказчика)", price:5000, tip:"Проверяем кандидатов на уголовное/кредитное прошлое — подготавливаем отчёт в формате документа по запросу."},
+  {name:"Проверка рекомендаций с предыдущих мест работы (до 5 кандидатов)", price:5000, tip:"Находим контакты руководителей с предыдущих мест работы кандидата, договариваемся о контакте, задаём вопросы под запись и передаём информацию клиенту в удобном формате.\n\nВажно: нет гарантии, что предыдущие руководители выйдут на связь, однако мы предпримем все действия для разговора с ними."},
+  {name:"Увеличение % формального соответствия для усложн. критериев до 100%", price:0, free:true, tip:"ТОЛЬКО ПО ПРОСЬБЕ ЗАКАЗЧИКА! Если заказчик хочет проставить усложняющие критерии по 100% релевантности, такая корректировка может быть внесена в договор."},
+  {name:"Увеличение % формального соответствия до 70%", price:7000, tip:"Увеличивает процент формального соответствия кандидатов до 70%. Чем выше порог, тем больше кандидатов необходимо рассмотреть на этапе резюме — это увеличивает объём работы и затраты на ресурсы."},
+  {name:"Увеличение срока рассмотрения кандидатов до 3 дней", price:0, free:true, tip:"Увеличение срока, в течение которого заказчик даёт обратную связь по кандидатам, до 3 дней. Предоставляется бесплатно."},
+  {name:"Увеличение срока рассмотрения кандидатов до 4–5 дней", price:7000, tip:"Увеличение срока обратной связи заказчика по кандидатам до 4–5 дней. Оплачивается дополнительно, так как удлиняет цикл подбора."},
+];
+
+// Скидки за сотрудников и вакансии
+const DISC_STAFF = [
+  {label:"1 сотрудник", disc:0},
+  {label:"2 сотрудника", disc:10},
+  {label:"3 сотрудника", disc:15},
+  {label:"4 сотрудника", disc:20},
+  {label:"5+ сотрудников", disc:25},
+];
+const DISC_VAC = [
+  {label:"1 вакансия", disc:0},
+  {label:"2 вакансии", disc:5},
+  {label:"3 вакансии", disc:10},
+  {label:"4 вакансии", disc:15},
+  {label:"5+ вакансий", disc:20},
+];
+
+function fmt(n){ return n.toLocaleString('ru-RU') + ' ₽'; }
+
+let activeTip = null;
+function toggleSectionTip(id) {
+  const popup = document.getElementById(id);
+  if (activeTip && activeTip !== popup) activeTip.classList.remove('visible');
+  popup.classList.toggle('visible');
+  activeTip = popup.classList.contains('visible') ? popup : null;
+}
+function showTip(id, btn) {
+  const popup = document.getElementById(id);
+  if (activeTip && activeTip !== popup) activeTip.classList.remove('visible');
+  popup.classList.add('visible');
+  activeTip = popup;
+  popup.style.top = (btn.offsetTop + btn.offsetHeight + 6) + 'px';
+  popup.style.left = '0px';
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.tip-btn') && !e.target.closest('.tip-popup')) {
+    document.querySelectorAll('.tip-popup.visible').forEach(p => p.classList.remove('visible'));
+    activeTip = null;
+  }
+});
+
+function buildList(arr, prefix, containerId) {
+  const container = document.getElementById(containerId);
+  arr.forEach((item, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'row-wrap';
+    const div = document.createElement('div');
+    div.className = 'row';
+    const priceStr = item.free ? 'Бесплатно' : fmt(item.price);
+    const tipHtml = item.tip ? `<button class="tip-btn" type="button" onclick="event.stopPropagation(); showTip('tip-${prefix}-${i}', this)">?</button>` : '';
+    div.innerHTML = `
+      <input type="checkbox" class="row-check" id="${prefix}-${i}" onchange="calcTotal()" ${item.checked ? 'checked' : ''}>
+      <label for="${prefix}-${i}" class="row-name">${item.name}</label>
+      ${tipHtml}
+      <span class="row-price${item.free?' free':''}">${priceStr}</span>`;
+    wrap.appendChild(div);
+    if (item.tip) {
+      const popup = document.createElement('div');
+      popup.className = 'tip-popup';
+      popup.id = `tip-${prefix}-${i}`;
+      popup.textContent = item.tip;
+      wrap.appendChild(popup);
+    }
+    container.appendChild(wrap);
+  });
+}
+
+buildList(BASE, 'b', 'base-list');
+buildList(CRIT, 'c', 'crit-list');
+buildList(EXTRA, 'e', 'extra-list');
+
+function getChecked(arr, prefix) {
+  return arr.filter((_, i) => document.getElementById(`${prefix}-${i}`)?.checked);
+}
+
+function calcTotal() {
+  const bases  = getChecked(BASE,  'b');
+  const crits  = getChecked(CRIT,  'c');
+  const extras = getChecked(EXTRA, 'e');
+  const subtotal = bases.reduce((s,x)=>s+x.price,0)
+                 + crits.reduce((s,x)=>s+x.price,0)
+                 + extras.filter(x=>!x.free).reduce((s,x)=>s+x.price,0);
+  document.getElementById('total-final').textContent = fmt(subtotal);
+  renderSmeta(bases, crits, extras, subtotal);
+}
+
+function tariffCard(color, badge, name, subtotal, prepayRatio, guarantee, speed, extraDisc, minNote) {
+  // Строим строки скидок: берём max из staff/vac, затем +extraDisc для максимального
+  let discRows = '';
+
+  // Скидки за сотрудников
+  discRows += `<div class="st-disc-title">За кол-во сотрудников</div>`;
+  DISC_STAFF.forEach(d => {
+    if (d.label === '1 сотрудник' && minNote) return; // минимальный — от 2
+    const totalDisc = Math.min(d.disc + extraDisc, 35);
+    const finalAmt = Math.round(subtotal * (1 - totalDisc / 100));
+    const p1 = Math.round(finalAmt * prepayRatio);
+    const p2 = finalAmt - p1;
+    const discStr = totalDisc > 0 ? `−${totalDisc}%` : '—';
+    const payStr = prepayRatio === 1
+      ? fmt(finalAmt)
+      : `${fmt(p1)} + ${fmt(p2)}`;
+    discRows += `<div class="st-disc-row"><span class="dlbl">${d.label}</span><span class="dval">${discStr} → ${payStr}</span></div>`;
+  });
+
+  // Скидки за вакансии
+  discRows += `<div class="st-disc-title" style="margin-top:6px">За кол-во вакансий</div>`;
+  DISC_VAC.forEach(d => {
+    if (d.disc === 0) return; // 1 вакансия — без скидки, пропускаем
+    const totalDisc = Math.min(d.disc + extraDisc, 35);
+    const finalAmt = Math.round(subtotal * (1 - totalDisc / 100));
+    const p1 = Math.round(finalAmt * prepayRatio);
+    const p2 = finalAmt - p1;
+    const payStr = prepayRatio === 1
+      ? fmt(finalAmt)
+      : `${fmt(p1)} + ${fmt(p2)}`;
+    discRows += `<div class="st-disc-row"><span class="dlbl">${d.label} (−${d.disc + extraDisc}%)</span><span class="dval">${payStr}</span></div>`;
+  });
+
+  // Базовая цена без скидки
+  const baseFinal = Math.round(subtotal * (1 - extraDisc / 100));
+  const baseP1 = Math.round(baseFinal * prepayRatio);
+  const baseP2 = baseFinal - baseP1;
+  const basePayStr = prepayRatio === 1
+    ? fmt(baseFinal)
+    : `${fmt(baseP1)} + ${fmt(baseP2)}`;
+
+  return `<div class="st-card ${color}${minNote ? ' disabled' : ''}">
+    <div class="st-badge">${badge}</div>
+    <div class="st-name">${name}</div>
+    <div class="st-row"><span class="lbl">Гарантия</span><span class="val">${guarantee}</span></div>
+    <div class="st-row"><span class="lbl">Скорость</span><span class="val">${speed}</span></div>
+    <div class="st-divider"></div>
+    <div class="st-row" style="margin-bottom:4px"><span class="lbl">Без скидки</span><span class="val">${basePayStr}</span></div>
+    ${discRows}
+    ${minNote ? `<div class="st-note">${minNote}</div>` : ''}
+  </div>`;
+}
+
+function renderSmeta(bases, crits, extras, subtotal) {
+  const vname = document.getElementById('vname').value.trim();
+  document.getElementById('smeta-title').textContent = vname ? `Смета — ${vname}` : 'Смета по вакансии';
+  document.getElementById('smeta-date').textContent = new Date().toLocaleDateString('ru-RU', {day:'2-digit', month:'long', year:'numeric'});
+
+  let html = '';
+
+  if (bases.length) {
+    html += `<div class="smeta-section"><div class="smeta-sec-title">Базовая стоимость</div>`;
+    bases.forEach(x => { html += `<div class="smeta-item"><span class="smeta-item-name">${x.name}</span><span class="smeta-item-price">${fmt(x.price)}</span></div>`; });
+    html += `</div>`;
+  }
+  if (crits.length) {
+    html += `<div class="smeta-section"><div class="smeta-sec-title">Усложняющие критерии</div>`;
+    crits.forEach(x => { html += `<div class="smeta-item"><span class="smeta-item-name">${x.name}</span><span class="smeta-item-price">${fmt(x.price)}</span></div>`; });
+    html += `</div>`;
+  }
+  const extraPaid = extras.filter(x => !x.free);
+  const extraFree = extras.filter(x =>  x.free);
+  if (extraPaid.length || extraFree.length) {
+    html += `<div class="smeta-section"><div class="smeta-sec-title">Дополнительные услуги</div>`;
+    extraPaid.forEach(x => { html += `<div class="smeta-item"><span class="smeta-item-name">${x.name}</span><span class="smeta-item-price">${fmt(x.price)}</span></div>`; });
+    extraFree.forEach(x => { html += `<div class="smeta-item"><span class="smeta-item-name">${x.name}</span><span class="smeta-item-price free">Бесплатно</span></div>`; });
+    html += `</div>`;
+  }
+
+  html += `<hr class="smeta-divider">`;
+  html += `<div class="smeta-subtotal"><span class="smeta-subtotal-label">Итого без скидок</span><span class="smeta-subtotal-value">${fmt(subtotal)}</span></div>`;
+
+  html += `<div class="smeta-tariffs-label">Тарифы и варианты скидок — для менеджера</div>`;
+  html += `<div class="smeta-tariffs-grid">`;
+  html += tariffCard('green',  'Максимальный', '100% предоплата', subtotal, 1,   '365 дней', 'Максимальная', 5,  null);
+  html += tariffCard('blue',   'Средний',       '70% предоплата',  subtotal, 0.7, '150 дней', 'Стандартная',  0,  null);
+  html += tariffCard('purple', 'Минимальный',   '50% предоплата',  subtotal, 0.5, '100 дней', 'Стандартная',  0,  'Доступен от 2 сотрудников на вакансию');
+  html += `</div>`;
+
+  html += `<p class="smeta-hint">Скидки за сотрудников и вакансии не суммируются — берётся наибольшая. Исключение: скидка максимального тарифа (−5%) суммируется с любой из них.</p>`;
+
+  document.getElementById('smeta-body').innerHTML = html;
+}
+
+let smetaVisible = false;
+function toggleSmeta() {
+  smetaVisible = !smetaVisible;
+  document.getElementById('smeta-block').classList.toggle('visible', smetaVisible);
+  document.getElementById('smeta-btn-text').textContent = smetaVisible ? 'Скрыть смету' : 'Сформировать смету';
+  if (smetaVisible) setTimeout(() => document.getElementById('smeta-block').scrollIntoView({behavior:'smooth', block:'start'}), 50);
+}
+
+calcTotal();
+</script>
+</body>
+</html>
