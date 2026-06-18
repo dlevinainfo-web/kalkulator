@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Калькулятор точечного подбора</title>
+<title>Калькулятор подбора</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -16,12 +16,16 @@
   }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; min-height: 100vh; padding: 2rem 1rem 4rem; }
   .page { max-width: 760px; margin: 0 auto; }
-  .header { margin-bottom: 2rem; }
+  .header { margin-bottom: 1.5rem; }
   .header-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: .5rem; }
   .header h1 { font-size: 26px; font-weight: 600; color: var(--text); letter-spacing: -.01em; }
-  .header-sub { font-size: 14px; color: var(--text2); margin-top: .4rem; }
 
-  /* Статус бар */
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: var(--radius-sm); padding: 4px; margin-bottom: 1.25rem; }
+  .tab { flex: 1; padding: 8px 12px; font-size: 14px; font-weight: 500; font-family: inherit; background: transparent; border: none; border-radius: 6px; cursor: pointer; color: var(--text2); transition: background .15s, color .15s; text-align: center; }
+  .tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+
+  /* Status bar */
   .status-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .6rem 1rem; margin-bottom: 1rem; font-size: 13px; flex-wrap: wrap; }
   .status-left { display: flex; align-items: center; gap: 8px; color: var(--text2); }
   .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
@@ -37,14 +41,61 @@
   .card-title-wrap { display: flex; align-items: center; gap: 6px; margin-bottom: 1rem; padding-bottom: .6rem; border-bottom: 1px solid var(--border); }
   .card-title-wrap .card-title { margin: 0; padding: 0; border: none; }
 
-  .vname-wrap { margin-bottom: 1.25rem; }
-  .vname-wrap label { display: block; font-size: 13px; color: var(--text2); margin-bottom: 5px; }
-  .vname-wrap input { width: 100%; height: 40px; padding: 0 12px; font-size: 15px; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); outline: none; transition: border-color .15s; }
-  .vname-wrap input:focus { border-color: var(--accent); }
+  .field-wrap { margin-bottom: 1.1rem; }
+  .field-wrap:last-child { margin-bottom: 0; }
+  .field-wrap label { display: block; font-size: 13px; color: var(--text2); margin-bottom: 5px; }
+  .field-hint { font-size: 11.5px; color: var(--text3); margin-top: 4px; line-height: 1.4; }
+  .field-wrap input, .field-wrap select, .field-wrap textarea { width: 100%; padding: 0 12px; font-size: 14px; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); outline: none; transition: border-color .15s; }
+  .field-wrap input, .field-wrap select { height: 40px; }
+  .field-wrap textarea { padding: 10px 12px; height: 80px; resize: vertical; line-height: 1.5; }
+  .field-wrap input:focus, .field-wrap select:focus, .field-wrap textarea:focus { border-color: var(--accent); }
+  .field-wrap input[type=number] { -moz-appearance: textfield; }
+  .field-wrap input[type=number]::-webkit-outer-spin-button,
+  .field-wrap input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 
-  .author-wrap { margin-bottom: 1.5rem; }
-  .author-wrap label { display: block; font-size: 13px; color: var(--text2); margin-bottom: 5px; }
-  .author-wrap select { width: 100%; height: 38px; padding: 0 10px; font-size: 14px; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); outline: none; cursor: pointer; }
+  /* Компания */
+  .company-row { display: grid; grid-template-columns: 160px 1fr; gap: 8px; }
+  .company-result { margin-top: 6px; font-size: 13px; font-weight: 600; color: var(--text); background: var(--surface2); border-radius: var(--radius-sm); padding: 8px 12px; min-height: 36px; display: flex; align-items: center; }
+
+  /* ЗП */
+  .salary-entries { display: flex; flex-direction: column; gap: 0; margin-bottom: 10px; }
+  .salary-entry { position: relative; padding: 12px 30px 12px 0; border-top: 1px solid var(--border); }
+  .salary-entry:first-child { border-top: none; padding-top: 0; }
+  .salary-inner-amount { display: grid; grid-template-columns: 1fr 110px; gap: 8px; margin-bottom: 8px; }
+  .salary-inner-amount input { height: 40px; font-size: 14px; font-weight: 400; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 0 12px; outline: none; background: var(--surface); color: var(--text); width: 100%; transition: border-color .15s, background .15s; }
+  .salary-inner-amount input:focus { border-color: var(--accent); }
+  .salary-inner-amount input::placeholder { color: var(--text3); }
+  .salary-inner-amount select { height: 40px; font-size: 13px; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 0 8px; outline: none; background: var(--surface); color: var(--text2); cursor: pointer; width: 100%; transition: border-color .15s, background .15s; }
+  .salary-inner-note textarea { width: 100%; font-size: 13px; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 8px 12px; background: var(--surface2); color: var(--text3); resize: none; height: 36px; line-height: 1.5; outline: none; display: block; box-sizing: border-box; transition: border-color .15s, background .15s, color .15s; }
+  .salary-inner-note textarea::placeholder { color: var(--text3); }
+  .salary-inner-note textarea:focus { color: var(--text2); background: var(--surface); border-color: var(--accent); }
+  .salary-inner-amount input.salary-amount-filled { border-color: #a8d9bc; background: #f0faf4; }
+  .salary-inner-amount select.salary-cur-filled { border-color: #a8d9bc; background: #f0faf4; color: var(--text); }
+  .salary-inner-note textarea.salary-note-filled { color: var(--text); background: #f0faf4; border-color: #a8d9bc; }
+  .btn-remove-salary { position: absolute; top: 14px; right: 0; width: 22px; height: 22px; border-radius: 50%; border: none; background: var(--surface2); color: var(--text3); font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; transition: background .15s, color .15s; }
+  .salary-entry:first-child .btn-remove-salary { top: 2px; }
+  .btn-remove-salary:hover { background: #fee2e2; color: #991b1b; }
+  .btn-add-salary { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 14px; font-size: 13px; font-family: inherit; background: var(--surface); color: var(--text2); border: 1px dashed var(--border2); border-radius: var(--radius-sm); cursor: pointer; transition: background .15s, border-color .15s, color .15s; width: 100%; }
+  .btn-add-salary:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+
+  /* Filled/empty field states */
+  .field-wrap input.filled, .field-wrap select.filled, .field-wrap textarea.filled { border-color: #a8d9bc; background: #f8fdfb; }
+  .company-result.filled { border: 1.5px solid #a8d9bc; background: #f0faf4; color: var(--text); font-weight: 600; }
+  .salary-amount-filled { border-color: #a8d9bc !important; background: #f8fdfb !important; }
+  .salary-note { color: var(--text3); }
+  .salary-note:focus { color: var(--text2); }
+  .salary-note.salary-note-filled { color: var(--text); background: #f8fdfb; border-radius: 4px; padding: 2px 4px; margin: -2px -4px; border: 1px solid #a8d9bc; }
+  .ip-error { font-size: 12px; color: #c0392b; margin-top: 4px; display: none; }
+  .ip-error.visible { display: block; }
+  /* company input — no green highlight */
+  #exp-co-name.filled, #exp-co-name:focus { border-color: var(--border2); background: var(--surface); }
+
+  /* Конкуренция */
+  .competition-badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin-top: 5px; }
+  .comp-low    { background: #d1fae5; color: #065f46; }
+  .comp-mid    { background: #fef3c7; color: #92400e; }
+  .comp-high   { background: #fee2e2; color: #991b1b; }
+  .comp-xhigh  { background: #fce7f3; color: #9d174d; }
 
   .row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
   .row:last-child { border-bottom: none; }
@@ -71,6 +122,24 @@
   .btn-smeta { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; font-size: 14px; font-weight: 500; font-family: inherit; background: var(--surface); color: var(--text); border: 1px solid var(--border2); border-radius: var(--radius-sm); cursor: pointer; transition: background .15s; }
   .btn-smeta:hover { background: var(--surface2); }
 
+  /* Массовый result cards */
+  .mass-result { display: none; margin-top: 1rem; }
+  .mass-result.visible { display: block; }
+  .mass-cards { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+  @media (max-width: 500px) { .mass-cards { grid-template-columns: 1fr; } }
+  .mass-card { border-radius: var(--radius-sm); padding: 1rem; border: 1.5px solid var(--border); background: var(--surface); }
+  .mass-card.recommended { border-color: #a8d9bc; background: #f0faf4; }
+  .mass-card-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin-bottom: 6px; background: var(--surface2); color: var(--text2); }
+  .mass-card.recommended .mass-card-badge { background: #d1fae5; color: #065f46; }
+  .mass-card-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; line-height: 1.4; }
+  .mass-card-row { display: flex; justify-content: space-between; font-size: 12.5px; padding: 2px 0; }
+  .mass-card-row .lbl { color: var(--text2); }
+  .mass-card-row .val { color: var(--text); font-weight: 500; }
+  .mass-card-divider { border: none; border-top: 1px solid rgba(0,0,0,.07); margin: 7px 0; }
+  .mass-card-total { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; }
+  .mass-card.recommended .mass-card-total .val { color: #065f46; }
+  .mass-hint { font-size: 12px; color: var(--text2); background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 14px; margin-top: .75rem; line-height: 1.5; }
+
   /* Toast */
   .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--text); color: #fff; font-size: 13px; padding: 10px 18px; border-radius: 20px; opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none; white-space: nowrap; z-index: 999; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -94,11 +163,9 @@
   .smeta-subtotal { display: flex; justify-content: space-between; align-items: center; background: var(--surface2); border-radius: var(--radius-sm); padding: .9rem 1.1rem; margin-bottom: 1.5rem; }
   .smeta-subtotal-label { font-size: 14px; color: var(--text2); }
   .smeta-subtotal-value { font-size: 18px; font-weight: 700; color: var(--text); }
-
   .smeta-tariffs-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); margin-bottom: .75rem; }
   .smeta-tariffs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; margin-bottom: 1.25rem; }
   @media (max-width: 540px) { .smeta-tariffs-grid { grid-template-columns: 1fr; } }
-
   .st-card { border-radius: var(--radius-sm); padding: .9rem 1rem; border: 1.5px solid transparent; }
   .st-card.green  { background: #f0faf4; border-color: #a8d9bc; }
   .st-card.blue   { background: #eff6ff; border-color: #93c5fd; }
@@ -123,10 +190,10 @@
 
   @media print {
     body { background: white; padding: 0; }
-    .calc-section, .status-bar { display: none !important; }
+    .tabs, .calc-section, .status-bar, .mass-result { display: none !important; }
     .smeta { display: block !important; box-shadow: none; border: 1px solid #ccc; }
     .smeta-top { background: #1c1b18 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .st-card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .st-card, .mass-card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
 </style>
 </head>
@@ -134,15 +201,21 @@
 <div class="page">
   <div class="header">
     <div class="header-eyebrow">Рекрутинговое агентство</div>
-    <h1>Калькулятор точечного подбора</h1>
-    <p class="header-sub">Выберите параметры вакансии — смета сформируется автоматически</p>
+    <h1>Калькулятор подбора</h1>
   </div>
 
-  <!-- Статус -->
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" id="tab-expertise" onclick="switchTab('expertise')">Экспертиза вакансии</button>
+    <button class="tab" id="tab-tochechny" onclick="switchTab('tochechny')">Точечный подбор</button>
+    <button class="tab" id="tab-massovy" onclick="switchTab('massovy')">Массовый подбор</button>
+  </div>
+
+  <!-- Status bar -->
   <div class="status-bar">
     <div class="status-left">
       <div class="status-dot" id="status-dot"></div>
-      <span id="status-text">Загрузка...</span>
+      <span id="status-text">Новый расчёт</span>
       <span class="status-id" id="status-id"></span>
     </div>
     <button class="btn-copy-link" id="btn-copy-link" onclick="copyLink()" style="display:none">
@@ -151,83 +224,254 @@
     </button>
   </div>
 
-  <div class="calc-section">
+  <!-- ===================== ЭКСПЕРТИЗА ===================== -->
+  <div id="section-expertise">
+
     <div class="card">
-      <div class="vname-wrap">
-        <label for="vname">Название вакансии</label>
-        <input type="text" id="vname" placeholder="Например: Менеджер по продажам" oninput="onEdit()">
+      <div class="card-title">Название вакансии</div>
+      <div class="field-wrap" style="margin-bottom:0">
+        <input type="text" id="exp-vname" placeholder="Например: Менеджер по продажам" oninput="expEdit()">
+        <div class="field-hint">Официальное название или то, как называет вакансию клиент</div>
       </div>
-      <div class="author-wrap">
-        <label for="author">Кто заполняет</label>
-        <select id="author" onchange="onEdit()">
-          <option value="Ассистент">Ассистент</option>
-          <option value="Менеджер">Менеджер</option>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Название компании</div>
+      <div class="field-wrap">
+        <label>Форма</label>
+        <div class="company-row">
+          <select id="exp-co-type" onchange="updateCompany()">
+            <option value="brand">Бренд</option>
+            <option value="ip">ИП</option>
+            <option value="ooo">ООО</option>
+            <option value="ao">АО</option>
+            <option value="pao">ПАО</option>
+            <option value="zao">ЗАО</option>
+            <option value="oao">ОАО</option>
+            <option value="up">УП</option>
+            <option value="np">НП</option>
+            <option value="gup">ГУП</option>
+            <option value="mup">МУП</option>
+            <option value="other">Другое</option>
+          </select>
+          <input type="text" id="exp-co-name" placeholder="Название" oninput="updateCompany()">
+        </div>
+        <div class="field-hint" id="exp-co-hint">Введите торговое название или бренд</div>
+        <div class="ip-error" id="ip-error"></div>
+      </div>
+      <div class="field-wrap" style="margin-bottom:0">
+        <label>Результат</label>
+        <div class="company-result" id="exp-co-result">—</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Регион поиска сотрудников</div>
+      <div class="field-wrap" style="margin-bottom:0">
+        <input type="text" id="exp-region" placeholder="Например: Москва" oninput="capitalizeFirst(this); expEdit()">
+        <div class="field-hint">Город, регион или страна — укажите то, что применимо</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Кол-во потенциальных кандидатов</div>
+      <div class="field-wrap" style="margin-bottom:0">
+        <input type="number" id="exp-candidates" placeholder="Количество резюме на рынке" oninput="expEdit()">
+        <div class="field-hint">Оценочное кол-во подходящих резюме в открытом доступе</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Конкуренция за сотрудников</div>
+      <div class="field-wrap" style="margin-bottom:0">
+        <select id="exp-competition" onchange="updateCompetition()">
+          <option value="">— Выберите уровень —</option>
+          <option value="50-60">50–60% — умеренная</option>
+          <option value="60-75">60–75% — выше умеренной</option>
+          <option value="75-85">75–85% — высокая</option>
+          <option value="85-95">85–95% — крайне высокая</option>
         </select>
+        <div id="exp-competition-badge" style="margin-top:6px"></div>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-title-wrap">
-        <div class="card-title">Базовая стоимость позиции</div>
-        <button class="tip-btn" onclick="toggleSectionTip('tip-base')" type="button">?</button>
+      <div class="card-title">Ориентировочный срок закрытия</div>
+      <div class="field-wrap" style="margin-bottom:0">
+        <select id="exp-deadline" onchange="toggleDeadlineCustom()">
+          <option value="">— Выберите срок —</option>
+          <option value="1">1 неделя</option>
+          <option value="2">2 недели</option>
+          <option value="3">3 недели</option>
+          <option value="4">4 недели</option>
+          <option value="5">5 недель</option>
+          <option value="6">6 недель</option>
+          <option value="7">7 недель</option>
+          <option value="8">8 недель</option>
+          <option value="9">9 недель</option>
+          <option value="10">10 недель</option>
+          <option value="other">Другое</option>
+        </select>
+        <input type="text" id="exp-deadline-custom" placeholder="Укажите срок" oninput="expEdit()" style="display:none;margin-top:8px">
       </div>
-      <div class="tip-popup" id="tip-base">Стоимость нашей работы — сюда входит подготовка к подбору с созданием воронки найма, работа по поиску кандидатов и стоимость переданных кандидатов.</div>
-      <div id="base-list"></div>
     </div>
 
     <div class="card">
-      <div class="card-title-wrap">
-        <div class="card-title">Усложняющие критерии поиска</div>
-        <button class="tip-btn" onclick="toggleSectionTip('tip-crit')" type="button">?</button>
-      </div>
-      <div class="tip-popup" id="tip-crit">Некоторые усложняющие критерии можно указать в портрете кандидата как «желательные» — в этом случае доплата не требуется.</div>
-      <div id="crit-list"></div>
+      <div class="card-title">Рекомендуемая ЗП</div>
+      <div id="salary-entries" class="salary-entries"></div>
+      <button class="btn-add-salary" onclick="addSalaryEntry()">+ Добавить вариант ЗП</button>
     </div>
 
     <div class="card">
-      <div class="card-title-wrap">
-        <div class="card-title">Дополнительные услуги</div>
-        <button class="tip-btn" onclick="toggleSectionTip('tip-extra')" type="button">?</button>
+      <div class="card-title">Доп. информация (при наличии)</div>
+      <div class="field-wrap" style="margin-bottom:0">
+        <textarea id="exp-extra" placeholder="Любые дополнительные сведения о вакансии или клиенте, которые стоит учесть при работе..." oninput="expEdit()"></textarea>
       </div>
-      <div class="tip-popup" id="tip-extra">Дополнительные услуги — это процессы, увеличивающие нашу работу в процессе подбора: то, что усложняет воронку найма.</div>
-      <div id="extra-list"></div>
     </div>
 
     <div class="card">
-      <div class="total-box">
-        <div class="total-box-label">Итоговая стоимость</div>
-        <div class="total-box-value" id="total-final">0 ₽</div>
-      </div>
       <div class="actions">
-        <button class="btn-save" id="btn-save" onclick="saveData()">
+        <button class="btn-save" id="exp-btn-save" onclick="saveData()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
           Сохранить
         </button>
-        <button class="btn-smeta" onclick="toggleSmeta()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          <span id="smeta-btn-text">Сформировать смету</span>
-        </button>
       </div>
     </div>
   </div>
 
-  <div class="smeta" id="smeta-block">
-    <div class="smeta-top">
-      <div>
-        <div class="smeta-top-title" id="smeta-title">Смета</div>
-        <div class="smeta-top-date" id="smeta-date"></div>
+  <!-- ===================== ТОЧЕЧНЫЙ ===================== -->
+  <div id="section-tochechny" style="display:none">
+    <div class="calc-section">
+      <div class="card">
+        <div class="card-title-wrap">
+          <div class="card-title">Базовая стоимость позиции</div>
+          <button class="tip-btn" onclick="toggleSectionTip('tip-base')" type="button">?</button>
+        </div>
+        <div class="tip-popup" id="tip-base">Стоимость нашей работы — сюда входит подготовка к подбору с созданием воронки найма, работа по поиску кандидатов и стоимость переданных кандидатов.</div>
+        <div id="base-list"></div>
       </div>
-      <div class="smeta-top-badge">Точечный подбор</div>
+
+      <div class="card">
+        <div class="card-title-wrap">
+          <div class="card-title">Усложняющие критерии поиска</div>
+          <button class="tip-btn" onclick="toggleSectionTip('tip-crit')" type="button">?</button>
+        </div>
+        <div class="tip-popup" id="tip-crit">Некоторые усложняющие критерии можно указать в портрете кандидата как «желательные» — в этом случае доплата не требуется.</div>
+        <div id="crit-list"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title-wrap">
+          <div class="card-title">Дополнительные услуги</div>
+          <button class="tip-btn" onclick="toggleSectionTip('tip-extra')" type="button">?</button>
+        </div>
+        <div class="tip-popup" id="tip-extra">Дополнительные услуги — это процессы, увеличивающие нашу работу в процессе подбора: то, что усложняет воронку найма.</div>
+        <div id="extra-list"></div>
+      </div>
+
+      <div class="card">
+        <div class="total-box">
+          <div class="total-box-label">Итоговая стоимость</div>
+          <div class="total-box-value" id="total-final">0 ₽</div>
+        </div>
+        <div class="actions">
+          <button class="btn-save" id="btn-save" onclick="saveData()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Сохранить
+          </button>
+          <button class="btn-smeta" onclick="toggleSmeta()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <span id="smeta-btn-text">Сформировать смету</span>
+          </button>
+        </div>
+      </div>
     </div>
-    <div class="smeta-body" id="smeta-body"></div>
+
+    <div class="smeta" id="smeta-block">
+      <div class="smeta-top">
+        <div>
+          <div class="smeta-top-title" id="smeta-title">Смета</div>
+          <div class="smeta-top-date" id="smeta-date"></div>
+        </div>
+        <div class="smeta-top-badge">Точечный подбор</div>
+      </div>
+      <div class="smeta-body" id="smeta-body"></div>
+    </div>
   </div>
+
+  <!-- ===================== МАССОВЫЙ ===================== -->
+  <div id="section-massovy" style="display:none">
+    <div class="calc-section">
+      <div class="card">
+        <div class="card-title">Шаг 1 — Параметры заказа</div>
+        <div class="field-wrap">
+          <label for="m-level">Уровень требований к кандидату</label>
+          <select id="m-level" onchange="massCalc()">
+            <option value="1-4">1–4 требования к кандидату</option>
+            <option value="5-8">5–8 требований к кандидату</option>
+          </select>
+        </div>
+        <div class="field-wrap">
+          <label for="m-tariff">Тариф</label>
+          <select id="m-tariff" onchange="massCalc()">
+            <option value="search">Поиск и подбор</option>
+            <option value="full">Поиск и подбор + администрирование найма</option>
+          </select>
+        </div>
+        <div class="field-wrap" style="margin-bottom:0">
+          <label for="m-staff">Сколько сотрудников нужно нанять</label>
+          <input type="number" id="m-staff" min="0" placeholder="0" oninput="massCalc()">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Шаг 2 — Кандидаты в подбор</div>
+        <div id="m-rec-hint" style="font-size:13px; color:var(--text2); margin-bottom:1rem; background:var(--surface2); padding:10px 14px; border-radius:var(--radius-sm);">Укажите кол-во сотрудников выше — появится рекомендация</div>
+        <div class="field-wrap" style="margin-bottom:0">
+          <label for="m-cands">Кандидатов в подбор</label>
+          <input type="number" id="m-cands" min="0" placeholder="Минимум 10" oninput="massCalc()">
+        </div>
+      </div>
+
+      <div class="mass-result" id="mass-result">
+        <div id="mass-error" class="mass-error" style="display:none"></div>
+        <div id="mass-cards" class="mass-cards"></div>
+        <div class="mass-hint" id="mass-hint"></div>
+      </div>
+
+      <div class="card" style="margin-top:1rem">
+        <div class="actions">
+          <button class="btn-save" id="m-btn-save" onclick="saveData()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Сохранить
+          </button>
+          <button class="btn-smeta" onclick="toggleMassSmeta()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <span id="m-smeta-btn-text">Сформировать смету</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="smeta" id="m-smeta-block">
+      <div class="smeta-top">
+        <div>
+          <div class="smeta-top-title" id="m-smeta-title">Смета</div>
+          <div class="smeta-top-date" id="m-smeta-date"></div>
+        </div>
+        <div class="smeta-top-badge">Массовый подбор</div>
+      </div>
+      <div class="smeta-body" id="m-smeta-body"></div>
+    </div>
+  </div>
+
 </div>
-
 <div class="toast" id="toast"></div>
 
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwTB9CsIjNYLH1HD6sSUpOAgS3p7p_ra3AlMyvf95rbFg3nafQyxn4R2_VLea-MSk7d/exec';
 
+// ==================== ДАННЫЕ ТОЧЕЧНОГО ====================
 const BASE = [
   {name:"Рабочая позиция", price:35000, tip:"Сотрудники, выполняющие простые физические или вспомогательные работы, как правило без необходимости общения с клиентами и наличия специальных навыков.\n\nПримеры: грузчики, разнорабочие, подсобные рабочие, уборщики, дворники, сортировщики, фасовщики."},
   {name:"Линейная позиция", price:40000, tip:"Сотрудники, выполняющие регулярные операционные задачи.\n\nПримеры: продавцы-консультанты, администраторы, кладовщики, операторы производства."},
@@ -250,25 +494,24 @@ const CRIT = [
   {name:"Знание иностранного языка (1 шт.)", price:5000, tip:"Оплачивается дополнительно, если данное требование не касается учителей иностранных языков и переводчиков."},
   {name:"Наличие водительских прав", price:5000, tip:"Касается всех, кто хочет, чтобы сотрудник имел водительские права. КРОМЕ водителей и персонала для автомастерских."},
   {name:"Собственный автомобиль", price:5000, tip:"Проставляется в том случае, если сотрудник должен иметь собственный автомобиль."},
-  {name:"Менее 500 кандидатов на вакансию (в открытом доступе)", price:5000, tip:"Проставляется если на рынке труда менее 500 кандидатов на данную вакансию.\n\nНа этапе аудита мы проверяем кол-во потенциальных кандидатов в данном регионе. Если кандидатов мало — требуются дополнительные средства на привлечение и холодный поиск.\n\nЕсли во время аудита окажется, что кандидатов более 500, стоимость скорректируется в меньшую сторону."},
-  {name:"Менее 300 кандидатов на вакансию (в открытом доступе)", price:10000, tip:"Проставляется если на рынке труда менее 300 кандидатов на данную вакансию.\n\nНа этапе аудита мы проверяем кол-во потенциальных кандидатов в данном регионе. Если кандидатов мало — требуются дополнительные средства на привлечение и холодный поиск.\n\nЕсли во время аудита окажется, что кандидатов более 300, стоимость скорректируется в меньшую сторону."},
+  {name:"Менее 500 кандидатов на вакансию (в открытом доступе)", price:5000, tip:"Проставляется если на рынке труда менее 500 кандидатов на данную вакансию.\n\nЕсли во время аудита окажется, что кандидатов более 500, стоимость скорректируется в меньшую сторону."},
+  {name:"Менее 300 кандидатов на вакансию (в открытом доступе)", price:10000, tip:"Проставляется если на рынке труда менее 300 кандидатов на данную вакансию.\n\nЕсли во время аудита окажется, что кандидатов более 300, стоимость скорректируется в меньшую сторону."},
   {name:"В вакансии от 20 до 30 требований", price:7000, tip:"Проставляется, если в вакансии от 20 до 30 формальных требований к кандидату. Большое число требований сужает выборку и увеличивает объём работы."},
 ];
 const EXTRA = [
-  {name:"Внесение корректировок в «портрет кандидата» во время подбора (1 раз)", price:0, free:true, checked:true, tip:"В том случае, если заказчику требуется проводить стажировку/тест кандидатов, подбор не будет остановлен даже после выхода одного из кандидатов на работу.\n\nЕсли один из кандидатов проработает более 7 календарных дней, подбор будет завершён."},
-  {name:"Тест кандидата на рабочем месте до 7 календарных дней", price:0, free:true, tip:"Если заказчику потребуется провести стажировку/тест кандидата на рабочем месте перед принятием на работу, выход кандидата на первый рабочий день не будет означать завершение подбора.\n\nПодбор завершится, если с момента выхода кандидата на работу пройдёт более 7 дней."},
-  {name:"Тест кандидата на рабочем месте от 7 до 14 календарных дней", price:10000, tip:"Если заказчику потребуется провести стажировку/тест кандидата, мы замедлим либо остановим подбор (по возможности).\n\nЕсли один из кандидатов проработает более 14 дней, подбор будет завершён.\n\nДополнительная оплата закладывается заранее, так как приостановка процесса поиска требует дополнительных средств."},
-  {name:"Ускоренный поиск и подбор кандидатов", price:15000, tip:"Для срочных, «горящих» вакансий. Вакансия получает высокий приоритет, подключается дополнительный рекрутер.\n\nДля ускорения также рекомендуется приобрести дополнительные ресурсы для поиска кандидатов.\n\nВ данном случае можем указать максимальный срок подбора в договоре (по согласованию с HRD)."},
+  {name:"Внесение корректировок в «портрет кандидата» во время подбора (1 раз)", price:0, free:true, checked:true, tip:"В том случае, если заказчику требуется проводить стажировку/тест кандидатов, подбор не будет остановлен даже после выхода одного из кандидатов на работу."},
+  {name:"Тест кандидата на рабочем месте до 7 календарных дней", price:0, free:true, tip:"Выход кандидата на первый рабочий день не будет означать завершение подбора. Подбор завершится, если пройдёт более 7 дней с момента выхода."},
+  {name:"Тест кандидата на рабочем месте от 7 до 14 календарных дней", price:10000, tip:"Мы замедлим либо остановим подбор (по возможности). Дополнительная оплата закладывается заранее, так как приостановка процесса требует дополнительных средств."},
+  {name:"Ускоренный поиск и подбор кандидатов", price:15000, tip:"Для срочных, «горящих» вакансий. Вакансия получает высокий приоритет, подключается дополнительный рекрутер."},
   {name:"Проведение профильных тестовых заданий (все кандидаты)", price:15000, tip:"Проверка практических навыков кандидатов через выполнение тестовых заданий, имитирующих рабочие задачи."},
-  {name:"Проведение внутренних собеседований в видео-формате", price:10000, tip:"По стандарту интервью проводится в аудио-формате. С данной опцией оно будет проводиться в видео-формате."},
-  {name:"Проверка кандидатов СБ (до 5 кандидатов на выбор заказчика)", price:5000, tip:"Проверяем кандидатов на уголовное/кредитное прошлое — подготавливаем отчёт в формате документа по запросу."},
-  {name:"Проверка рекомендаций с предыдущих мест работы (до 5 кандидатов)", price:5000, tip:"Находим контакты руководителей с предыдущих мест работы кандидата, договариваемся о контакте, задаём вопросы под запись и передаём информацию клиенту в удобном формате.\n\nВажно: нет гарантии, что предыдущие руководители выйдут на связь, однако мы предпримем все действия для разговора с ними."},
-  {name:"Увеличение % формального соответствия для усложн. критериев до 100%", price:0, free:true, tip:"ТОЛЬКО ПО ПРОСЬБЕ ЗАКАЗЧИКА! Если заказчик хочет проставить усложняющие критерии по 100% релевантности, такая корректировка может быть внесена в договор."},
-  {name:"Увеличение % формального соответствия до 70%", price:7000, tip:"Увеличивает процент формального соответствия кандидатов до 70%. Чем выше порог, тем больше кандидатов необходимо рассмотреть на этапе резюме — это увеличивает объём работы и затраты на ресурсы."},
-  {name:"Увеличение срока рассмотрения кандидатов до 3 дней", price:0, free:true, tip:"Увеличение срока, в течение которого заказчик даёт обратную связь по кандидатам, до 3 дней. Предоставляется бесплатно."},
-  {name:"Увеличение срока рассмотрения кандидатов до 4–5 дней", price:7000, tip:"Увеличение срока обратной связи заказчика по кандидатам до 4–5 дней. Оплачивается дополнительно, так как удлиняет цикл подбора."},
+  {name:"Проведение внутренних собеседований в видео-формате", price:10000, tip:"По стандарту интервью проводится в аудио-формате. С данной опцией — в видео-формате."},
+  {name:"Проверка кандидатов СБ (до 5 кандидатов на выбор заказчика)", price:5000, tip:"Проверяем кандидатов на уголовное/кредитное прошлое — подготавливаем отчёт по запросу."},
+  {name:"Проверка рекомендаций с предыдущих мест работы (до 5 кандидатов)", price:5000, tip:"Находим контакты руководителей с предыдущих мест работы, задаём вопросы и передаём информацию клиенту."},
+  {name:"Увеличение % формального соответствия для усложн. критериев до 100%", price:0, free:true, tip:"ТОЛЬКО ПО ПРОСЬБЕ ЗАКАЗЧИКА! Корректировка может быть внесена в договор."},
+  {name:"Увеличение % формального соответствия до 70%", price:7000, tip:"Чем выше порог, тем больше кандидатов необходимо рассмотреть на этапе резюме — это увеличивает объём работы и затраты на ресурсы."},
+  {name:"Увеличение срока рассмотрения кандидатов до 3 дней", price:0, free:true, tip:"Предоставляется бесплатно."},
+  {name:"Увеличение срока рассмотрения кандидатов до 4–5 дней", price:7000, tip:"Оплачивается дополнительно, так как удлиняет цикл подбора."},
 ];
-
 const DISC_STAFF = [
   {label:"1 сотрудник", disc:0},
   {label:"2 сотрудника", disc:10},
@@ -283,12 +526,268 @@ const DISC_VAC = [
   {label:"5+ вакансий", disc:20},
 ];
 
+// ==================== ДАННЫЕ МАССОВОГО ====================
+const MASS_PRICES = { '1-4': { search: 3750, full: 6500 }, '5-8': { search: 4750, full: 7500 } };
+const MASS_TARIFF_NAMES = { search: 'Поиск и подбор', full: 'Поиск и подбор + администрирование найма' };
+const MASS_TARIFF_INCLUDES = {
+  search: '1. Экспертиза вакансии и подготовка подбора\n2. Маркетинг вакансии (120+ площадок)\n3. Поиск кандидатов (тёплый, холодный, хантинг)\n4. Отбор кандидатов по резюме (скрининг)\n5. Подбор кандидатов по требованиям\n6. Проведение собеседований с HR\n7. Подтверждение условий работы\n8. Предоставление полного профиля кандидата',
+  full:   '1–8. Всё из тарифа «Поиск и подбор»\n9. Поддержка и организация очных этапов\n10. Гарантия прохождения очных этапов\n11. Поддержка и организация трудоустройства\n12. Гарантия замены кандидата при увольнении (30 дней)',
+};
+function massGetPayCondition(c) { return c < 10 ? null : c < 20 ? '100% предоплата' : 'Предоплата за каждые 10 кандидатов'; }
+function massGetDiscount(c) { return c >= 41 ? 0.10 : c >= 31 ? 0.07 : c >= 21 ? 0.05 : 0; }
+
+// ==================== ОБЩЕЕ ====================
 let currentId = null;
-let dirty = false;
+let currentTab = 'expertise';
+let salaryCounter = 0;
 
-function fmt(n){ return n.toLocaleString('ru-RU') + ' ₽'; }
+function fmt(n) { return n.toLocaleString('ru-RU') + ' ₽'; }
+function fmtCurrency(n, cur) {
+  if (cur === 'RUB') return n.toLocaleString('ru-RU') + ' ₽';
+  if (cur === 'USD') return '$' + n.toLocaleString('ru-RU');
+  if (cur === 'EUR') return '€' + n.toLocaleString('ru-RU');
+  if (cur === 'CNY') return '¥' + n.toLocaleString('ru-RU');
+  return n.toLocaleString('ru-RU') + ' ' + cur;
+}
 
-// ——— Tips ———
+function switchTab(tab) {
+  currentTab = tab;
+  ['expertise','tochechny','massovy'].forEach(t => {
+    document.getElementById('section-' + t).style.display = t === tab ? '' : 'none';
+    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+  });
+}
+
+// ==================== ЭКСПЕРТИЗА ====================
+const COMP_INFO = {
+  '50-60': { label: 'Умеренная', cls: 'comp-low',   desc: 'Рынок достаточно открыт, кандидатов относительно много' },
+  '60-75': { label: 'Выше умеренной', cls: 'comp-mid',  desc: 'Конкуренция заметна, поиск потребует активных действий' },
+  '75-85': { label: 'Высокая', cls: 'comp-high',  desc: 'Кандидаты дефицитны, нужны нестандартные методы поиска' },
+  '85-95': { label: 'Крайне высокая', cls: 'comp-xhigh', desc: 'Острый дефицит кадров, хантинг и холодный поиск обязательны' },
+};
+
+const CO_HINTS = {
+  brand: 'Введите торговое название или бренд',
+  ip:    'Введите полное ФИО предпринимателя — например: Мален Кихрен Иванович',
+  ooo:   'Введите название без кавычек',
+  ao:    'Введите название без кавычек',
+  pao:   'Введите название без кавычек',
+  zao:   'Введите название без кавычек',
+  oao:   'Введите название без кавычек',
+  up:    'Введите название',
+  np:    'Введите название',
+  gup:   'Введите название',
+  mup:   'Введите название',
+  other: 'Введите название',
+};
+
+function updateCompany() {
+  const type = document.getElementById('exp-co-type').value;
+  const name = document.getElementById('exp-co-name').value.trim();
+  const hint = document.getElementById('exp-co-hint');
+  const result = document.getElementById('exp-co-result');
+
+  hint.textContent = CO_HINTS[type] || '';
+
+  let formatted = '—';
+  if (name) {
+    const upper = name.toUpperCase();
+    if (type === 'brand') formatted = `«${upper}»`;
+    else if (type === 'ip')  formatted = `ИП ${upper}`;
+    else if (type === 'ooo') formatted = `ООО «${upper}»`;
+    else if (type === 'ao')  formatted = `АО «${upper}»`;
+    else if (type === 'pao') formatted = `ПАО «${upper}»`;
+    else if (type === 'zao') formatted = `ЗАО «${upper}»`;
+    else if (type === 'oao') formatted = `ОАО «${upper}»`;
+    else if (type === 'up')  formatted = `УП «${upper}»`;
+    else if (type === 'np')  formatted = `НП «${upper}»`;
+    else if (type === 'gup') formatted = `ГУП «${upper}»`;
+    else if (type === 'mup') formatted = `МУП «${upper}»`;
+    else formatted = upper;
+  }
+  result.textContent = formatted;
+  result.classList.toggle('filled', !!name);
+  validateIP();
+  expEdit();
+}
+
+function updateCompetition() {
+  const val = document.getElementById('exp-competition').value;
+  const badge = document.getElementById('exp-competition-badge');
+  if (val && COMP_INFO[val]) {
+    const info = COMP_INFO[val];
+    badge.innerHTML = `<span class="competition-badge ${info.cls}">${info.label}</span> <span style="font-size:12px;color:var(--text2);margin-left:6px">${info.desc}</span>`;
+  } else {
+    badge.innerHTML = '';
+  }
+  expEdit();
+}
+
+function toggleDeadlineCustom() {
+  const sel = document.getElementById('exp-deadline');
+  const custom = document.getElementById('exp-deadline-custom');
+  custom.style.display = sel.value === 'other' ? '' : 'none';
+  expEdit();
+}
+
+// Зарплата
+function addSalaryEntry(data) {
+  const id = salaryCounter++;
+  const container = document.getElementById('salary-entries');
+  const div = document.createElement('div');
+  div.className = 'salary-entry';
+  div.id = `salary-${id}`;
+  div.innerHTML = `
+    <button class="btn-remove-salary" onclick="removeSalaryEntry(${id})" title="Удалить">×</button>
+    <div class="salary-inner-amount">
+      <input type="number" id="salary-amount-${id}" placeholder="Сумма" value="${data?.amount||''}" oninput="expEdit()">
+      <select id="salary-cur-${id}" onchange="expEdit()">
+        <option value="RUB" ${(!data?.cur||data?.cur==='RUB')?'selected':''}>₽ RUB</option>
+        <option value="USD" ${data?.cur==='USD'?'selected':''}>$ USD</option>
+        <option value="EUR" ${data?.cur==='EUR'?'selected':''}>€ EUR</option>
+        <option value="CNY" ${data?.cur==='CNY'?'selected':''}>¥ CNY</option>
+        <option value="GBP" ${data?.cur==='GBP'?'selected':''}>£ GBP</option>
+        <option value="AED" ${data?.cur==='AED'?'selected':''}>AED</option>
+        <option value="TRY" ${data?.cur==='TRY'?'selected':''}>₺ TRY</option>
+        <option value="KZT" ${data?.cur==='KZT'?'selected':''}>₸ KZT</option>
+        <option value="BYN" ${data?.cur==='BYN'?'selected':''}>Br BYN</option>
+        <option value="UZS" ${data?.cur==='UZS'?'selected':''}>UZS</option>
+      </select>
+    </div>
+    <div class="salary-inner-note">
+      <textarea id="salary-note-${id}" placeholder="Примечание — например: для кандидатов из Москвы" oninput="expEdit()" rows="1">${data?.note||''}</textarea>
+    </div>`;
+  container.appendChild(div);
+  const amountInput = div.querySelector('input[type=number]');
+  const curSelect   = div.querySelector('select');
+  if (amountInput) {
+    amountInput.addEventListener('focus', () => {
+      amountInput.classList.remove('salary-amount-filled');
+      if (curSelect) curSelect.classList.remove('salary-cur-filled');
+    });
+    amountInput.addEventListener('blur', () => {
+      const filled = !!amountInput.value;
+      amountInput.classList.toggle('salary-amount-filled', filled);
+      if (curSelect) curSelect.classList.toggle('salary-cur-filled', filled);
+    });
+  }
+  const noteEl = div.querySelector('.salary-inner-note textarea');
+  if (noteEl) {
+    noteEl.addEventListener('focus', () => noteEl.classList.remove('salary-note-filled'));
+    noteEl.addEventListener('blur',  () => noteEl.classList.toggle('salary-note-filled', !!noteEl.value.trim()));
+  }
+  const ta = div.querySelector('textarea');
+  ta.addEventListener('input', () => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; });
+  if (data?.note) { setTimeout(() => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; }, 0); }
+  expEdit();
+}
+
+function removeSalaryEntry(id) {
+  const el = document.getElementById(`salary-${id}`);
+  if (el) el.remove();
+  expEdit();
+}
+
+function getSalaries() {
+  const entries = document.querySelectorAll('.salary-entry');
+  return Array.from(entries).map(el => {
+    const id = el.id.replace('salary-','');
+    const amount = parseFloat(document.getElementById(`salary-amount-${id}`)?.value) || 0;
+    const cur    = document.getElementById(`salary-cur-${id}`)?.value || 'RUB';
+    const note   = document.getElementById(`salary-note-${id}`)?.value || '';
+    return {amount, cur, note};
+  }).filter(s => s.amount > 0 || s.note);
+}
+
+function capitalizeFirst(el) {
+  const v = el.value;
+  if (v && v[0] !== v[0].toUpperCase()) el.value = v[0].toUpperCase() + v.slice(1);
+}
+
+function updateFieldState(el) {
+  if (!el) return;
+  const val = el.value?.trim();
+  el.classList.toggle('filled', !!val);
+  el.classList.toggle('empty', !val);
+}
+
+function updateAllFieldStates() {
+  // только при blur — здесь просто синхронизируем текущее состояние
+}
+
+function attachBlurListeners() {
+  ['exp-vname','exp-region','exp-candidates','exp-extra'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('focus', () => { el.classList.remove('filled'); });
+    el.addEventListener('blur',  () => { el.classList.toggle('filled', !!el.value.trim()); });
+  });
+  ['exp-competition','exp-deadline'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('change', () => { el.classList.toggle('filled', !!el.value); });
+  });
+}
+
+function validateIP() {
+  const type = document.getElementById('exp-co-type').value;
+  const name = document.getElementById('exp-co-name').value.trim();
+  const errEl = document.getElementById('ip-error');
+  if (!errEl) return;
+  if (type === 'ip' && name) {
+    const words = name.trim().split(/\s+/);
+    if (words.length < 3) {
+      errEl.textContent = 'У ИП должно быть заполнено полное ФИО — фамилия, имя и отчество';
+      errEl.classList.add('visible');
+    } else {
+      errEl.classList.remove('visible');
+    }
+  } else {
+    errEl.classList.remove('visible');
+  }
+}
+
+function expEdit() {
+  setStatus('yellow', 'Есть несохранённые изменения');
+}
+
+function getExpState() {
+  return {
+    vname:       document.getElementById('exp-vname')?.value || '',
+    coType:      document.getElementById('exp-co-type')?.value || '',
+    coName:      document.getElementById('exp-co-name')?.value || '',
+    coExtra:     document.getElementById('exp-co-extra')?.value || '',
+    region:      document.getElementById('exp-region')?.value || '',
+    candidates:  document.getElementById('exp-candidates')?.value || '',
+    competition: document.getElementById('exp-competition')?.value || '',
+    deadline:    document.getElementById('exp-deadline')?.value || '',
+    deadlineCustom: document.getElementById('exp-deadline-custom')?.value || '',
+    salaries:    getSalaries(),
+    extra:       document.getElementById('exp-extra')?.value || '',
+  };
+}
+
+function setExpState(s) {
+  if (!s) return;
+  if (s.vname !== undefined)      document.getElementById('exp-vname').value       = s.vname;
+  if (s.coType)                   document.getElementById('exp-co-type').value     = s.coType;
+  if (s.coName !== undefined)     document.getElementById('exp-co-name').value     = s.coName;
+  if (s.coExtra !== undefined)    document.getElementById('exp-co-extra').value    = s.coExtra;
+  if (s.region !== undefined)     document.getElementById('exp-region').value      = s.region;
+  if (s.candidates !== undefined) document.getElementById('exp-candidates').value  = s.candidates;
+  if (s.competition)              document.getElementById('exp-competition').value = s.competition;
+  if (s.deadline)                 document.getElementById('exp-deadline').value    = s.deadline;
+  if (s.deadlineCustom !== undefined) { document.getElementById('exp-deadline-custom').value = s.deadlineCustom; toggleDeadlineCustom(); }
+  if (s.extra !== undefined)      document.getElementById('exp-extra').value       = s.extra;
+  // salaries
+  document.getElementById('salary-entries').innerHTML = '';
+  salaryCounter = 0;
+  (s.salaries || []).forEach(sal => addSalaryEntry(sal));
+  updateCompany();
+  updateCompetition();
+}
+
+// ==================== TIPS ====================
 let activeTip = null;
 function toggleSectionTip(id) {
   const p = document.getElementById(id);
@@ -311,7 +810,7 @@ document.addEventListener('click', function(e) {
   }
 });
 
-// ——— Build lists ———
+// ==================== ТОЧЕЧНЫЙ ====================
 function buildList(arr, prefix, containerId) {
   const container = document.getElementById(containerId);
   arr.forEach((item, i) => {
@@ -336,192 +835,120 @@ function buildList(arr, prefix, containerId) {
     container.appendChild(wrap);
   });
 }
-buildList(BASE, 'b', 'base-list');
-buildList(CRIT, 'c', 'crit-list');
+buildList(BASE,  'b', 'base-list');
+buildList(CRIT,  'c', 'crit-list');
 buildList(EXTRA, 'e', 'extra-list');
 
-function getChecked(arr, prefix) {
-  return arr.filter((_, i) => document.getElementById(`${prefix}-${i}`)?.checked);
-}
+function getChecked(arr, prefix) { return arr.filter((_, i) => document.getElementById(`${prefix}-${i}`)?.checked); }
 
-// ——— State ———
 function getState() {
-  const base = BASE.map((_,i) => document.getElementById(`b-${i}`)?.checked ? 1 : 0);
-  const crit = CRIT.map((_,i) => document.getElementById(`c-${i}`)?.checked ? 1 : 0);
-  const extra = EXTRA.map((_,i) => document.getElementById(`e-${i}`)?.checked ? 1 : 0);
-  return {base, crit, extra};
+  return {
+    exp:   getExpState(),
+    base:  BASE.map((_,i)  => document.getElementById(`b-${i}`)?.checked ? 1 : 0),
+    crit:  CRIT.map((_,i)  => document.getElementById(`c-${i}`)?.checked ? 1 : 0),
+    extra: EXTRA.map((_,i) => document.getElementById(`e-${i}`)?.checked ? 1 : 0),
+    mass:  { level: document.getElementById('m-level')?.value, tariff: document.getElementById('m-tariff')?.value, staff: document.getElementById('m-staff')?.value, cands: document.getElementById('m-cands')?.value },
+    tab:   currentTab,
+  };
 }
 
 function setState(state) {
   if (!state) return;
-  (state.base  || []).forEach((v,i) => { const el = document.getElementById(`b-${i}`); if(el) el.checked = !!v; });
-  (state.crit  || []).forEach((v,i) => { const el = document.getElementById(`c-${i}`); if(el) el.checked = !!v; });
-  (state.extra || []).forEach((v,i) => { const el = document.getElementById(`e-${i}`); if(el) el.checked = !!v; });
+  if (state.exp) setExpState(state.exp);
+  (state.base  || []).forEach((v,i) => { const el = document.getElementById(`b-${i}`);  if(el) el.checked = !!v; });
+  (state.crit  || []).forEach((v,i) => { const el = document.getElementById(`c-${i}`);  if(el) el.checked = !!v; });
+  (state.extra || []).forEach((v,i) => { const el = document.getElementById(`e-${i}`);  if(el) el.checked = !!v; });
+  if (state.mass) {
+    if (state.mass.level)  document.getElementById('m-level').value  = state.mass.level;
+    if (state.mass.tariff) document.getElementById('m-tariff').value = state.mass.tariff;
+    if (state.mass.staff)  document.getElementById('m-staff').value  = state.mass.staff;
+    if (state.mass.cands)  document.getElementById('m-cands').value  = state.mass.cands;
+  }
 }
 
-// ——— Calc ———
 function calcTotal() {
   const bases  = getChecked(BASE,  'b');
   const crits  = getChecked(CRIT,  'c');
   const extras = getChecked(EXTRA, 'e');
-  const subtotal = bases.reduce((s,x)=>s+x.price,0)
-                 + crits.reduce((s,x)=>s+x.price,0)
-                 + extras.filter(x=>!x.free).reduce((s,x)=>s+x.price,0);
+  const subtotal = bases.reduce((s,x)=>s+x.price,0) + crits.reduce((s,x)=>s+x.price,0) + extras.filter(x=>!x.free).reduce((s,x)=>s+x.price,0);
   document.getElementById('total-final').textContent = fmt(subtotal);
   renderSmeta(bases, crits, extras, subtotal);
   return subtotal;
 }
 
-function onEdit() {
-  dirty = true;
-  document.getElementById('btn-save').textContent = '💾 Сохранить';
-  setStatus('yellow', 'Есть несохранённые изменения');
-  calcTotal();
-}
+function onEdit() { setStatus('yellow', 'Есть несохранённые изменения'); calcTotal(); }
 
-// ——— Toast ———
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
-
-// ——— Status ———
-function setStatus(color, text, id) {
-  const dot = document.getElementById('status-dot');
-  dot.className = 'status-dot' + (color ? ' ' + color : '');
-  document.getElementById('status-text').textContent = text;
-  document.getElementById('status-id').textContent = id ? `#${id}` : '';
-}
-
-// ——— API ———
-async function api(params) {
-  const url = SCRIPT_URL + '?' + new URLSearchParams(params).toString();
-  const res = await fetch(url);
-  return res.json();
-}
-
-// ——— Save ———
-async function saveData() {
-  const btn = document.getElementById('btn-save');
-  btn.disabled = true;
-  btn.textContent = 'Сохранение...';
-
-  const vacancy = document.getElementById('vname').value.trim() || 'Без названия';
-  const author  = document.getElementById('author').value;
-  const data    = JSON.stringify(getState());
-
-  try {
-    let result;
-    if (currentId) {
-      result = await api({action:'save', id:currentId, vacancy, author, data});
-    } else {
-      result = await api({action:'create', vacancy, author, data});
-      if (result.success) {
-        currentId = result.id;
-        history.replaceState(null, '', '?id=' + currentId);
-        document.getElementById('btn-copy-link').style.display = 'inline-flex';
-      }
-    }
-
-    if (result.success) {
-      dirty = false;
-      setStatus('green', 'Сохранено · ' + author, currentId);
-      showToast('✓ Сохранено');
-      btn.textContent = 'Сохранено ✓';
-      setTimeout(() => { btn.textContent = 'Сохранить'; btn.disabled = false; }, 2000);
-    } else {
-      throw new Error(result.error);
-    }
-  } catch(e) {
-    showToast('Ошибка сохранения');
-    btn.textContent = 'Сохранить';
-    btn.disabled = false;
-    setStatus('', 'Ошибка сохранения');
+// ==================== МАССОВЫЙ ====================
+function massCalc() {
+  const staff  = parseInt(document.getElementById('m-staff').value) || 0;
+  const cands  = parseInt(document.getElementById('m-cands').value) || 0;
+  const level  = document.getElementById('m-level').value;
+  const tariff = document.getElementById('m-tariff').value;
+  const recHint = document.getElementById('m-rec-hint');
+  recHint.textContent = staff > 0 ? `Рекомендуемое кол-во кандидатов для ${staff} сотр.: ${Math.max(10, Math.round(staff*4))} канд. (из расчёта 4 канд. на 1 позицию)` : 'Укажите кол-во сотрудников выше — появится рекомендация';
+  const result = document.getElementById('mass-result');
+  if (cands < 10) { result.classList.remove('visible'); return; }
+  result.classList.add('visible');
+  const pricePerCand = MASS_PRICES[level][tariff];
+  const payCond      = massGetPayCondition(cands);
+  const discount     = massGetDiscount(cands);
+  const total        = pricePerCand * cands;
+  const totalDisc    = Math.round(total * (1 - discount));
+  const discPct      = Math.round(discount * 100);
+  let cardsHtml = '';
+  cardsHtml += `<div class="mass-card${discount===0?' recommended':''}"><div class="mass-card-badge">${discount===0?'Итого':'Без 100% предоплаты'}</div><div class="mass-card-name">${MASS_TARIFF_NAMES[tariff]}</div><div class="mass-card-row"><span class="lbl">Стоимость 1 кандидата</span><span class="val">${fmt(pricePerCand)}</span></div><div class="mass-card-row"><span class="lbl">Кандидатов</span><span class="val">${cands}</span></div><div class="mass-card-row"><span class="lbl">Условие оплаты</span><span class="val">${payCond}</span></div><div class="mass-card-divider"></div><div class="mass-card-total"><span class="lbl">Итого</span><span class="val">${fmt(total)}</span></div></div>`;
+  if (discount > 0) {
+    cardsHtml += `<div class="mass-card recommended"><div class="mass-card-badge">Со скидкой (100% предоплата)</div><div class="mass-card-name">${MASS_TARIFF_NAMES[tariff]}</div><div class="mass-card-row"><span class="lbl">Стоимость 1 кандидата</span><span class="val">${fmt(pricePerCand)}</span></div><div class="mass-card-row"><span class="lbl">Кандидатов</span><span class="val">${cands}</span></div><div class="mass-card-row"><span class="lbl">Скидка за 100% предоплату</span><span class="val">−${discPct}%</span></div><div class="mass-card-divider"></div><div class="mass-card-total"><span class="lbl">Итого</span><span class="val">${fmt(totalDisc)}</span></div></div>`;
   }
+  document.getElementById('mass-cards').innerHTML = cardsHtml;
+  document.getElementById('mass-hint').textContent = `Уровень: ${level==='1-4'?'1–4 требования':'5–8 требований'} · Скидки за 100% предоплату: 21–30 канд. → 5%, 31–40 → 7%, от 41 → 10%`;
+  renderMassSmeta(level, tariff, staff, cands, pricePerCand, payCond, total, discount, totalDisc);
 }
 
-// ——— Load ———
-async function loadData(id) {
-  setStatus('', 'Загрузка...');
-  try {
-    const result = await api({action:'get', id});
-    if (result.success) {
-      currentId = result.id;
-      document.getElementById('vname').value = result.vacancy || '';
-      if (result.data) {
-        try { setState(JSON.parse(result.data)); } catch(e) {}
-      }
-      calcTotal();
-      setStatus('green', `Последнее изменение: ${result.modified} · ${result.author}`, currentId);
-      document.getElementById('btn-copy-link').style.display = 'inline-flex';
-      history.replaceState(null, '', '?id=' + currentId);
-    } else {
-      setStatus('', 'Расчёт не найден — начните новый');
-      calcTotal();
-    }
-  } catch(e) {
-    setStatus('', 'Ошибка загрузки');
-    calcTotal();
-  }
-}
-
-// ——— Copy link ———
-function copyLink() {
-  const url = location.href.split('?')[0] + '?id=' + currentId;
-  navigator.clipboard.writeText(url).then(() => {
-    const btn = document.getElementById('btn-copy-link');
-    btn.classList.add('copied');
-    btn.textContent = '✓ Ссылка скопирована';
-    setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Скопировать ссылку'; }, 2000);
-  });
-}
-
-// ——— Smeta ———
+// ==================== СМЕТА ТОЧЕЧНЫЙ ====================
 function tariffCard(color, badge, name, subtotal, prepayRatio, guarantee, speed, extraDisc, minNote) {
-  let discRows = '';
-  discRows += `<div class="st-disc-title">За кол-во сотрудников</div>`;
+  let discRows = '<div class="st-disc-title">За кол-во сотрудников</div>';
   DISC_STAFF.forEach(d => {
     if (minNote && d.disc === 0) return;
-    const totalDisc = Math.min(d.disc + extraDisc, 35);
-    const finalAmt  = Math.round(subtotal * (1 - totalDisc / 100));
-    const p1 = Math.round(finalAmt * prepayRatio);
-    const p2 = finalAmt - p1;
-    const discStr = totalDisc > 0 ? `−${totalDisc}%` : '—';
-    const payStr  = prepayRatio === 1 ? fmt(finalAmt) : `${fmt(p1)} + ${fmt(p2)}`;
-    discRows += `<div class="st-disc-row"><span class="dlbl">${d.label}</span><span class="dval">${discStr} → ${payStr}</span></div>`;
+    const td = Math.min(d.disc + extraDisc, 35);
+    const fa = Math.round(subtotal * (1 - td / 100));
+    const p1 = Math.round(fa * prepayRatio), p2 = fa - p1;
+    const payStr = prepayRatio === 1 ? fmt(fa) : `${fmt(p1)} + ${fmt(p2)}`;
+    discRows += `<div class="st-disc-row"><span class="dlbl">${d.label}</span><span class="dval">${td>0?`−${td}%`:'—'} → ${payStr}</span></div>`;
   });
-  discRows += `<div class="st-disc-title" style="margin-top:6px">За кол-во вакансий</div>`;
+  discRows += '<div class="st-disc-title" style="margin-top:6px">За кол-во вакансий</div>';
   DISC_VAC.forEach(d => {
-    const totalDisc = Math.min(d.disc + extraDisc, 35);
-    const finalAmt  = Math.round(subtotal * (1 - totalDisc / 100));
-    const p1 = Math.round(finalAmt * prepayRatio);
-    const p2 = finalAmt - p1;
-    const payStr = prepayRatio === 1 ? fmt(finalAmt) : `${fmt(p1)} + ${fmt(p2)}`;
-    discRows += `<div class="st-disc-row"><span class="dlbl">${d.label} (−${d.disc + extraDisc}%)</span><span class="dval">${payStr}</span></div>`;
+    const td = Math.min(d.disc + extraDisc, 35);
+    const fa = Math.round(subtotal * (1 - td / 100));
+    const p1 = Math.round(fa * prepayRatio), p2 = fa - p1;
+    discRows += `<div class="st-disc-row"><span class="dlbl">${d.label} (−${d.disc+extraDisc}%)</span><span class="dval">${prepayRatio===1?fmt(fa):`${fmt(p1)} + ${fmt(p2)}`}</span></div>`;
   });
-  const baseFinal = Math.round(subtotal * (1 - extraDisc / 100));
-  const baseP1 = Math.round(baseFinal * prepayRatio);
-  const baseP2 = baseFinal - baseP1;
-  const basePayStr = prepayRatio === 1 ? fmt(baseFinal) : `${fmt(baseP1)} + ${fmt(baseP2)}`;
+  const bf = Math.round(subtotal*(1-extraDisc/100)), bp1=Math.round(bf*prepayRatio), bp2=bf-bp1;
   return `<div class="st-card ${color}${minNote?' disabled':''}">
-    <div class="st-badge">${badge}</div>
-    <div class="st-name">${name}</div>
+    <div class="st-badge">${badge}</div><div class="st-name">${name}</div>
     <div class="st-row"><span class="lbl">Гарантия</span><span class="val">${guarantee}</span></div>
     <div class="st-row"><span class="lbl">Скорость</span><span class="val">${speed}</span></div>
     <div class="st-divider"></div>
-    <div class="st-row" style="margin-bottom:4px"><span class="lbl">Без скидки</span><span class="val">${basePayStr}</span></div>
-    ${discRows}
-    ${minNote ? `<div class="st-note">${minNote}</div>` : ''}
+    <div class="st-row" style="margin-bottom:4px"><span class="lbl">Без скидки</span><span class="val">${prepayRatio===1?fmt(bf):`${fmt(bp1)} + ${fmt(bp2)}`}</span></div>
+    ${discRows}${minNote?`<div class="st-note">${minNote}</div>`:''}
   </div>`;
 }
 
 function renderSmeta(bases, crits, extras, subtotal) {
-  const vname = document.getElementById('vname').value.trim();
-  document.getElementById('smeta-title').textContent = vname ? `Смета — ${vname}` : 'Смета по вакансии';
+  const exp = getExpState();
+  const vname = exp.vname || 'Смета по вакансии';
+  document.getElementById('smeta-title').textContent = `Смета — ${vname}`;
   document.getElementById('smeta-date').textContent = new Date().toLocaleDateString('ru-RU', {day:'2-digit', month:'long', year:'numeric'});
   let html = '';
+  // Экспертиза в смете
+  const coResult = document.getElementById('exp-co-result')?.textContent;
+  if (exp.vname || coResult !== '—') {
+    html += `<div class="smeta-section"><div class="smeta-sec-title">Вакансия</div>`;
+    if (exp.vname) html += `<div class="smeta-item"><span class="smeta-item-name">Название</span><span class="smeta-item-price">${exp.vname}</span></div>`;
+    if (coResult && coResult !== '—') html += `<div class="smeta-item"><span class="smeta-item-name">Компания</span><span class="smeta-item-price">${coResult}</span></div>`;
+    if (exp.region) html += `<div class="smeta-item"><span class="smeta-item-name">Регион</span><span class="smeta-item-price">${exp.region}</span></div>`;
+    html += `</div>`;
+  }
   if (bases.length) {
     html += `<div class="smeta-section"><div class="smeta-sec-title">Базовая стоимость</div>`;
     bases.forEach(x => { html += `<div class="smeta-item"><span class="smeta-item-name">${x.name}</span><span class="smeta-item-price">${fmt(x.price)}</span></div>`; });
@@ -532,12 +959,11 @@ function renderSmeta(bases, crits, extras, subtotal) {
     crits.forEach(x => { html += `<div class="smeta-item"><span class="smeta-item-name">${x.name}</span><span class="smeta-item-price">${fmt(x.price)}</span></div>`; });
     html += `</div>`;
   }
-  const extraPaid = extras.filter(x => !x.free);
-  const extraFree = extras.filter(x =>  x.free);
-  if (extraPaid.length || extraFree.length) {
+  const ep = extras.filter(x=>!x.free), ef = extras.filter(x=>x.free);
+  if (ep.length || ef.length) {
     html += `<div class="smeta-section"><div class="smeta-sec-title">Дополнительные услуги</div>`;
-    extraPaid.forEach(x => { html += `<div class="smeta-item"><span class="smeta-item-name">${x.name}</span><span class="smeta-item-price">${fmt(x.price)}</span></div>`; });
-    extraFree.forEach(x => { html += `<div class="smeta-item"><span class="smeta-item-name">${x.name}</span><span class="smeta-item-price free">Бесплатно</span></div>`; });
+    ep.forEach(x => { html += `<div class="smeta-item"><span class="smeta-item-name">${x.name}</span><span class="smeta-item-price">${fmt(x.price)}</span></div>`; });
+    ef.forEach(x => { html += `<div class="smeta-item"><span class="smeta-item-name">${x.name}</span><span class="smeta-item-price free">Бесплатно</span></div>`; });
     html += `</div>`;
   }
   html += `<hr class="smeta-divider">`;
@@ -545,8 +971,8 @@ function renderSmeta(bases, crits, extras, subtotal) {
   html += `<div class="smeta-tariffs-label">Тарифы и варианты скидок — для менеджера</div>`;
   html += `<div class="smeta-tariffs-grid">`;
   html += tariffCard('green',  'Максимальный', '100% предоплата', subtotal, 1,   '365 дней', 'Максимальная', 5, null);
-  html += tariffCard('blue',   'Средний',       '70% предоплата',  subtotal, 0.7, '150 дней', 'Стандартная',  0, null);
-  html += tariffCard('purple', 'Минимальный',   '50% предоплата',  subtotal, 0.5, '100 дней', 'Стандартная',  0, 'Доступен от 2 сотрудников на вакансию');
+  html += tariffCard('blue',   'Средний',      '70% предоплата',  subtotal, 0.7, '150 дней', 'Стандартная',  0, null);
+  html += tariffCard('purple', 'Минимальный',  '50% предоплата',  subtotal, 0.5, '100 дней', 'Стандартная',  0, 'Доступен от 2 сотрудников на вакансию');
   html += `</div>`;
   html += `<p class="smeta-hint">Скидки за сотрудников и вакансии не суммируются — берётся наибольшая. Скидка максимального тарифа (−5%) суммируется с любой из них.</p>`;
   document.getElementById('smeta-body').innerHTML = html;
@@ -560,7 +986,134 @@ function toggleSmeta() {
   if (smetaVisible) setTimeout(() => document.getElementById('smeta-block').scrollIntoView({behavior:'smooth', block:'start'}), 50);
 }
 
-// ——— Init ———
+// ==================== СМЕТА МАССОВЫЙ ====================
+function renderMassSmeta(level, tariff, staff, cands, pricePerCand, payCond, total, discount, totalDisc) {
+  const exp = getExpState();
+  const vname = exp.vname || 'Смета по вакансии';
+  document.getElementById('m-smeta-title').textContent = `Смета — ${vname}`;
+  document.getElementById('m-smeta-date').textContent = new Date().toLocaleDateString('ru-RU', {day:'2-digit', month:'long', year:'numeric'});
+  const discPct = Math.round(discount * 100);
+  const levelName = level === '1-4' ? '1–4 требования' : '5–8 требований';
+  let html = '';
+  html += `<div class="smeta-section"><div class="smeta-sec-title">Параметры заказа</div>`;
+  html += `<div class="smeta-item"><span class="smeta-item-name">Уровень требований</span><span class="smeta-item-price">${levelName}</span></div>`;
+  html += `<div class="smeta-item"><span class="smeta-item-name">Тариф</span><span class="smeta-item-price">${MASS_TARIFF_NAMES[tariff]}</span></div>`;
+  if (staff > 0) html += `<div class="smeta-item"><span class="smeta-item-name">Сотрудников</span><span class="smeta-item-price">${staff}</span></div>`;
+  html += `<div class="smeta-item"><span class="smeta-item-name">Кандидатов в подбор</span><span class="smeta-item-price">${cands}</span></div>`;
+  html += `<div class="smeta-item"><span class="smeta-item-name">Стоимость 1 кандидата</span><span class="smeta-item-price">${fmt(pricePerCand)}</span></div>`;
+  html += `</div>`;
+  html += `<hr class="smeta-divider">`;
+  html += `<div class="smeta-subtotal"><span class="smeta-subtotal-label">Итого без скидки</span><span class="smeta-subtotal-value">${fmt(total)}</span></div>`;
+  html += `<div class="smeta-tariffs-label">Варианты оплаты — для менеджера</div>`;
+  html += `<div class="smeta-tariffs-grid" style="grid-template-columns:${discount>0?'1fr 1fr':'1fr'}">`;
+  html += `<div class="st-card blue"><div class="st-badge">Стандарт</div><div class="st-name">${payCond}</div><div class="st-row"><span class="lbl">Итого</span><span class="val">${fmt(total)}</span></div>${payCond==='Предоплата за каждые 10 кандидатов'?`<div class="st-row"><span class="lbl">Платёж за 10 канд.</span><span class="val">${fmt(pricePerCand*10)}</span></div>`:''}</div>`;
+  if (discount > 0) {
+    html += `<div class="st-card green"><div class="st-badge">100% предоплата −${discPct}%</div><div class="st-name">Единый платёж</div><div class="st-row"><span class="lbl">Скидка</span><span class="val">−${discPct}%</span></div><div class="st-row"><span class="lbl">Итого</span><span class="val">${fmt(totalDisc)}</span></div><div class="st-row"><span class="lbl">Экономия</span><span class="val">${fmt(total-totalDisc)}</span></div></div>`;
+  }
+  html += `</div>`;
+  html += `<p class="smeta-hint">Скидки за 100% предоплату: 21–30 канд. → 5%, 31–40 → 7%, от 41 → 10%. Минимальный заказ — 10 кандидатов.</p>`;
+  document.getElementById('m-smeta-body').innerHTML = html;
+}
+
+let massSmetaVisible = false;
+function toggleMassSmeta() {
+  massSmetaVisible = !massSmetaVisible;
+  document.getElementById('m-smeta-block').classList.toggle('visible', massSmetaVisible);
+  document.getElementById('m-smeta-btn-text').textContent = massSmetaVisible ? 'Скрыть смету' : 'Сформировать смету';
+  if (massSmetaVisible) setTimeout(() => document.getElementById('m-smeta-block').scrollIntoView({behavior:'smooth', block:'start'}), 50);
+}
+
+// ==================== TOAST & STATUS ====================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+function setStatus(color, text, id) {
+  document.getElementById('status-dot').className = 'status-dot' + (color ? ' ' + color : '');
+  document.getElementById('status-text').textContent = text;
+  document.getElementById('status-id').textContent = id ? `#${id}` : '';
+}
+
+// ==================== API ====================
+async function api(params) {
+  const url = SCRIPT_URL + '?' + new URLSearchParams(params).toString();
+  const res = await fetch(url);
+  return res.json();
+}
+
+async function saveData() {
+  const btns = ['exp-btn-save','btn-save','m-btn-save'].map(id => document.getElementById(id)).filter(Boolean);
+  btns.forEach(b => { b.disabled = true; b.textContent = 'Сохранение...'; });
+  const exp = getExpState();
+  const vacancy = exp.vname || 'Без названия';
+  const data = JSON.stringify(getState());
+  try {
+    let result;
+    if (currentId) {
+      result = await api({action:'save', id:currentId, vacancy, author:'', data});
+    } else {
+      result = await api({action:'create', vacancy, author:'', data});
+      if (result.success) {
+        currentId = result.id;
+        history.replaceState(null, '', '?id=' + currentId);
+        document.getElementById('btn-copy-link').style.display = 'inline-flex';
+      }
+    }
+    if (result.success) {
+      setStatus('green', 'Сохранено', currentId);
+      showToast('✓ Сохранено');
+      btns.forEach(b => { b.textContent = 'Сохранено ✓'; setTimeout(() => { b.textContent = 'Сохранить'; b.disabled = false; }, 2000); });
+    } else throw new Error(result.error);
+  } catch(e) {
+    showToast('Ошибка сохранения');
+    btns.forEach(b => { b.textContent = 'Сохранить'; b.disabled = false; });
+  }
+}
+
+function copyLink() {
+  const url = location.href.split('?')[0] + '?id=' + currentId;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.getElementById('btn-copy-link');
+    btn.classList.add('copied');
+    btn.textContent = '✓ Ссылка скопирована';
+    setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Скопировать ссылку'; }, 2000);
+  });
+}
+
+// ==================== INIT ====================
+async function loadData(id) {
+  setStatus('', 'Загрузка...');
+  try {
+    const result = await api({action:'get', id});
+    if (result.success) {
+      currentId = result.id;
+      let state = null;
+      try { state = JSON.parse(result.data); } catch(e) {}
+      if (state) {
+        setState(state);
+        if (state.tab) switchTab(state.tab);
+      }
+      calcTotal();
+      massCalc();
+      setStatus('green', `Изменено: ${result.modified}`, currentId);
+      document.getElementById('btn-copy-link').style.display = 'inline-flex';
+      history.replaceState(null, '', '?id=' + currentId);
+    } else {
+      setStatus('', 'Расчёт не найден — начните новый');
+      calcTotal();
+    }
+  } catch(e) {
+    setStatus('', 'Ошибка загрузки');
+    calcTotal();
+  }
+}
+
+// Init salary with one empty entry
+addSalaryEntry();
+attachBlurListeners();
+
 const urlId = new URLSearchParams(location.search).get('id');
 if (urlId) {
   loadData(urlId);
