@@ -47,7 +47,8 @@
   .card-title-wrap { display: flex; align-items: center; gap: 6px; margin-bottom: 1rem; padding-bottom: .6rem; border-bottom: 1px solid var(--border); }
   .card-title-wrap .card-title { margin: 0; padding: 0; border: none; }
 
-  .field-wrap { margin-bottom: 1.1rem; }
+  .exp-section { margin-bottom: 1.25rem; }
+  .exp-divider { border: none; border-top: 1px solid var(--border); margin: 0 -1.5rem 1.25rem; }
   .field-wrap:last-child { margin-bottom: 0; }
   .field-wrap label { display: block; font-size: 13px; color: var(--text2); margin-bottom: 5px; }
   .field-hint { font-size: 11.5px; color: var(--text3); margin-top: 4px; line-height: 1.4; }
@@ -86,6 +87,7 @@
 
   /* Filled/empty field states */
   .field-wrap input.filled, .field-wrap select.filled, .field-wrap textarea.filled { border-color: #a8d9bc; background: #f8fdfb; }
+  .field-wrap input.field-empty, .field-wrap select.field-empty, .field-wrap textarea.field-empty { border-color: #f0e4a0; background: #fffdf0; }
   .company-result.filled { border: 1.5px solid #a8d9bc; background: #f0faf4; color: var(--text); font-weight: 600; }
   .salary-amount-filled { border-color: #a8d9bc !important; background: #f8fdfb !important; }
   .salary-note { color: var(--text3); }
@@ -110,7 +112,7 @@
   .row-counter span { font-size: 13px; font-weight: 500; min-width: 14px; text-align: center; color: var(--text); }
   .row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
   .row:last-child { border-bottom: none; }
-  .row-check { width: 18px; height: 18px; flex-shrink: 0; accent-color: var(--accent); cursor: pointer; }
+  .row-check { width: 18px; height: 18px; flex-shrink: 0; accent-color: #2d7a4f; cursor: pointer; }
   .row-name { flex: 1; font-size: 14px; color: var(--text); cursor: pointer; user-select: none; }
   .row-price { font-size: 13px; color: var(--text2); white-space: nowrap; min-width: 80px; text-align: right; }
   .row-price.free { color: var(--green); }
@@ -122,9 +124,12 @@
   .tip-popup::before { content: ''; position: absolute; top: -5px; right: 8px; left: auto; width: 10px; height: 10px; background: var(--text); transform: rotate(45deg); border-radius: 2px; }
   .row-wrap { position: relative; }
 
-  .total-box { background: var(--accent-light); border: 1px solid #c9c4f0; border-radius: var(--radius-sm); padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
-  .total-box-label { font-size: 13px; color: var(--accent-text); }
-  .total-box-value { font-size: 24px; font-weight: 700; color: var(--accent-text); }
+  .total-box { background: #f0faf4; border: 1.5px solid #a8d9bc; border-radius: var(--radius-sm); padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+  .total-box-label { font-size: 13px; color: #065f46; font-weight: 500; }
+  .total-box-value { font-size: 24px; font-weight: 700; color: #065f46; }
+
+  .smeta-item { display: flex; justify-content: space-between; align-items: baseline; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; }
+  .smeta-item:last-child { border-bottom: none; padding-bottom: 0; }
 
   .staff-banner { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .85rem 1rem; margin-bottom: 1.1rem; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   .staff-banner-text { min-width: 180px; }
@@ -137,15 +142,46 @@
   .btn-smeta:hover { background: var(--surface2); }
 
   /* Кастомные поля */
-  .custom-row { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
-  .custom-row-inner { display: grid; grid-template-columns: 1fr 140px; gap: 8px; margin-bottom: 4px; }
+  .custom-row { margin-top: 8px; padding-top: 0; border-top: none; }
+  .custom-row-inner { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .custom-row-inner .custom-name { flex: 1; height: 36px; font-size: 13px; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 0 10px; outline: none; background: var(--surface); color: var(--text); transition: border-color .15s; min-width: 0; }
+  .custom-row-inner .custom-price { width: 90px; height: 36px; font-size: 13px; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 0 8px; outline: none; background: var(--surface); color: var(--text); transition: border-color .15s; flex-shrink: 0; }
+  .custom-row-inner .custom-tip { flex-shrink: 0; }
+  .custom-row-inner input:focus { border-color: var(--accent); }
+  .custom-row-inner input::placeholder { color: var(--text3); }
+  .custom-row .field-hint { margin-top: 4px; max-width: 520px; }
+  .btn-add-custom { display: flex; align-items: center; gap: 6px; width: 100%; margin-top: 4px; padding: 8px 6px; font-size: 13px; font-weight: 500; font-family: inherit; background: none; border: none; border-radius: var(--radius-sm); color: var(--text3); cursor: pointer; transition: background .15s, color .15s; text-align: left; }
+  .btn-add-custom:hover { background: var(--surface2); color: var(--accent); }
+  .btn-remove-custom { flex-shrink: 0; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border: none; background: none; color: var(--text3); font-size: 16px; cursor: pointer; border-radius: 50%; transition: background .15s, color .15s; }
+  .btn-remove-custom:hover { background: #fdf0ee; color: #c0392b; }
+
+  /* Сворачиваемый блок */
+  .collapse-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 2rem; box-shadow: var(--shadow); overflow: visible; position: relative; }
+  .collapse-card .section-header { border-radius: var(--radius) var(--radius) 0 0; }
+  .collapse-header { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; background: none; border: none; cursor: pointer; gap: 12px; text-align: left; border-radius: var(--radius) var(--radius) 0 0; }
+  .collapse-header:hover { background: var(--surface2); }
+  .collapse-header-left { display: flex; align-items: center; gap: 12px; flex: 1; }
+  .collapse-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .collapse-summary { font-size: 14px; font-weight: 700; color: #065f46; background: #f0faf4; border: 1px solid #a8d9bc; padding: 2px 10px; border-radius: 20px; }
+  .collapse-chevron { color: var(--text3); transition: transform .2s; flex-shrink: 0; }
+  .collapse-chevron.open { transform: rotate(180deg); }
+  .collapse-body { padding: 1rem 1rem 0; border-top: 1px solid var(--border); }
+  .collapse-body.hidden { display: none; }
+  .collapse-total-row { background: #f0faf4; border: 1.5px solid #a8d9bc; border-radius: var(--radius-sm); padding: .85rem 1.25rem; display: flex; justify-content: space-between; align-items: center; margin: .75rem 0 1rem; }
+  .collapse-total-label { font-size: 13px; font-weight: 500; color: #065f46; }
+  .collapse-total-value { font-size: 20px; font-weight: 700; color: #065f46; }
+  .collapse-bottom-btn { display: flex; justify-content: center; width: 100%; background: none; border: none; padding: 0; cursor: pointer; position: absolute; bottom: -16px; left: 0; z-index: 10; }
+  .collapse-bottom-circle { width: 32px; height: 32px; border-radius: 50%; background: var(--surface); border: 1.5px solid var(--border2); display: flex; align-items: center; justify-content: center; color: var(--text2); box-shadow: 0 2px 8px rgba(0,0,0,.1); transition: border-color .15s, color .15s, box-shadow .15s; }
+  .collapse-bottom-btn:hover .collapse-bottom-circle { border-color: var(--accent); color: var(--accent); box-shadow: 0 2px 12px rgba(74,63,199,.25); }
+  .custom-row-inner .custom-price { width: 110px; height: 36px; font-size: 13px; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 0 8px; outline: none; background: var(--surface); color: var(--text); transition: border-color .15s; flex-shrink: 0; -moz-appearance: textfield; }
+  .custom-row-inner .custom-price::-webkit-outer-spin-button,
+  .custom-row-inner .custom-price::-webkit-inner-spin-button { -webkit-appearance: none; }
   .custom-row-inner input { height: 36px; font-size: 13px; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 0 10px; outline: none; background: var(--surface); color: var(--text); transition: border-color .15s; }
   .custom-row-inner input:focus { border-color: var(--accent); }
   .custom-row-inner input::placeholder { color: var(--text3); }
 
   /* Раздел менеджера */
-  .manager-section { margin-top: 1.5rem; }
-  .manager-section-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); margin-bottom: 1rem; padding: .6rem 1rem; background: var(--accent-light); border-radius: var(--radius-sm); border-left: 3px solid var(--accent); }
+  .manager-section { margin-top: 1.5rem; overflow: visible; }
   .tariff-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; margin-bottom: 1rem; }
   @media (max-width: 700px) { .tariff-cards { grid-template-columns: 1fr; } }
   .tariff-card-sel { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: .9rem 1rem; cursor: pointer; transition: border-color .15s, background .15s; position: relative; }
@@ -171,20 +207,26 @@
   .discount-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: .75rem; }
   @media (max-width: 500px) { .discount-grid { grid-template-columns: 1fr; } }
   .discount-card { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .75rem 1rem; }
+  .discount-stack-note { font-size: 11px; color: var(--text3); margin: -3px 0 .75rem; }
   .discount-card label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px; }
   .discount-card select { width: 100%; height: 36px; font-size: 13px; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 0 8px; outline: none; background: var(--surface); color: var(--text); cursor: pointer; }
-  .discount-custom-wrap { border: 1px solid #f5c6c0; border-radius: var(--radius-sm); padding: .75rem 1rem; background: #fdf0ee; }
+  .discount-custom-wrap { border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: .85rem 1rem; background: var(--surface2); }
   .discount-custom-wrap label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px; }
   .discount-custom-row { display: grid; grid-template-columns: 80px 1fr; gap: 8px; align-items: center; }
   .discount-custom-row input { height: 36px; font-size: 14px; font-weight: 500; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 0 10px; outline: none; background: var(--surface); color: var(--text); }
-  .discount-custom-warn { font-size: 11px; color: #c0392b; margin-top: 5px; }
+  .discount-custom-hint { font-size: 11px; color: var(--text3); margin-top: 5px; }
+  .discount-custom-warn { font-size: 11.5px; margin: 8px 0 14px; padding: 6px 10px; border-radius: var(--radius-sm); display: none; }
+  .smeta-plain-note { font-size: 11.5px; color: var(--text3); margin: 4px 0 16px; }
+  .discount-custom-warn.warn-low    { display: block; background: #eff6ff; border: 1px solid #93c5fd; color: #1e40af; }
+  .discount-custom-warn.warn-high   { display: block; background: #fdf0ee; border: 1px solid #f5c6c0; color: #c0392b; }
+  .discount-custom-warn.warn-std    { display: block; background: #f0faf4; border: 1px solid #a8d9bc; color: #065f46; }
 
   /* Смета менеджера */
   .pay-parts { display: grid; grid-template-columns: repeat(3,1fr); gap: .75rem; margin-bottom: 1rem; }
   .pay-parts.cols-4 { grid-template-columns: repeat(4,1fr); }
   @media (max-width: 700px) { .pay-parts.cols-4 { grid-template-columns: repeat(2,1fr); } }
   @media (max-width: 500px) { .pay-parts, .pay-parts.cols-4 { grid-template-columns: 1fr; } }
-  .pay-part { border-radius: var(--radius-sm); padding: .9rem 1rem; }
+  .pay-part { border-radius: var(--radius-sm); padding: .9rem 1rem; display: flex; flex-direction: column; }
   .pay-part.pp-green  { background: #f0faf4; border: 1.5px solid #a8d9bc; }
   .pay-part.pp-blue   { background: #eff6ff; border: 1.5px solid #93c5fd; }
   .pay-part.pp-purple { background: #f5f3ff; border: 1.5px solid #c4b5fd; }
@@ -198,8 +240,7 @@
   .pp-sub { font-size: 11.5px; color: var(--text2); }
   .pp-note { font-size: 10.5px; color: var(--text3); margin-top: 6px; line-height: 1.4; }
   .smeta-pay-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); margin-bottom: .75rem; margin-top: 1.25rem; }
-  .smeta-discount-note { font-size: 11.5px; color: var(--text3); margin: -8px 0 12px; }
-  .btn-magic { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; font-size: 12px; font-family: inherit; background: #eff6ff; color: #1e40af; border: 1px solid #93c5fd; border-radius: var(--radius-sm); cursor: pointer; margin-top: 6px; transition: background .15s; }
+  .btn-magic { display: flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap; font-size: 11px; font-family: inherit; background: #eff6ff; color: #1e40af; border: 1px solid #93c5fd; border-radius: var(--radius-sm); cursor: pointer; transition: background .15s; margin-top: 8px; padding: 6px 10px; }
   .btn-magic:hover { background: #dbeafe; }
   .manager-total-row { display: flex; justify-content: space-between; font-size: 14px; padding: 4px 0; color: var(--text2); }
   .manager-total-row.final { font-size: 17px; font-weight: 700; color: var(--text); border-top: 1px solid var(--border); padding-top: 8px; margin-top: 4px; }
@@ -224,25 +265,32 @@
   .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--text); color: #fff; font-size: 13px; padding: 10px 18px; border-radius: 20px; opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none; white-space: nowrap; z-index: 999; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+  /* ОБЩИЙ СТИЛЬ ЗАГОЛОВКОВ РАЗДЕЛОВ */
+  .section-header { background: linear-gradient(135deg, #1c1b18 0%, #2d2b24 100%); border-bottom: none; color: #fff; padding: .6rem 1.25rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 52px; }
+  .smeta-top { background: linear-gradient(135deg, #1c1b18 0%, #2d2b24 100%); color: #fff; padding: .6rem 1.25rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 52px; }
+  .section-header-left { display: flex; flex-direction: column; gap: 1px; }
+  .section-header-title { font-size: 14px; font-weight: 600; letter-spacing: -.01em; line-height: 1.3; color: #fff; }
+  .section-header-sub { font-size: 11px; color: rgba(255,255,255,.55); margin-top: 1px; }
+  .section-header-icon { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: rgba(255,255,255,.85); }
+
   /* СМЕТА */
   .smeta { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-top: 1.25rem; box-shadow: var(--shadow); overflow: hidden; }
-  .smeta-top { background: var(--text); color: #fff; padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
-  .smeta-top-title { font-size: 16px; font-weight: 600; line-height: 1.3; }
-  .smeta-top-date { font-size: 12px; opacity: .55; margin-top: 3px; }
-  .smeta-top-badge { font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; background: rgba(255,255,255,.15); padding: 4px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; align-self: flex-start; }
+  .smeta-top-title { font-size: 14px; font-weight: 600; line-height: 1.3; letter-spacing: -.01em; color: #fff; }
+  .smeta-top-date { font-size: 11px; opacity: .5; margin-top: 1px; }
+  .smeta-top-badge { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: rgba(255,255,255,.85); }
   .smeta-body { padding: 1.25rem 1.5rem; }
   .smeta-section { margin-bottom: 1.25rem; }
   .smeta-sec-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); margin-bottom: .5rem; }
-  .smeta-item { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; }
-  .smeta-item:last-child { border-bottom: none; }
   .smeta-item-name { color: var(--text); flex: 1; padding-right: 12px; }
   .smeta-item-price { color: var(--text2); white-space: nowrap; }
   .smeta-item-price.free { color: var(--green); }
+  .smeta-item { display: flex; justify-content: space-between; align-items: baseline; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; }
+  .smeta-item:last-child { border-bottom: none; padding-bottom: 2px; }
   .smeta-divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
   .smeta-subtotal { display: flex; justify-content: space-between; align-items: center; background: var(--surface2); border-radius: var(--radius-sm); padding: .9rem 1.1rem; margin-bottom: 1.5rem; }
-  .smeta-subtotal.final { background: var(--accent-light); margin-bottom: 0; }
-  .smeta-subtotal.final .smeta-subtotal-value { color: var(--accent-text); font-size: 20px; }
-  .smeta-subtotal.final .smeta-subtotal-label { color: var(--accent-text); font-weight: 600; }
+  .smeta-subtotal.final { background: #f0faf4; border: 1.5px solid #a8d9bc; margin-bottom: 0; }
+  .smeta-subtotal.final .smeta-subtotal-value { color: #065f46; font-size: 20px; }
+  .smeta-subtotal.final .smeta-subtotal-label { color: #065f46; font-weight: 600; }
   .smeta-subtotal-label { font-size: 14px; color: var(--text2); }
   .smeta-subtotal-value { font-size: 18px; font-weight: 700; color: var(--text); }
   .smeta-tariffs-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); margin-bottom: .75rem; }
@@ -316,182 +364,227 @@
   <div id="section-expertise">
 
     <div class="card">
-      <div class="card-title">Название вакансии</div>
-      <div class="field-wrap" style="margin-bottom:0">
-        <input type="text" id="exp-vname" placeholder="Например: Менеджер по продажам" oninput="capitalizeFirst(this); expEdit()">
-        <div class="field-hint">Официальное название или то, как называет вакансию клиент</div>
-      </div>
-    </div>
 
-    <div class="card">
-      <div class="card-title">Название компании</div>
-      <div class="field-wrap">
-        <label>Форма</label>
-        <div class="company-row">
-          <select id="exp-co-type" onchange="updateCompany()">
+      <div class="exp-section">
+        <div class="card-title">Название вакансии</div>
+        <div class="field-wrap" style="margin-bottom:0">
+          <input type="text" id="exp-vname" placeholder="Например: Менеджер по продажам" oninput="capitalizeFirst(this); expEdit()">
+          <div class="field-hint">Официальное название или то, как называет вакансию клиент</div>
+        </div>
+      </div>
+
+      <div class="exp-divider"></div>
+
+      <div class="exp-section">
+        <div class="card-title">Название компании</div>
+        <div class="field-wrap">
+          <div class="company-row">
+            <select id="exp-co-type" class="field-empty" onchange="updateCompany(); this.classList.toggle('field-empty', !this.value); this.classList.toggle('filled', !!this.value)">
+              <option value="">— Не выбрано —</option>
             <option value="brand">Бренд</option>
-            <option value="ip">ИП</option>
-            <option value="ooo">ООО</option>
-            <option value="ao">АО</option>
-            <option value="pao">ПАО</option>
-            <option value="zao">ЗАО</option>
-            <option value="oao">ОАО</option>
-            <option value="up">УП</option>
-            <option value="np">НП</option>
-            <option value="gup">ГУП</option>
-            <option value="mup">МУП</option>
+              <option value="ip">ИП</option>
+              <option value="ooo">ООО</option>
+              <option value="ao">АО</option>
+              <option value="pao">ПАО</option>
+              <option value="zao">ЗАО</option>
+              <option value="oao">ОАО</option>
+              <option value="up">УП</option>
+              <option value="np">НП</option>
+              <option value="gup">ГУП</option>
+              <option value="mup">МУП</option>
+              <option value="other">Другое</option>
+            </select>
+            <input type="text" id="exp-co-name" placeholder="Название" oninput="updateCompany()">
+          </div>
+          <div class="field-hint" id="exp-co-hint">Выберите формат наименования компании клиента и введите название</div>
+          <div class="ip-error" id="ip-error"></div>
+        </div>
+        <div class="field-wrap" style="margin-bottom:0">
+          <div class="company-result" id="exp-co-result">—</div>
+        </div>
+      </div>
+
+      <div class="exp-divider"></div>
+
+      <div class="exp-section">
+        <div class="card-title">Регион поиска сотрудников</div>
+        <div class="field-wrap" style="margin-bottom:0">
+          <input type="text" id="exp-region" placeholder="Например: Москва" oninput="capitalizeFirst(this); expEdit()">
+          <div class="field-hint">Город, регион или страна — укажите то, что применимо</div>
+        </div>
+      </div>
+
+      <div class="exp-divider"></div>
+
+      <div class="exp-section">
+        <div class="card-title">Кол-во потенциальных кандидатов</div>
+        <div class="field-wrap" style="margin-bottom:0">
+          <input type="number" id="exp-candidates" placeholder="Количество резюме на рынке" oninput="expEdit()">
+          <div class="field-hint">Оценочное кол-во подходящих резюме в открытом доступе</div>
+        </div>
+      </div>
+
+      <div class="exp-divider"></div>
+
+      <div class="exp-section">
+        <div class="card-title">Конкуренция за сотрудников</div>
+        <div class="field-wrap" style="margin-bottom:0">
+          <select id="exp-competition" onchange="updateCompetition()">
+            <option value="">— Выберите уровень —</option>
+            <option value="50-60">50–60% — умеренная</option>
+            <option value="60-75">60–75% — выше умеренной</option>
+            <option value="75-85">75–85% — высокая</option>
+            <option value="85-95">85–95% — крайне высокая</option>
+          </select>
+          <div id="exp-competition-badge" style="margin-top:6px"></div>
+        </div>
+      </div>
+
+      <div class="exp-divider"></div>
+
+      <div class="exp-section">
+        <div class="card-title">Ориентировочный срок закрытия</div>
+        <div class="field-wrap" style="margin-bottom:0">
+          <select id="exp-deadline" onchange="toggleDeadlineCustom()">
+            <option value="">— Выберите срок —</option>
+            <option value="1">1 неделя</option>
+            <option value="2">2 недели</option>
+            <option value="3">3 недели</option>
+            <option value="4">4 недели</option>
+            <option value="5">5 недель</option>
+            <option value="6">6 недель</option>
+            <option value="7">7 недель</option>
+            <option value="8">8 недель</option>
+            <option value="9">9 недель</option>
+            <option value="10">10 недель</option>
             <option value="other">Другое</option>
           </select>
-          <input type="text" id="exp-co-name" placeholder="Название" oninput="updateCompany()">
+          <input type="text" id="exp-deadline-custom" placeholder="Укажите срок" oninput="expEdit()" style="display:none;margin-top:8px">
         </div>
-        <div class="field-hint" id="exp-co-hint">Введите торговое название или бренд</div>
-        <div class="ip-error" id="ip-error"></div>
       </div>
-      <div class="field-wrap" style="margin-bottom:0">
-        <label>Результат</label>
-        <div class="company-result" id="exp-co-result">—</div>
-      </div>
-    </div>
 
-    <div class="card">
-      <div class="card-title">Регион поиска сотрудников</div>
-      <div class="field-wrap" style="margin-bottom:0">
-        <input type="text" id="exp-region" placeholder="Например: Москва" oninput="capitalizeFirst(this); expEdit()">
-        <div class="field-hint">Город, регион или страна — укажите то, что применимо</div>
-      </div>
-    </div>
+      <div class="exp-divider"></div>
 
-    <div class="card">
-      <div class="card-title">Кол-во потенциальных кандидатов</div>
-      <div class="field-wrap" style="margin-bottom:0">
-        <input type="number" id="exp-candidates" placeholder="Количество резюме на рынке" oninput="expEdit()">
-        <div class="field-hint">Оценочное кол-во подходящих резюме в открытом доступе</div>
+      <div class="exp-section">
+        <div class="card-title">Рекомендуемая ЗП</div>
+        <div id="salary-entries" class="salary-entries"></div>
+        <button class="btn-add-salary" onclick="addSalaryEntry()">+ Добавить вариант ЗП</button>
       </div>
-    </div>
 
-    <div class="card">
-      <div class="card-title">Конкуренция за сотрудников</div>
-      <div class="field-wrap" style="margin-bottom:0">
-        <select id="exp-competition" onchange="updateCompetition()">
-          <option value="">— Выберите уровень —</option>
-          <option value="50-60">50–60% — умеренная</option>
-          <option value="60-75">60–75% — выше умеренной</option>
-          <option value="75-85">75–85% — высокая</option>
-          <option value="85-95">85–95% — крайне высокая</option>
-        </select>
-        <div id="exp-competition-badge" style="margin-top:6px"></div>
+      <div class="exp-divider"></div>
+
+      <div class="exp-section" style="margin-bottom:0">
+        <div class="card-title">Доп. информация (при наличии)</div>
+        <div class="field-wrap" style="margin-bottom:0">
+          <textarea id="exp-extra" placeholder="Любые дополнительные сведения о вакансии или клиенте, которые стоит учесть при работе..." oninput="expEdit()"></textarea>
+        </div>
       </div>
-    </div>
 
-    <div class="card">
-      <div class="card-title">Ориентировочный срок закрытия</div>
-      <div class="field-wrap" style="margin-bottom:0">
-        <select id="exp-deadline" onchange="toggleDeadlineCustom()">
-          <option value="">— Выберите срок —</option>
-          <option value="1">1 неделя</option>
-          <option value="2">2 недели</option>
-          <option value="3">3 недели</option>
-          <option value="4">4 недели</option>
-          <option value="5">5 недель</option>
-          <option value="6">6 недель</option>
-          <option value="7">7 недель</option>
-          <option value="8">8 недель</option>
-          <option value="9">9 недель</option>
-          <option value="10">10 недель</option>
-          <option value="other">Другое</option>
-        </select>
-        <input type="text" id="exp-deadline-custom" placeholder="Укажите срок" oninput="expEdit()" style="display:none;margin-top:8px">
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Рекомендуемая ЗП</div>
-      <div id="salary-entries" class="salary-entries"></div>
-      <button class="btn-add-salary" onclick="addSalaryEntry()">+ Добавить вариант ЗП</button>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Доп. информация (при наличии)</div>
-      <div class="field-wrap" style="margin-bottom:0">
-        <textarea id="exp-extra" placeholder="Любые дополнительные сведения о вакансии или клиенте, которые стоит учесть при работе..." oninput="expEdit()"></textarea>
-      </div>
     </div>
   </div>
 
   <!-- ===================== ТОЧЕЧНЫЙ ===================== -->
   <div id="section-tochechny" style="display:none">
     <div class="calc-section">
-      <div class="card">
-        <div class="card-title-wrap">
-          <div class="card-title">Базовая стоимость позиции</div>
-          <button class="tip-btn" onclick="toggleSectionTip('tip-base')" type="button">?</button>
-        </div>
-        <div class="tip-popup" id="tip-base">Стоимость нашей работы — сюда входит подготовка к подбору (с созданием воронки найма), маркетинг вакансии (публикации вакансий, покупки баз резюме и иное), работа по поиску кандидатов и работа по подбору кандидатов.</div>
-        <div id="base-list"></div>
-      </div>
 
-      <div class="card">
-        <div class="card-title-wrap">
-          <div class="card-title">Усложняющие критерии поиска</div>
-          <button class="tip-btn" onclick="toggleSectionTip('tip-crit')" type="button">?</button>
-        </div>
-        <div class="tip-popup" id="tip-crit">Некоторые усложняющие критерии можно указать в портрете кандидата как «желательные» — в этом случае доплата не требуется.</div>
-        <div id="crit-list"></div>
-        <div class="custom-row" id="crit-custom">
-          <div class="custom-row-inner">
-            <input type="text" id="crit-custom-name" placeholder="Индивидуальная особенность" oninput="calcTotal()">
-            <input type="number" id="crit-custom-price" placeholder="Стоимость, ₽" oninput="calcTotal()">
+      <!-- Сворачиваемый блок расчёта -->
+      <div class="collapse-card" id="calc-collapse">
+        <button class="section-header" style="width:100%;text-align:left;cursor:pointer;border:none" onclick="toggleCalcCollapse()" type="button">
+          <div class="section-header-left">
+            <div class="section-header-title">Расчёт стоимости</div>
+            <div class="section-header-sub">Как правило, заполняется аудитором</div>
           </div>
-          <div class="field-hint">Для нестандартных усложняющих критериев — например, узкий регион или очень плохая репутация работодателя</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title-wrap">
-          <div class="card-title">Дополнительные услуги</div>
-          <button class="tip-btn" onclick="toggleSectionTip('tip-extra')" type="button">?</button>
-        </div>
-        <div class="tip-popup" id="tip-extra">Дополнительные услуги — это процессы, увеличивающие нашу работу в процессе подбора: то, что усложняет воронку найма.</div>
-        <div id="extra-list"></div>
-        <div class="custom-row" id="extra-custom">
-          <div class="custom-row-inner">
-            <input type="text" id="extra-custom-name" placeholder="Дополнительная услуга" oninput="calcTotal()">
-            <input type="number" id="extra-custom-price" placeholder="Стоимость, ₽" oninput="calcTotal()">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="collapse-summary" id="collapse-summary" style="display:none;font-size:13px;font-weight:700;color:#065f46;background:#f0faf4;border:1px solid #a8d9bc;padding:2px 10px;border-radius:20px"></span>
+            <div id="collapse-chevron" style="transition:transform .2s;color:rgba(255,255,255,.6);display:flex;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
+            <div class="section-header-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg></div>
           </div>
-          <div class="field-hint">Для индивидуальных услуг, не входящих в стандартный список</div>
-        </div>
-      </div>
+        </button>
+        <div class="collapse-body" id="calc-collapse-body">
+          <div class="card" style="margin-bottom:.75rem;box-shadow:none;border-color:var(--border)">
+            <div class="card-title-wrap">
+              <div class="card-title">Базовая стоимость позиции</div>
+              <button class="tip-btn" onclick="toggleSectionTip('tip-base')" type="button">?</button>
+            </div>
+            <div class="tip-popup" id="tip-base">Стоимость нашей работы — сюда входит подготовка к подбору (с созданием воронки найма), маркетинг вакансии (публикации вакансий, покупки баз резюме и иное), работа по поиску кандидатов и работа по подбору кандидатов.</div>
+            <div id="base-list"></div>
+            <div id="base-custom-list"></div>
+            <button class="btn-add-custom" type="button" onclick="addCustomRow('base')">+ Добавить другую позицию</button>
+          </div>
 
-      <div class="card">
-        <div class="total-box">
-          <div class="total-box-label">Итоговая стоимость</div>
-          <div class="total-box-value" id="total-final">0 ₽</div>
+          <div class="card" style="margin-bottom:.75rem;box-shadow:none;border-color:var(--border)">
+            <div class="card-title-wrap">
+              <div class="card-title">Усложняющие критерии поиска</div>
+              <button class="tip-btn" onclick="toggleSectionTip('tip-crit')" type="button">?</button>
+            </div>
+            <div class="tip-popup" id="tip-crit">Некоторые усложняющие критерии можно указать в портрете кандидата как «желательные» — в этом случае доплата не требуется.</div>
+            <div id="crit-list"></div>
+            <div id="crit-custom-list"></div>
+            <button class="btn-add-custom" type="button" onclick="addCustomRow('crit')">+ Добавить другой усложняющий критерий</button>
+          </div>
+
+          <div class="card" style="margin-bottom:0;box-shadow:none;border-color:var(--border)">
+            <div class="card-title-wrap">
+              <div class="card-title">Дополнительные услуги</div>
+              <button class="tip-btn" onclick="toggleSectionTip('tip-extra')" type="button">?</button>
+            </div>
+            <div class="tip-popup" id="tip-extra">Дополнительные услуги — это процессы, увеличивающие нашу работу в процессе подбора: то, что усложняет воронку найма.</div>
+            <div id="extra-list"></div>
+            <div id="extra-custom-list"></div>
+            <button class="btn-add-custom" type="button" onclick="addCustomRow('extra')">+ Добавить другую доп. услугу</button>
+          </div>
+
+          <!-- Итоговая стоимость внутри блока -->
+          <div class="collapse-total-row">
+            <span class="collapse-total-label">Итоговая стоимость</span>
+            <span class="collapse-total-value" id="total-final">0 ₽</span>
+          </div>
         </div>
+
+        <!-- Кнопка свернуть снизу -->
+        <button class="collapse-bottom-btn" onclick="toggleCalcCollapse()" type="button">
+          <div class="collapse-bottom-circle" id="collapse-chevron-bottom">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </button>
       </div>
 
       <!-- РАЗДЕЛ МЕНЕДЖЕРА -->
-      <div class="card manager-section">
-        <div class="manager-section-title">Раздел менеджера — тарифы и скидки</div>
-
-        <div class="staff-banner">
-          <div class="staff-banner-text">
-            <label class="staff-banner-label" for="pt-staff">Кол-во сотрудников, которых требуется нанять</label>
-            <div class="staff-banner-hint">Влияет на скидку за объём</div>
+      <div class="collapse-card manager-section" id="mgr-collapse">
+        <button class="section-header" style="width:100%;text-align:left;cursor:pointer;border:none" onclick="toggleMgrCollapse()" type="button">
+          <div class="section-header-left">
+            <div class="section-header-title">Тарифы и скидки</div>
+            <div class="section-header-sub">Как правило, заполняется менеджером</div>
           </div>
-          <input type="number" id="pt-staff" min="1" value="1" oninput="onStaffCountChange()">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span id="mgr-summary" style="display:none;font-size:13px;font-weight:700;padding:2px 10px;border-radius:20px"></span>
+            <div id="mgr-chevron" style="transition:transform .2s;color:rgba(255,255,255,.6);display:flex;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
+            <div class="section-header-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+          </div>
+        </button>
+        <div class="collapse-body" id="mgr-collapse-body">
+
+        <div class="card-title" style="margin-bottom:.75rem">Объём работы</div>
+        <div class="discount-custom-wrap" style="background:var(--surface);border-color:var(--border2)">
+          <label>Количество сотрудников</label>
+          <div class="discount-custom-row">
+            <input type="number" id="pt-staff" min="1" value="1" oninput="onStaffCountChange()" style="height:36px;font-size:14px;font-weight:500;font-family:inherit">
+            <span style="font-size:13px;color:var(--text2)">чел. — введите сколько сотрудников требуется найти</span>
+          </div>
+          <div id="staff-warn" style="font-size:11.5px;margin-top:6px;display:none"></div>
         </div>
 
         <div style="margin-bottom:1rem">
-          <div class="card-title" style="margin-bottom:.75rem">Тариф оплаты</div>
+          <div class="card-title" style="margin-bottom:.75rem;margin-top:1.25rem">Тариф оплаты</div>
           <div class="tariff-cards">
-            <label class="tariff-card-sel sel-green" id="tc-max" onclick="selectManagerTariff('max')">
-              <input type="radio" name="mgr-tariff" value="max">
+            <label class="tariff-card-sel sel-green selected" id="tc-max" onclick="selectManagerTariff('max')">
+              <input type="radio" name="mgr-tariff" value="max" checked>
               <div class="tc-head">
                 <div class="tc-badge">Максимальный</div>
                 <button class="tip-btn" type="button" onclick="event.stopPropagation(); toggleSectionTip('tip-tc-max')">?</button>
               </div>
-              <div class="tc-name">100% предоплата</div>
-              <div class="tc-detail">Гарантия 365 дней<span class="sep"> · </span>Доп. скидка −5%<span class="sep"> · </span>Вся услуга бесплатно, если не найдём кандидатов за 30 дней</div>
+              <div class="tc-name"><span style="color:var(--text2);font-weight:400;font-size:12px">Максимальный</span> · 100%</div>
+              <div class="tc-detail">Гарантия 365 дней<span class="sep"> · </span>Скидка −5%<span class="sep"> · </span>Бесплатно, если не найдём за 30 дней</div>
               <div class="tip-popup" id="tip-tc-max">Условия:
 • Оплата вносится одним платежом перед началом оказания услуг
 
@@ -501,13 +594,13 @@
 • Самая высокая скорость подбора
 • Вся услуга — бесплатно, если не найдём подходящих кандидатов за 30 дней</div>
             </label>
-            <label class="tariff-card-sel sel-blue selected" id="tc-mid" onclick="selectManagerTariff('mid')">
-              <input type="radio" name="mgr-tariff" value="mid" checked>
+            <label class="tariff-card-sel sel-blue" id="tc-mid" onclick="selectManagerTariff('mid')">
+              <input type="radio" name="mgr-tariff" value="mid">
               <div class="tc-head">
                 <div class="tc-badge">Средний</div>
                 <button class="tip-btn" type="button" onclick="event.stopPropagation(); toggleSectionTip('tip-tc-mid')">?</button>
               </div>
-              <div class="tc-name">70% / 30%</div>
+              <div class="tc-name"><span style="color:var(--text2);font-weight:400;font-size:12px">Средний</span> · 70% / 30%</div>
               <div class="tc-detail">Гарантия 150 дней<span class="sep"> · </span>Вторая часть оплаты после завершения подбора</div>
               <div class="tip-popup" id="tip-tc-mid">Условия:
 • Вторая часть вносится равными частями после подбора каждого сотрудника
@@ -522,7 +615,7 @@
                 <div class="tc-badge">Минимальный</div>
                 <button class="tip-btn" type="button" onclick="event.stopPropagation(); toggleSectionTip('tip-tc-min')">?</button>
               </div>
-              <div class="tc-name">50% / 50%</div>
+              <div class="tc-name"><span style="color:var(--text2);font-weight:400;font-size:12px">Минимальный</span> · 50% / 50%</div>
               <div class="tc-detail">Гарантия 100 дней<span class="sep"> · </span>Вторая часть оплаты после завершения подбора</div>
               <div class="tc-restriction" id="tc-min-restriction">Только при подборе от 2-х сотрудников</div>
               <div class="tip-popup" id="tip-tc-min">Условия:
@@ -539,8 +632,19 @@
         <div class="discount-section">
           <div class="card-title" style="margin-bottom:.75rem">Скидки</div>
           <div class="discount-grid">
-            <div class="discount-card">
-              <label>За кол-во сотрудников</label>
+            <div class="discount-card" style="position:relative">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+                <label style="font-size:12px;color:var(--text2)">За кол-во сотрудников</label>
+                <button class="tip-btn" type="button" onclick="event.stopPropagation();showTip('tip-disc-staff',this)" style="flex-shrink:0">?</button>
+                <div class="tip-popup" id="tip-disc-staff" style="right:0;left:auto">Скидка за количество сотрудников на одну вакансию:
+• 1 сотрудник — без скидки
+• 2 сотрудника — −10%
+• 3 сотрудника — −15%
+• 4 сотрудника — −20%
+• 5 и более сотрудников — −25%
+
+Скидки из разных категорий не суммируются — выбирается наибольшая.</div>
+              </div>
               <select id="mgr-disc-staff" onchange="onDiscountChange()">
                 <option value="0">1 сотрудник — без скидки</option>
                 <option value="10">2 сотрудника — −10%</option>
@@ -549,8 +653,19 @@
                 <option value="25">5+ сотрудников — −25%</option>
               </select>
             </div>
-            <div class="discount-card">
-              <label>За кол-во вакансий</label>
+            <div class="discount-card" style="position:relative">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+                <label style="font-size:12px;color:var(--text2)">За кол-во вакансий</label>
+                <button class="tip-btn" type="button" onclick="event.stopPropagation();showTip('tip-disc-vac',this)" style="flex-shrink:0">?</button>
+                <div class="tip-popup" id="tip-disc-vac" style="right:0;left:auto">Скидка за количество вакансий в одном договоре:
+• 1 вакансия — без скидки
+• 2 вакансии — −5%
+• 3 вакансии — −10%
+• 4 вакансии — −15%
+• 5 и более вакансий — −20%
+
+Скидки из разных категорий не суммируются — выбирается наибольшая.</div>
+              </div>
               <select id="mgr-disc-vac" onchange="onDiscountChange()">
                 <option value="0">1 вакансия — без скидки</option>
                 <option value="5">2 вакансии — −5%</option>
@@ -560,24 +675,33 @@
               </select>
             </div>
           </div>
-          <div class="discount-custom-wrap">
+          <div class="discount-stack-note">Скидки за количество между собой не суммируются — учитывается наибольшая по проценту.</div>
+          <div class="discount-custom-wrap" style="background:var(--surface);border-color:var(--border2)">
             <label>Итоговый процент скидки</label>
             <div class="discount-custom-row">
               <input type="number" id="mgr-disc-custom" min="0" max="50" placeholder="0" oninput="calcTotal()">
               <span style="font-size:13px;color:var(--text2)">% — можно снизить вручную</span>
             </div>
+            <div class="discount-custom-warn" id="mgr-disc-warn"></div>
           </div>
         </div>
+        </div>
+
+        <!-- Кнопка свернуть снизу менеджер -->
+        <button class="collapse-bottom-btn" onclick="toggleMgrCollapse()" type="button">
+          <div class="collapse-bottom-circle" id="mgr-chevron-bottom">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </button>
       </div>
     </div>
 
     <div class="smeta" id="smeta-block">
       <div class="smeta-top">
-        <div>
+        <div class="section-header-left">
           <div class="smeta-top-title" id="smeta-title">Смета</div>
-          <div class="smeta-top-date" id="smeta-date"></div>
         </div>
-        <div class="smeta-top-badge">Точечный подбор</div>
+        <div class="smeta-top-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg></div>
       </div>
       <div class="smeta-body" id="smeta-body"></div>
     </div>
@@ -586,16 +710,9 @@
   <!-- ===================== МАССОВЫЙ ===================== -->
   <div id="section-massovy" style="display:none">
     <div class="calc-section">
-      <div class="staff-banner">
-        <div class="staff-banner-text">
-          <label class="staff-banner-label" for="m-staff">Кол-во сотрудников, которых требуется нанять</label>
-          <div class="staff-banner-hint">Используется для расчёта рекомендуемого кол-ва кандидатов</div>
-        </div>
-        <input type="number" id="m-staff" min="0" placeholder="0" oninput="massCalc()">
-      </div>
 
       <div class="card">
-        <div class="card-title">Шаг 1 — Параметры заказа</div>
+        <div class="card-title">Параметры заказа</div>
         <div class="field-wrap">
           <label for="m-level">Уровень требований к кандидату</label>
           <select id="m-level" onchange="massCalc()">
@@ -613,11 +730,23 @@
       </div>
 
       <div class="card">
-        <div class="card-title">Шаг 2 — Кандидаты в подбор</div>
-        <div id="m-rec-hint" style="font-size:13px; color:var(--text2); margin-bottom:1rem; background:var(--surface2); padding:10px 14px; border-radius:var(--radius-sm);">Укажите кол-во сотрудников выше — появится рекомендация</div>
-        <div class="field-wrap" style="margin-bottom:0">
-          <label for="m-cands">Кандидатов в подбор</label>
-          <input type="number" id="m-cands" min="0" placeholder="Минимум 10" oninput="massCalc()">
+        <div class="card-title">Кол-во сотрудников и кандидатов</div>
+
+        <div class="field-wrap">
+          <label for="m-staff">Кол-во сотрудников, которых требуется нанять</label>
+          <input type="number" id="m-staff" min="0" placeholder="0" oninput="massCalc()">
+        </div>
+
+        <div class="field-wrap">
+          <label>Рекомендуемое кол-во кандидатов</label>
+          <div id="m-rec-display" style="height:40px;border:1.5px solid #a8d9bc;border-radius:var(--radius-sm);background:#f0faf4;display:flex;align-items:center;padding:0 12px;font-size:15px;font-weight:600;color:#065f46">—</div>
+          <div class="field-hint" style="color:#065f46">Рассчитывается автоматически: 4 кандидата на 1 сотрудника, минимум 10</div>
+        </div>
+
+        <div style="background:#fdf0ee;border:1px solid #f5c6c0;border-radius:var(--radius-sm);padding:.85rem 1rem;margin-top:.25rem">
+          <label style="display:block;font-size:12px;color:var(--text2);margin-bottom:5px">Ввести кол-во кандидатов вручную</label>
+          <input type="number" id="m-cands" min="0" placeholder="Например: 25" oninput="massCalc()" style="width:100%;height:38px;font-size:14px;font-family:inherit;border:1px solid #f5c6c0;border-radius:var(--radius-sm);padding:0 12px;outline:none;background:var(--surface);color:var(--text)">
+          <div style="font-size:11px;color:#c0392b;margin-top:5px">Можно указать любое кол-во кандидатов вне зависимости от рекомендуемого</div>
         </div>
       </div>
 
@@ -630,11 +759,10 @@
 
     <div class="smeta" id="m-smeta-block">
       <div class="smeta-top">
-        <div>
+        <div class="section-header-left">
           <div class="smeta-top-title" id="m-smeta-title">Смета</div>
-          <div class="smeta-top-date" id="m-smeta-date"></div>
         </div>
-        <div class="smeta-top-badge">Массовый подбор</div>
+        <div class="smeta-top-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg></div>
       </div>
       <div class="smeta-body" id="m-smeta-body"></div>
     </div>
@@ -742,6 +870,7 @@ const COMP_INFO = {
 };
 
 const CO_HINTS = {
+  '':    'Выберите формат наименования компании клиента и введите название',
   brand: 'Введите торговое название или бренд',
   ip:    'Введите полное ФИО предпринимателя — например: Мален Кихрен Иванович',
   ooo:   'Введите название без кавычек',
@@ -781,7 +910,7 @@ function updateCompany() {
     else formatted = upper;
   }
   result.textContent = formatted;
-  result.classList.toggle('filled', !!name);
+  result.classList.remove('filled'); // убираем при изменении
   validateIP();
   expEdit();
 }
@@ -894,13 +1023,39 @@ function attachBlurListeners() {
   ['exp-vname','exp-region','exp-candidates','exp-extra'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.addEventListener('focus', () => { el.classList.remove('filled'); });
-    el.addEventListener('blur',  () => { el.classList.toggle('filled', !!el.value.trim()); });
+    el.classList.add('field-empty');
+    el.addEventListener('focus', () => { el.classList.remove('filled'); el.classList.remove('field-empty'); });
+    el.addEventListener('blur',  () => {
+      const v = !!el.value.trim();
+      el.classList.toggle('filled', v);
+      el.classList.toggle('field-empty', !v);
+    });
   });
+  const coName = document.getElementById('exp-co-name');
+  if (coName) {
+    coName.classList.add('field-empty');
+    coName.addEventListener('focus', () => {
+      coName.classList.remove('filled');
+      coName.classList.remove('field-empty');
+      const result = document.getElementById('exp-co-result');
+      if (result) result.classList.remove('filled');
+    });
+    coName.addEventListener('blur', () => {
+      coName.classList.remove('filled');
+      coName.classList.toggle('field-empty', !coName.value.trim());
+      const result = document.getElementById('exp-co-result');
+      if (result) result.classList.toggle('filled', !!coName.value.trim());
+    });
+  }
   ['exp-competition','exp-deadline'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.addEventListener('change', () => { el.classList.toggle('filled', !!el.value); });
+    el.classList.add('field-empty');
+    el.addEventListener('focus', () => { el.classList.remove('field-empty'); });
+    el.addEventListener('change', () => {
+      el.classList.toggle('filled', !!el.value);
+      el.classList.toggle('field-empty', !el.value);
+    });
   });
 }
 
@@ -982,8 +1137,9 @@ document.addEventListener('click', function(e) {
 });
 
 // ==================== ТОЧЕЧНЫЙ ====================
-function buildList(arr, prefix, containerId) {
+function buildList(arr, prefix, containerId, exclusive) {
   const container = document.getElementById(containerId);
+  const changeHandler = exclusive ? `enforceBaseExclusivity(this); onEdit()` : `onEdit()`;
   arr.forEach((item, i) => {
     const wrap = document.createElement('div');
     wrap.className = 'row-wrap';
@@ -993,9 +1149,9 @@ function buildList(arr, prefix, containerId) {
 
     if (item.counter) {
       // Counter row (e.g. languages)
-      div.innerHTML = `<input type="checkbox" class="row-check" id="${prefix}-${i}" onchange="onEdit()" ${item.checked ? 'checked' : ''}><label for="${prefix}-${i}" class="row-name">${item.name.replace('(1 шт.)','').trim()} <div class="row-counter" style="display:inline-flex;vertical-align:middle;margin-left:6px"><button type="button" onclick="changeCounter('${prefix}',${i},-1)" id="${prefix}-${i}-minus" disabled>−</button><span id="${prefix}-${i}-label" style="font-size:12px;color:var(--text3);min-width:28px;text-align:center">1 шт.</span><button type="button" onclick="changeCounter('${prefix}',${i},1)" id="${prefix}-${i}-plus">+</button></div></label><span class="row-price" id="${prefix}-${i}-price">${fmt(item.price)}</span>${tipHtml}`;
+      div.innerHTML = `<input type="checkbox" class="row-check" id="${prefix}-${i}" onchange="${changeHandler}" ${item.checked ? 'checked' : ''}><label for="${prefix}-${i}" class="row-name">${item.name.replace('(1 шт.)','').trim()} <div class="row-counter" style="display:inline-flex;vertical-align:middle;margin-left:6px"><button type="button" onclick="changeCounter('${prefix}',${i},-1)" id="${prefix}-${i}-minus" disabled>−</button><span id="${prefix}-${i}-label" style="font-size:12px;color:var(--text3);min-width:28px;text-align:center">1 шт.</span><button type="button" onclick="changeCounter('${prefix}',${i},1)" id="${prefix}-${i}-plus">+</button></div></label><span class="row-price" id="${prefix}-${i}-price">${fmt(item.price)}</span>${tipHtml}`;
     } else {
-      div.innerHTML = `<input type="checkbox" class="row-check" id="${prefix}-${i}" onchange="onEdit()" ${item.checked ? 'checked' : ''}><label for="${prefix}-${i}" class="row-name">${item.name}</label><span class="row-price${item.free?' free':''}">${item.free ? 'Бесплатно' : fmt(item.price)}</span>${tipHtml}`;
+      div.innerHTML = `<input type="checkbox" class="row-check" id="${prefix}-${i}" onchange="${changeHandler}" ${item.checked ? 'checked' : ''}><label for="${prefix}-${i}" class="row-name">${item.name}</label><span class="row-price${item.free?' free':''}">${item.free ? 'Бесплатно' : fmt(item.price)}</span>${tipHtml}`;
     }
 
     wrap.appendChild(div);
@@ -1007,6 +1163,13 @@ function buildList(arr, prefix, containerId) {
       wrap.appendChild(popup);
     }
     container.appendChild(wrap);
+  });
+}
+
+function enforceBaseExclusivity(currentEl) {
+  if (!currentEl || !currentEl.checked) return;
+  document.querySelectorAll('#base-list .row-check, #base-custom-list .row-check').forEach(cb => {
+    if (cb !== currentEl) cb.checked = false;
   });
 }
 
@@ -1032,7 +1195,7 @@ function getCounterValue(prefix, i) {
   const el = document.getElementById(`${prefix}-${i}-label`);
   return el ? parseInt(el.textContent) : 1;
 }
-buildList(BASE,  'b', 'base-list');
+buildList(BASE,  'b', 'base-list', true);
 buildList(CRIT,  'c', 'crit-list');
 buildList(EXTRA, 'e', 'extra-list');
 
@@ -1066,6 +1229,23 @@ function setState(state) {
 }
 
 
+function getCustomItems(category) {
+  const container = document.getElementById(category + '-custom-list');
+  const items = [];
+  if (!container) return items;
+  container.querySelectorAll('.custom-row-inner').forEach(row => {
+    const checkbox = row.querySelector('.row-check');
+    const nameEl = row.querySelector('.custom-name');
+    const priceEl = row.querySelector('.custom-price');
+    if (checkbox?.checked) {
+      const name = nameEl?.value.trim();
+      const price = parseFloat(priceEl?.value) || 0;
+      if (name) items.push({ name, price });
+    }
+  });
+  return items;
+}
+
 function calcTotal() {
   const bases  = getChecked(BASE,  'b');
   const crits  = getChecked(CRIT,  'c');
@@ -1077,19 +1257,188 @@ function calcTotal() {
     return s + x.price * count;
   }, 0);
   const extraSum = extras.filter(x=>!x.free).reduce((s,x) => s + x.price, 0);
-  const critCustom  = parseFloat(document.getElementById('crit-custom-price')?.value)  || 0;
-  const extraCustom = parseFloat(document.getElementById('extra-custom-price')?.value) || 0;
-  const subtotal = baseSum + critSum + extraSum + critCustom + extraCustom;
+  const baseCustomItems  = getCustomItems('base');
+  const critCustomItems  = getCustomItems('crit');
+  const extraCustomItems = getCustomItems('extra');
+  const baseCustomSum  = baseCustomItems.reduce((s,x) => s + x.price, 0);
+  const critCustomSum  = critCustomItems.reduce((s,x) => s + x.price, 0);
+  const extraCustomSum = extraCustomItems.reduce((s,x) => s + x.price, 0);
+  const subtotal = baseSum + critSum + extraSum + baseCustomSum + critCustomSum + extraCustomSum;
   document.getElementById('total-final').textContent = fmt(subtotal);
+  updateTotalBreakdown(bases, crits, extras, baseCustomItems, critCustomItems, extraCustomItems);
+  // обновить summary в свёрнутом блоке
+  if (calcCollapsed) {
+    const s = document.getElementById('collapse-summary');
+    if (s) s.textContent = fmt(subtotal);
+  }
   renderSmeta(bases, crits, extras, subtotal);
   return subtotal;
 }
 
+let totalCollapsed = false;
+function toggleTotalCollapse() {
+  totalCollapsed = !totalCollapsed;
+  document.getElementById('total-collapse-body').classList.toggle('hidden', !totalCollapsed);
+  document.getElementById('total-chevron').classList.toggle('open', totalCollapsed);
+}
+
+function updateTotalBreakdown(bases, crits, extras, baseCustomItems, critCustomItems, extraCustomItems) {
+  const bd = document.getElementById('total-breakdown');
+  if (!bd) return;
+  const lines = [];
+  bases.forEach(x => lines.push(`${x.name}: ${fmt(x.price)}`));
+  baseCustomItems.forEach(x => lines.push(`${x.name}: ${fmt(x.price)}`));
+  crits.forEach(x => {
+    const i = CRIT.indexOf(x);
+    const count = x.counter ? getCounterValue('c', i) : 1;
+    lines.push(`${x.name}${count>1?' ×'+count:''}: ${fmt(x.price*count)}`);
+  });
+  critCustomItems.forEach(x => lines.push(`${x.name}: ${fmt(x.price)}`));
+  extras.filter(x=>!x.free).forEach(x => lines.push(`${x.name}: ${fmt(x.price)}`));
+  extraCustomItems.forEach(x => lines.push(`${x.name}: ${fmt(x.price)}`));
+  bd.innerHTML = lines.map(l => `<div style="padding:3px 0;border-bottom:1px solid var(--border)">${l}</div>`).join('') || '<div style="color:var(--text3)">Ничего не выбрано</div>';
+}
+
+// Blur on Enter for all text/number inputs (not textarea, not Ctrl/Cmd/Shift+Enter)
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    const tag = e.target.tagName;
+    if (tag === 'TEXTAREA' && (e.ctrlKey || e.metaKey || e.shiftKey)) {
+      // Ctrl/Cmd/Shift+Enter в textarea — вставить новую строку
+      e.preventDefault();
+      const el = e.target;
+      const start = el.selectionStart;
+      const end = el.selectionEnd;
+      el.value = el.value.slice(0, start) + '\n' + el.value.slice(end);
+      el.selectionStart = el.selectionEnd = start + 1;
+      el.dispatchEvent(new Event('input'));
+    } else if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+      // Обычный Enter везде — снять фокус
+      e.preventDefault();
+      e.target.blur();
+    }
+  }
+});
+setTimeout(() => {
+  const c1 = document.getElementById('collapse-chevron');
+  if (c1) c1.style.transform = 'rotate(180deg)';
+  const c2 = document.getElementById('mgr-chevron');
+  if (c2) c2.style.transform = 'rotate(180deg)';
+  const cb = document.getElementById('collapse-chevron-bottom');
+  if (cb) cb.style.transform = 'rotate(180deg)';
+  const mb = document.getElementById('mgr-chevron-bottom');
+  if (mb) mb.style.transform = 'rotate(180deg)';
+}, 10);
+let mgrCollapsed = false;
+let mgrTariff = 'max';
+function toggleMgrCollapse() {
+  mgrCollapsed = !mgrCollapsed;
+  document.getElementById('mgr-collapse-body').classList.toggle('hidden', mgrCollapsed);
+  const hdr = document.querySelector('#mgr-collapse .section-header');
+  if (hdr) hdr.style.borderRadius = mgrCollapsed ? 'var(--radius)' : 'var(--radius) var(--radius) 0 0';
+  const chev = document.getElementById('mgr-chevron');
+  if (chev) chev.style.transform = mgrCollapsed ? 'rotate(0deg)' : 'rotate(180deg)';
+  const chevBot = document.getElementById('mgr-chevron-bottom');
+  if (chevBot) chevBot.style.transform = mgrCollapsed ? 'rotate(0deg)' : 'rotate(180deg)';
+  const summary = document.getElementById('mgr-summary');
+  if (summary) {
+    if (mgrCollapsed) {
+      const tariffLabels = { max: 'Максимальный · 100%', mid: 'Средний · 70% / 30%', min: 'Минимальный · 50% / 50%' };
+      const tariffStyles = {
+        max: 'color:#065f46;background:#f0faf4;border:1px solid #a8d9bc',
+        mid: 'color:#1e40af;background:#eff6ff;border:1px solid #93c5fd',
+        min: 'color:#5b21b6;background:#f5f3ff;border:1px solid #c4b5fd',
+      };
+      summary.textContent = tariffLabels[mgrTariff] || '—';
+      summary.style.cssText = `display:inline;font-size:13px;font-weight:700;padding:2px 10px;border-radius:20px;${tariffStyles[mgrTariff]}`;
+    } else {
+      summary.style.display = 'none';
+    }
+  }
+}
+
+let calcCollapsed = false;
+function toggleCalcCollapse() {
+  calcCollapsed = !calcCollapsed;
+  document.getElementById('calc-collapse-body').classList.toggle('hidden', calcCollapsed);
+  const hdr = document.querySelector('#calc-collapse .section-header');
+  if (hdr) hdr.style.borderRadius = calcCollapsed ? 'var(--radius)' : 'var(--radius) var(--radius) 0 0';
+  // Обе стрелки: вниз=0deg когда закрыто, вверх=180deg когда открыто
+  const chev = document.getElementById('collapse-chevron');
+  if (chev) chev.style.transform = calcCollapsed ? 'rotate(0deg)' : 'rotate(180deg)';
+  const bottomCircle = document.getElementById('collapse-chevron-bottom');
+  if (bottomCircle) bottomCircle.style.transform = calcCollapsed ? 'rotate(0deg)' : 'rotate(180deg)';
+  const summary = document.getElementById('collapse-summary');
+  if (calcCollapsed) {
+    const val = document.getElementById('total-final')?.textContent || '0 ₽';
+    summary.textContent = val;
+    summary.style.display = '';
+  } else {
+    summary.style.display = 'none';
+  }
+}
+
 function onEdit() { setStatus('yellow', 'Есть несохранённые изменения'); calcTotal(); }
 
+function autoCheckCustom(checkboxId, nameId, priceId) {
+  const name  = document.getElementById(nameId)?.value.trim();
+  const price = document.getElementById(priceId)?.value;
+  const cb = document.getElementById(checkboxId);
+  if (!cb) return;
+  const bothFilled = !!(name && price);
+  const wasBothFilled = cb.dataset.wasFilled === '1';
+  if (bothFilled && !wasBothFilled) {
+    cb.checked = true;
+    if (cb.closest('#base-custom-list')) enforceBaseExclusivity(cb);
+  } else if (!bothFilled) {
+    cb.checked = false;
+  }
+  cb.dataset.wasFilled = bothFilled ? '1' : '0';
+}
+
+const customRowCounters = { base: 0, crit: 0, extra: 0 };
+const customPlaceholders = {
+  base:  'Своя позиция',
+  crit:  'Свой критерий',
+  extra: 'Своя услуга'
+};
+
+function addCustomRow(category, data) {
+  const id = customRowCounters[category]++;
+  const container = document.getElementById(category + '-custom-list');
+  if (!container) return id;
+  const checkId  = `${category}-custom-check-${id}`;
+  const nameId   = `${category}-custom-name-${id}`;
+  const priceId  = `${category}-custom-price-${id}`;
+  const changeHandler = category === 'base' ? `enforceBaseExclusivity(this); calcTotal()` : `calcTotal()`;
+  const div = document.createElement('div');
+  div.className = 'custom-row';
+  div.id = `${category}-custom-row-${id}`;
+  div.innerHTML = `
+    <div class="custom-row-inner">
+      <input type="checkbox" class="row-check" id="${checkId}" onchange="${changeHandler}" style="accent-color:#2d7a4f">
+      <input class="custom-name" type="text" id="${nameId}" placeholder="${customPlaceholders[category]}" oninput="autoCheckCustom('${checkId}','${nameId}','${priceId}'); calcTotal()">
+      <input class="custom-price" type="number" id="${priceId}" placeholder="Стоимость" oninput="autoCheckCustom('${checkId}','${nameId}','${priceId}'); calcTotal()">
+      <button class="btn-remove-custom" type="button" onclick="removeCustomRow('${category}', ${id})" title="Удалить">×</button>
+    </div>
+  `;
+  container.appendChild(div);
+  if (data) {
+    if (data.name)  div.querySelector('.custom-name').value = data.name;
+    if (data.price !== undefined && data.price !== null) div.querySelector('.custom-price').value = data.price;
+    if (data.checked) div.querySelector('.row-check').checked = true;
+  }
+  return id;
+}
+
+function removeCustomRow(category, id) {
+  const el = document.getElementById(`${category}-custom-row-${id}`);
+  if (el) el.remove();
+  calcTotal();
+}
+
 // ==================== МЕНЕДЖЕР ====================
-let mgrTariff = 'mid';
-let mgrMagicP1 = null;
+let mgrMagicP1 = null; // для среднего тарифа (70/30) — первая часть
 
 function selectManagerTariff(t) {
   mgrTariff = t;
@@ -1122,6 +1471,7 @@ function getDiscountLabel(volDisc, tariffDisc) {
 }
 
 function onDiscountChange() {
+  mgrMagicP1 = null;
   const std = getStdDiscount();
   const input = document.getElementById('mgr-disc-custom');
   if (input) input.value = std.total > 0 ? std.total : '';
@@ -1161,82 +1511,112 @@ function beautifyMid(total) {
   calcTotal();
 }
 
-function beautifyMax(total) {
-  const rem = total % 1000;
-  mgrMagicP1 = rem > 0 ? total - rem : total;
-  calcTotal();
-}
-
-function beautifyMin(total) {
-  const rem = total % 1000;
-  const nice = rem > 0 ? total - rem : total;
-  mgrMagicP1 = Math.round(nice * 0.5);
-  calcTotal();
-}
-
 // ==================== МАССОВЫЙ ====================
 function massCalc() {
   const staff  = parseInt(document.getElementById('m-staff').value) || 0;
-  const cands  = parseInt(document.getElementById('m-cands').value) || 0;
   const level  = document.getElementById('m-level').value;
   const tariff = document.getElementById('m-tariff').value;
-  const recHint = document.getElementById('m-rec-hint');
-  recHint.textContent = staff > 0 ? `Рекомендуемое кол-во кандидатов для ${staff} сотр.: ${Math.max(10, Math.round(staff*4))} канд. (из расчёта 4 канд. на 1 позицию)` : 'Укажите кол-во сотрудников выше — появится рекомендация';
+
+  // Обновить зелёное поле рекомендации
+  const recDisp = document.getElementById('m-rec-display');
+  const recVal = staff > 0 ? Math.max(10, Math.round(staff * 4)) : null;
+  if (recDisp) {
+    if (recVal) {
+      recDisp.textContent = recVal + ' кандидатов';
+    } else {
+      recDisp.textContent = '—';
+    }
+  }
+
+  // Берём введённое вручную или рекомендованное
+  const manualInput = document.getElementById('m-cands').value;
+  const cands = manualInput ? (parseInt(manualInput) || 0) : (recVal || 0);
+
   const result = document.getElementById('mass-result');
   if (cands < 10) { result.classList.remove('visible'); return; }
   result.classList.add('visible');
-  const pricePerCand = MASS_PRICES[level][tariff];
-  const payCond      = massGetPayCondition(cands);
-  const discount     = massGetDiscount(cands);
-  const total        = pricePerCand * cands;
-  const totalDisc    = Math.round(total * (1 - discount));
-  const discPct      = Math.round(discount * 100);
+
+  const payCond   = massGetPayCondition(cands);
+  const discount  = massGetDiscount(cands);
+  const discPct   = Math.round(discount * 100);
+
+  // Показываем оба тарифа одновременно
+  const tariffs = ['search', 'full'];
   let cardsHtml = '';
-  cardsHtml += `<div class="mass-card${discount===0?' recommended':''}"><div class="mass-card-badge">${discount===0?'Итого':'Без 100% предоплаты'}</div><div class="mass-card-name">${MASS_TARIFF_NAMES[tariff]}</div><div class="mass-card-row"><span class="lbl">Стоимость 1 кандидата</span><span class="val">${fmt(pricePerCand)}</span></div><div class="mass-card-row"><span class="lbl">Кандидатов</span><span class="val">${cands}</span></div><div class="mass-card-row"><span class="lbl">Условие оплаты</span><span class="val">${payCond}</span></div><div class="mass-card-divider"></div><div class="mass-card-total"><span class="lbl">Итого</span><span class="val">${fmt(total)}</span></div></div>`;
-  if (discount > 0) {
-    cardsHtml += `<div class="mass-card recommended"><div class="mass-card-badge">Со скидкой (100% предоплата)</div><div class="mass-card-name">${MASS_TARIFF_NAMES[tariff]}</div><div class="mass-card-row"><span class="lbl">Стоимость 1 кандидата</span><span class="val">${fmt(pricePerCand)}</span></div><div class="mass-card-row"><span class="lbl">Кандидатов</span><span class="val">${cands}</span></div><div class="mass-card-row"><span class="lbl">Скидка за 100% предоплату</span><span class="val">−${discPct}%</span></div><div class="mass-card-divider"></div><div class="mass-card-total"><span class="lbl">Итого</span><span class="val">${fmt(totalDisc)}</span></div></div>`;
-  }
+  tariffs.forEach(t => {
+    const pricePerCand = MASS_PRICES[level][t];
+    const total        = pricePerCand * cands;
+    const totalDisc    = Math.round(total * (1 - discount));
+    cardsHtml += `<div class="mass-card">
+      <div class="mass-card-badge">${MASS_TARIFF_NAMES[t]}</div>
+      <div class="mass-card-row"><span class="lbl">Стоимость 1 кандидата</span><span class="val">${fmt(pricePerCand)}</span></div>
+      <div class="mass-card-row"><span class="lbl">Кандидатов</span><span class="val">${cands}</span></div>
+      <div class="mass-card-row"><span class="lbl">Условие оплаты</span><span class="val">${payCond}</span></div>
+      <div class="mass-card-divider"></div>
+      <div class="mass-card-total"><span class="lbl">Без скидки</span><span class="val">${fmt(total)}</span></div>
+      ${discount > 0 ? `<div class="mass-card-total" style="margin-top:4px"><span class="lbl" style="color:#065f46">100% предоплата −${discPct}%</span><span class="val" style="color:#065f46">${fmt(totalDisc)}</span></div>` : ''}
+    </div>`;
+  });
+
   document.getElementById('mass-cards').innerHTML = cardsHtml;
   document.getElementById('mass-hint').textContent = `Уровень: ${level==='1-4'?'1–4 требования':'5–8 требований'} · Скидки за 100% предоплату: 21–30 канд. → 5%, 31–40 → 7%, от 41 → 10%`;
+
+  const pricePerCand = MASS_PRICES[level][tariff];
+  const total = pricePerCand * cands;
+  const totalDisc = Math.round(total * (1 - discount));
   renderMassSmeta(level, tariff, staff, cands, pricePerCand, payCond, total, discount, totalDisc);
+
+  // Обновить название сметы из экспертизы
+  const vname = document.getElementById('exp-vname')?.value?.trim();
+  const mTitle = document.getElementById('m-smeta-title');
+  if (mTitle) mTitle.textContent = vname || 'Смета';
 }
 
 // ==================== СМЕТА ТОЧЕЧНЫЙ ====================
 function renderSmeta(bases, crits, extras, subtotal) {
   const exp = getExpState();
   const vname = exp.vname || 'Смета по вакансии';
-  document.getElementById('smeta-title').textContent = `Смета — ${vname}`;
-  document.getElementById('smeta-date').textContent = new Date().toLocaleDateString('ru-RU', {day:'2-digit', month:'long', year:'numeric'});
+  document.getElementById('smeta-title').textContent = vname || 'Смета';
   const staffCount = parseInt(document.getElementById('pt-staff')?.value) || 1;
   let html = '';
   // Экспертиза в смете
   const coResult = document.getElementById('exp-co-result')?.textContent;
   if (exp.vname || coResult !== '—') {
     html += `<div class="smeta-section"><div class="smeta-sec-title">Вакансия</div>`;
-    if (exp.vname) html += `<div class="smeta-item"><span class="smeta-item-name">Название</span><span class="smeta-item-price">${exp.vname}</span></div>`;
+    if (exp.vname) html += `<div class="smeta-item"><span class="smeta-item-name">Название вакансии</span><span class="smeta-item-price">${exp.vname}</span></div>`;
     if (coResult && coResult !== '—') html += `<div class="smeta-item"><span class="smeta-item-name">Компания</span><span class="smeta-item-price">${coResult}</span></div>`;
     if (exp.region) html += `<div class="smeta-item"><span class="smeta-item-name">Регион</span><span class="smeta-item-price">${exp.region}</span></div>`;
     html += `<div class="smeta-item"><span class="smeta-item-name">Кол-во сотрудников</span><span class="smeta-item-price">${staffCount}</span></div>`;
     html += `</div>`;
   }
-  if (bases.length) {
+  const baseCustomItems = getCustomItems('base');
+  if (bases.length || baseCustomItems.length) {
     html += `<div class="smeta-section"><div class="smeta-sec-title">Базовая стоимость</div>`;
     bases.forEach(x => { html += `<div class="smeta-item"><span class="smeta-item-name">${x.name}</span><span class="smeta-item-price">${fmt(x.price)}</span></div>`; });
+    baseCustomItems.forEach(x => { html += `<div class="smeta-item"><span class="smeta-item-name">${x.name}</span><span class="smeta-item-price">${fmt(x.price)}</span></div>`; });
     html += `</div>`;
   }
-  if (crits.length) {
+  const critCustomItems = getCustomItems('crit');
+  if (crits.length || critCustomItems.length) {
     html += `<div class="smeta-section"><div class="smeta-sec-title">Усложняющие критерии</div>`;
-    crits.forEach(x => { html += `<div class="smeta-item"><span class="smeta-item-name">${x.name}</span><span class="smeta-item-price">${fmt(x.price)}</span></div>`; });
+    crits.forEach(x => {
+      const i = CRIT.indexOf(x);
+      const count = x.counter ? getCounterValue('c', i) : 1;
+      const name = x.counter ? x.name.replace('(1 шт.)', '').trim() + (count > 1 ? ` (${count} шт.)` : '') : x.name;
+      html += `<div class="smeta-item"><span class="smeta-item-name">${name}</span><span class="smeta-item-price">${fmt(x.price * count)}</span></div>`;
+    });
+    critCustomItems.forEach(x => { html += `<div class="smeta-item"><span class="smeta-item-name">${x.name}</span><span class="smeta-item-price">${fmt(x.price)}</span></div>`; });
     html += `</div>`;
   }
   const ep = extras.filter(x=>!x.free), ef = extras.filter(x=>x.free);
-  if (ep.length || ef.length) {
+  const extraCustomItems = getCustomItems('extra');
+  if (ep.length || ef.length || extraCustomItems.length) {
     html += `<div class="smeta-section"><div class="smeta-sec-title">Дополнительные услуги</div>`;
     ep.forEach(x => { html += `<div class="smeta-item"><span class="smeta-item-name">${x.name}</span><span class="smeta-item-price">${fmt(x.price)}</span></div>`; });
     ef.forEach(x => { html += `<div class="smeta-item"><span class="smeta-item-name">${x.name}</span><span class="smeta-item-price free">Бесплатно</span></div>`; });
+    extraCustomItems.forEach(x => { html += `<div class="smeta-item"><span class="smeta-item-name">${x.name}</span><span class="smeta-item-price">${fmt(x.price)}</span></div>`; });
     html += `</div>`;
   }
-  html += `<hr class="smeta-divider">`;
 
   // Стоимость до скидки = цена за 1 сотрудника × кол-во сотрудников
   const subtotalBeforeDiscount = Math.round(subtotal * staffCount);
@@ -1253,9 +1633,17 @@ function renderSmeta(bases, crits, extras, subtotal) {
 
   if (usedDisc > 0) {
     html += `<div class="smeta-item"><span class="smeta-item-name">Скидка −${usedDisc}%</span><span class="smeta-item-price">−${fmt(Math.round(subtotalBeforeDiscount * usedDisc / 100))}</span></div>`;
-    if (discStatus === 'custom')  html += `<div class="smeta-discount-note" style="color:#c0392b">⚠ Нестандартная скидка — согласование с руководством</div>`;
-    else if (discStatus === 'lowered') html += `<div class="smeta-discount-note" style="color:#d97706">⚠ Скидка снижена вручную — скорректируйте слайд в КП</div>`;
-    else html += `<div class="smeta-discount-note">${discLabel}</div>`;
+    if (discStatus === 'custom')  html += `<div class="discount-custom-warn warn-high">⚠ Нестандартная скидка — необходимо согласование с руководством</div>`;
+    else if (discStatus === 'lowered') html += `<div class="discount-custom-warn warn-low">⚠ Скидка снижена вручную — скорректируйте слайд скидки в КП</div>`;
+    else html += `<div class="smeta-plain-note">Скидка: ${discLabel}</div>`;
+  }
+
+  // Обновить warn в разделе менеджера
+  const warnEl = document.getElementById('mgr-disc-warn');
+  if (warnEl) {
+    if (discStatus === 'custom')  { warnEl.className = 'discount-custom-warn warn-high'; warnEl.textContent = '⚠ Нестандартная скидка — необходимо согласование с руководством'; }
+    else if (discStatus === 'lowered') { warnEl.className = 'discount-custom-warn warn-low'; warnEl.textContent = '⚠ Скидка снижена вручную — скорректируйте слайд скидки в КП'; }
+    else { warnEl.className = usedDisc > 0 ? 'discount-custom-warn warn-std' : 'discount-custom-warn'; warnEl.textContent = usedDisc > 0 ? 'Скидка: ' + discLabel : ''; }
   }
 
   // Итого к оплате
@@ -1274,15 +1662,10 @@ function renderPaymentSplit(finalPrice, staffCount) {
 
   if (mgrTariff === 'max') {
     guaranteeDays = '365';
-    const p1 = mgrMagicP1 !== null ? mgrMagicP1 : finalPrice;
-    const rem = finalPrice % 1000;
-    const nicePrice = rem > 0 ? finalPrice - rem : finalPrice;
-    const canBeautify = mgrMagicP1 === null && finalPrice !== nicePrice;
     parts += `<div class="pay-part pp-green">
         <div class="pp-label">100% предоплата</div>
-        <div class="pp-amount" id="sm-p1">${fmt(p1)}</div>
+        <div class="pp-amount">${fmt(finalPrice)}</div>
         <div class="pp-sub">До начала оказания услуг</div>
-        ${canBeautify ? `<button class="btn-magic" onclick="beautifyMax(${finalPrice})">✨ Сделать красиво → ${fmt(nicePrice)}</button>` : ''}
       </div>`;
   } else {
     const mid = mgrTariff === 'mid';
@@ -1291,19 +1674,19 @@ function renderPaymentSplit(finalPrice, staffCount) {
     const pctLabel1 = mid ? '70%' : '50%';
     const pctLabel2 = mid ? '30%' : '50%';
     const colorClass = mid ? 'pp-blue' : 'pp-purple';
-    const p1 = mgrMagicP1 !== null ? mgrMagicP1 : Math.round(finalPrice * ratio);
+    const p1 = (mid && mgrMagicP1 !== null) ? mgrMagicP1 : Math.round(finalPrice * ratio);
     const p2 = finalPrice - p1;
-    const needMagic = mgrMagicP1 === null && p1 % 50 !== 0;
+    const needMagic = mid && mgrMagicP1 === null && p1 % 100 !== 0;
 
-    parts += `<div class="pay-part pp-total">
+    parts += `<div class="pay-part pp-green">
         <div class="pp-label">Общая стоимость</div>
-        <div class="pp-amount">${fmt(finalPrice)}</div>
+        <div class="pp-amount" style="color:#065f46">${fmt(finalPrice)}</div>
       </div>`;
     parts += `<div class="pay-part ${colorClass}">
         <div class="pp-label">1-я часть (${pctLabel1})</div>
         <div class="pp-amount" id="sm-p1">${fmt(p1)}</div>
         <div class="pp-sub">Предоплата</div>
-        ${needMagic ? `<button class="btn-magic" onclick="beautify${mid ? 'Mid' : 'Min'}(${finalPrice})">✨ Сделать красиво</button>` : ''}
+        ${needMagic ? `<button class="btn-magic" onclick="beautifyMid(${finalPrice})">✨ Сделать красиво</button>` : ''}
       </div>`;
 
     if (staffCount > 1) {
@@ -1323,7 +1706,9 @@ function renderPaymentSplit(finalPrice, staffCount) {
     }
   }
 
-  parts += `<div class="pay-part pp-gray"><div class="pp-label">Гарантия</div><div class="pp-amount" style="font-size:15px">${guaranteeDays} дней</div></div>`;
+  const guarColor = mgrTariff === 'max' ? 'pp-green' : mgrTariff === 'mid' ? 'pp-blue' : 'pp-purple';
+  const guarTextColor = mgrTariff === 'max' ? '#065f46' : mgrTariff === 'mid' ? '#1e40af' : '#5b21b6';
+  parts += `<div class="pay-part ${guarColor}"><div class="pp-label">Гарантия</div><div class="pp-amount" style="font-size:16px;color:${guarTextColor}">${guaranteeDays} дней</div></div>`;
 
   const colsClass = mgrTariff === 'max' ? '' : ' cols-4';
   return `<div class="smeta-pay-label">Разделение платежей</div><div class="pay-parts${colsClass}">${parts}</div>`;
@@ -1341,8 +1726,7 @@ function toggleSmeta() {
 function renderMassSmeta(level, tariff, staff, cands, pricePerCand, payCond, total, discount, totalDisc) {
   const exp = getExpState();
   const vname = exp.vname || 'Смета по вакансии';
-  document.getElementById('m-smeta-title').textContent = `Смета — ${vname}`;
-  document.getElementById('m-smeta-date').textContent = new Date().toLocaleDateString('ru-RU', {day:'2-digit', month:'long', year:'numeric'});
+  document.getElementById('m-smeta-title').textContent = vname || 'Смета';
   const discPct = Math.round(discount * 100);
   const levelName = level === '1-4' ? '1–4 требования' : '5–8 требований';
   let html = '';
