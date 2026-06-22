@@ -1,0 +1,2932 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Калькулятор подбора</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f7f6f3; --surface: #ffffff; --surface2: #f2f1ee;
+    --border: #e4e2dd; --border2: #d0cec8;
+    --text: #1c1b18; --text2: #6b6860; --text3: #9c9a94;
+    --accent: #4a3fc7; --accent-light: #eeecfb; --accent-text: #3530a0;
+    --green: #2d7a4f; --radius: 10px; --radius-sm: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; min-height: 100vh; padding: 2rem 1rem 4rem; }
+  .page { max-width: 760px; margin: 0 auto; }
+  .header { margin-bottom: 1.5rem; }
+  .save-indicator { margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 20px; transition: background .2s, color .2s; }
+  .save-indicator::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+  .save-indicator.si-pending { background: #fef6e7; color: #b7791f; }
+  .save-indicator.si-saving  { background: #eef2ff; color: #4f56d3; }
+  .save-indicator.si-saved   { background: #ecfdf3; color: #1c8a4e; }
+  .save-indicator.si-error   { background: #fdf0ee; color: #c0392b; }
+  .header-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: .5rem; display: inline-block; text-decoration: none; cursor: pointer; }
+  .header-eyebrow:hover { text-decoration: underline; }
+  .header-eyebrow.disabled { cursor: default; opacity: .55; pointer-events: none; text-transform: none; letter-spacing: normal; font-weight: 500; }
+  .header h1 { font-size: 26px; font-weight: 600; color: var(--text); letter-spacing: -.01em; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: var(--radius-sm); padding: 4px; margin-bottom: 1.25rem; }
+  .tab { flex: 1; padding: 8px 12px; font-size: 14px; font-weight: 500; font-family: inherit; background: transparent; border: none; border-radius: 6px; cursor: pointer; color: var(--text2); transition: background .15s, color .15s; text-align: center; }
+  .tab.tab-vacancies { color: var(--accent); }
+  .tab.tab-vacancies.active { background: var(--accent); color: #fff; box-shadow: var(--shadow); }
+  .vac-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1rem; margin-bottom: .5rem; }
+  .vac-card { position: relative; min-height: 172px; border-radius: 14px; padding: 0; display: flex; flex-direction: column; cursor: pointer; background: var(--surface); border: 1px solid var(--border); transition: box-shadow .18s, border-color .18s, transform .12s; overflow: hidden; }
+  .vac-card::before { display: none; }
+  .vac-card:hover { box-shadow: 0 8px 24px rgba(74,63,199,.12); border-color: #c9c4f0; transform: translateY(-3px); }
+  .vac-card-body { padding: 1rem 1rem .7rem; display: flex; flex-direction: column; flex: 1; }
+  .vac-card-head { display: flex; align-items: flex-start; gap: 9px; margin-bottom: .8rem; padding-right: 26px; }
+  .vac-card-name { font-size: 14.5px; font-weight: 650; color: var(--text); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex: 1; padding-top: 1px; }
+  .vac-card-info-wrap { display: flex; flex-direction: column; gap: .55rem; flex: 1; }
+  .vac-card-info { display: flex; flex-direction: column; gap: 2px; padding: .55rem .65rem; border-radius: 9px; background: var(--surface2); }
+  .vac-card-info.is-point-max { background: #f0faf4; }
+  .vac-card-info.is-point-mid { background: #eff6ff; }
+  .vac-card-info.is-point-min { background: #f5f3ff; }
+  .vac-card-info.is-mass-search { background: #f5f3ff; }
+  .vac-card-info.is-mass-full   { background: #f0faf4; }
+  .vac-card-info-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 18px; }
+  .vac-card-info-type { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+  .vac-card-info.is-point-max .vac-card-info-type { color: #065f46; }
+  .vac-card-info.is-point-mid .vac-card-info-type { color: #1e40af; }
+  .vac-card-info.is-point-min .vac-card-info-type { color: #5b21b6; }
+  .vac-card-info.is-mass-search .vac-card-info-type { color: #5b21b6; }
+  .vac-card-info.is-mass-full   .vac-card-info-type { color: #065f46; }
+  .vac-card-info-meta { font-size: 12.5px; font-weight: 700; color: var(--text2); white-space: nowrap; }
+  .vac-card-info-sub { font-size: 10.5px; color: var(--text2); font-weight: 500; line-height: 1.25; }
+  .vac-card-info-val { font-size: 17px; font-weight: 750; color: var(--text); letter-spacing: -.02em; margin-top: 1px; }
+  .vac-card-empty { font-size: 12px; color: var(--text3); font-style: italic; padding: .6rem .2rem; text-align: center; background: var(--surface2); border-radius: 9px; }
+  .vac-card-foot { padding: .5rem 1rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 6px; background: #fcfcfb; }
+  .vac-card-date { font-size: 10px; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vac-card-open { font-size: 11px; font-weight: 700; color: var(--accent); white-space: nowrap; opacity: 0; transform: translateX(-3px); transition: opacity .15s, transform .15s; }
+  .vac-card:hover .vac-card-open { opacity: 1; transform: translateX(0); }
+  .vac-card-del { position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,.95); color: var(--text3); font-size: 16px; line-height: 1; border: 1px solid var(--border); opacity: 0; transition: opacity .15s, background .15s, color .15s; z-index: 3; }
+  .vac-card:hover .vac-card-del { opacity: 1; }
+  .vac-card-del:hover { background: #fdf0ee; color: #c0392b; border-color: #f5c6c0; }
+  .vac-card-check { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 6px; border: 1.5px solid var(--border2); background: var(--surface); transition: border-color .15s, background .15s; }
+  .vac-card-check:hover { border-color: var(--accent); }
+  .vac-card-check input { width: 13px; height: 13px; cursor: pointer; accent-color: var(--accent); margin: 0; opacity: 0; position: absolute; }
+  .vac-card-check::after { content: ''; width: 10px; height: 10px; border-radius: 2px; background: transparent; transition: background .15s; }
+  .vac-card.is-selected { background: var(--surface) !important; border-color: #22c55e; border-width: 2.5px; box-shadow: none; }
+  .vac-card.is-selected .vac-card-check { background: #22c55e; border-color: #16a34a; }
+  .vac-card.is-selected .vac-card-check::after { background: #fff; -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M13 4L6 11 3 8' stroke='black' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") center/contain no-repeat; mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M13 4L6 11 3 8' stroke='black' stroke-width='2.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") center/contain no-repeat; border-radius: 0; }
+  .vac-card.is-selected .vac-card-name { color: var(--text); }
+
+
+
+
+
+  .vac-card.is-selected .vac-card-date { color: var(--text3); }
+  .vac-card.is-selected .vac-card-foot { background: rgba(255,255,255,.4); border-top-color: rgba(93,79,199,.2); }
+  .vac-card.is-selected .vac-card-open { color: var(--accent); opacity: 1; transform: translateX(0); }
+  .vac-card.is-selected .vac-card-del { opacity: 1; background: rgba(255,255,255,.9); color: var(--text3); border-color: rgba(255,255,255,.5); }
+  .vac-card.is-selected .vac-card-del:hover { background: #fdf0ee; color: #c0392b; }
+  .vac-card-top-stripe { display: none !important; }
+  .vac-add { background: var(--surface2); border: 2px dashed var(--border2); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; min-height: 172px; transition: border-color .18s, background .18s, transform .12s; }
+  .vac-add::before { display: none; }
+  .vac-add:hover { border-color: var(--accent); background: var(--accent-light); transform: translateY(-3px); }
+  .vac-add-plus { font-size: 30px; font-weight: 300; color: var(--text3); line-height: 1; width: 54px; height: 54px; border-radius: 50%; background: var(--surface); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); transition: color .18s, transform .18s; }
+  .vac-add:hover .vac-add-plus { color: var(--accent); transform: scale(1.05); }
+  .vac-add-label { font-size: 12.5px; font-weight: 650; color: var(--text2); }
+  .vac-add:hover .vac-add-label { color: var(--accent); }
+  .vac-empty-hint { text-align: center; color: var(--text3); font-size: 13px; padding: 1.5rem 0; }
+  .tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 1rem; box-shadow: var(--shadow); }
+  .card-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--text3); margin-bottom: 1rem; padding-bottom: .6rem; border-bottom: 1px solid var(--border); }
+  .card-title-wrap { display: flex; align-items: center; gap: 6px; margin-bottom: 1rem; padding-bottom: .6rem; border-bottom: 1px solid var(--border); }
+  .card-title-wrap .card-title { margin: 0; padding: 0; border: none; }
+
+  .exp-section { margin-bottom: 1.25rem; }
+  .exp-divider { border: none; border-top: 1px solid var(--border); margin: 0 -1.5rem 1.25rem; }
+  .field-wrap:last-child { margin-bottom: 0; }
+  .field-wrap label { display: block; font-size: 13px; color: var(--text2); margin-bottom: 5px; }
+  .field-hint { font-size: 11.5px; color: var(--text3); margin-top: 4px; line-height: 1.4; }
+  .field-wrap input, .field-wrap select, .field-wrap textarea { width: 100%; padding: 0 12px; font-size: 14px; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); outline: none; transition: border-color .15s; }
+  .field-wrap input, .field-wrap select { height: 40px; }
+  .field-wrap textarea { padding: 10px 12px; height: 80px; resize: vertical; line-height: 1.5; }
+  .field-wrap input:focus, .field-wrap select:focus, .field-wrap textarea:focus { border-color: var(--accent); }
+  .field-wrap input[type=number] { -moz-appearance: textfield; }
+  .field-wrap input[type=number]::-webkit-outer-spin-button,
+  .field-wrap input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  /* Компания */
+  .company-row { display: grid; grid-template-columns: 160px 1fr; gap: 8px; }
+  .company-result { margin-top: 6px; font-size: 13px; font-weight: 600; color: var(--text); background: var(--surface2); border-radius: var(--radius-sm); padding: 8px 12px; min-height: 36px; display: flex; align-items: center; }
+
+  /* ЗП */
+  .salary-entries { display: flex; flex-direction: column; gap: 0; margin-bottom: 10px; }
+  .salary-entry { position: relative; padding: 12px 30px 12px 0; border-top: 1px solid var(--border); }
+  .salary-entry:first-child { border-top: none; padding-top: 0; }
+  .salary-inner-amount { display: grid; grid-template-columns: 1fr 110px; gap: 8px; margin-bottom: 8px; }
+  .salary-inner-amount input { height: 40px; font-size: 14px; font-weight: 400; font-family: inherit; border: 1px solid #f0e4a0; border-radius: var(--radius-sm); padding: 0 12px; outline: none; background: #fffdf0; color: var(--text); width: 100%; transition: border-color .15s, background .15s; }
+  .salary-inner-amount input:focus { border-color: var(--accent); background: var(--surface); }
+  .salary-inner-amount input::placeholder { color: var(--text3); }
+  .salary-inner-amount select { height: 40px; font-size: 13px; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 0 8px; outline: none; background: var(--surface); color: var(--text2); cursor: pointer; width: 100%; transition: border-color .15s, background .15s; }
+  .salary-inner-note textarea { width: 100%; font-size: 13px; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 8px 12px; background: var(--surface2); color: var(--text3); resize: none; height: 36px; line-height: 1.5; outline: none; display: block; box-sizing: border-box; transition: border-color .15s, background .15s, color .15s; }
+  .salary-inner-note textarea::placeholder { color: var(--text3); }
+  .salary-inner-note textarea:focus { color: var(--text2); background: var(--surface); border-color: var(--accent); }
+  .salary-inner-amount input.salary-amount-filled { border-color: #a8d9bc; background: #f0faf4; }
+  .salary-inner-amount select.salary-cur-filled { border-color: #a8d9bc; background: #f0faf4; color: var(--text); }
+  .salary-inner-note textarea.salary-note-filled { color: var(--text); background: #f0faf4; border-color: #a8d9bc; }
+  .btn-remove-salary { position: absolute; top: 14px; right: 0; width: 22px; height: 22px; border-radius: 50%; border: none; background: var(--surface2); color: var(--text3); font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; transition: background .15s, color .15s; }
+  .salary-entry:first-child .btn-remove-salary { top: 2px; }
+  .btn-remove-salary:hover { background: #fee2e2; color: #991b1b; }
+  .btn-add-salary { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 14px; font-size: 13px; font-family: inherit; background: var(--surface); color: var(--text2); border: 1px dashed var(--border2); border-radius: var(--radius-sm); cursor: pointer; transition: background .15s, border-color .15s, color .15s; width: 100%; }
+  .btn-add-salary:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+
+  /* Filled/empty field states */
+  .field-wrap input.filled, .field-wrap select.filled, .field-wrap textarea.filled { border-color: #a8d9bc; background: #f8fdfb; }
+  .field-wrap input.field-empty, .field-wrap select.field-empty, .field-wrap textarea.field-empty { border-color: #f0e4a0; background: #fffdf0; }
+  .company-result.filled { border: 1.5px solid #a8d9bc; background: #f0faf4; color: var(--text); font-weight: 600; }
+  .salary-amount-filled { border-color: #a8d9bc !important; background: #f8fdfb !important; }
+  .salary-note { color: var(--text3); }
+  .salary-note:focus { color: var(--text2); }
+  .salary-note.salary-note-filled { color: var(--text); background: #f8fdfb; border-radius: 4px; padding: 2px 4px; margin: -2px -4px; border: 1px solid #a8d9bc; }
+  .ip-error { font-size: 12px; color: #c0392b; margin-top: 4px; display: none; }
+  .ip-error.visible { display: block; }
+  /* company input — no green highlight */
+  #exp-co-name.filled, #exp-co-name:focus { border-color: var(--border2); background: var(--surface); }
+
+  /* Конкуренция */
+  .competition-badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin-top: 5px; }
+  .comp-low    { background: #d1fae5; color: #065f46; }
+  .comp-mid    { background: #fef3c7; color: #92400e; }
+  .comp-high   { background: #fee2e2; color: #991b1b; }
+  .comp-xhigh  { background: #fce7f3; color: #9d174d; }
+
+  .row-counter { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  .row-counter button { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border2); background: var(--surface2); color: var(--text); font-size: 13px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .15s; }
+  .row-counter button:hover { background: var(--accent-light); border-color: var(--accent); }
+  .row-counter button:disabled { opacity: .3; cursor: default; }
+  .row-counter span { font-size: 13px; font-weight: 500; min-width: 14px; text-align: center; color: var(--text); }
+  .row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .row:last-child { border-bottom: none; }
+  .row-check { width: 18px; height: 18px; flex-shrink: 0; accent-color: #2d7a4f; cursor: pointer; }
+  .row-name { flex: 1; font-size: 14px; color: var(--text); cursor: pointer; user-select: none; }
+  .row-price { font-size: 13px; color: var(--text2); white-space: nowrap; min-width: 80px; text-align: right; }
+  .row-price.free { color: var(--green); }
+
+  .tip-btn { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--border2); background: var(--surface2); color: var(--text3); font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: border-color .15s, color .15s; line-height: 1; }
+  .tip-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .tip-popup { display: none; position: absolute; z-index: 100; background: var(--text); color: #fff; font-size: 13px; line-height: 1.55; padding: 10px 13px; border-radius: var(--radius-sm); max-width: 320px; box-shadow: 0 4px 16px rgba(0,0,0,.18); pointer-events: none; white-space: pre-line; right: 0; top: 28px; left: auto; }
+  .tip-popup.visible { display: block; }
+  .tip-popup::before { content: ''; position: absolute; top: -5px; right: 8px; left: auto; width: 10px; height: 10px; background: var(--text); transform: rotate(45deg); border-radius: 2px; }
+  .row-wrap { position: relative; }
+
+  .total-box { background: #f0faf4; border: 1.5px solid #a8d9bc; border-radius: var(--radius-sm); padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+  .total-box-label { font-size: 13px; color: #065f46; font-weight: 500; }
+  .total-box-value { font-size: 24px; font-weight: 700; color: #065f46; }
+
+  .smeta-item { display: flex; justify-content: space-between; align-items: baseline; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; }
+  .smeta-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+  .staff-banner { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .85rem 1rem; margin-bottom: 1.1rem; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .staff-banner-text { min-width: 180px; }
+  .staff-banner-label { display: block; font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer; }
+  .staff-banner-hint { font-size: 11.5px; color: var(--text3); margin-top: 2px; }
+  .staff-banner input { width: 70px; height: 40px; font-size: 15px; font-weight: 600; text-align: center; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); outline: none; transition: border-color .15s; flex-shrink: 0; }
+  .staff-banner input:focus { border-color: var(--accent); }
+
+  .btn-smeta { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; font-size: 14px; font-weight: 500; font-family: inherit; background: var(--surface); color: var(--text); border: 1px solid var(--border2); border-radius: var(--radius-sm); cursor: pointer; transition: background .15s; }
+  .btn-smeta:hover { background: var(--surface2); }
+
+  /* Кастомные поля */
+  .custom-row { margin-top: 8px; padding-top: 0; border-top: none; }
+  .custom-row-inner { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .custom-row-inner .custom-name { flex: 1; height: 36px; font-size: 13px; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 0 10px; outline: none; background: var(--surface); color: var(--text); transition: border-color .15s; min-width: 0; }
+  .custom-row-inner .custom-price { width: 90px; height: 36px; font-size: 13px; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 0 8px; outline: none; background: var(--surface); color: var(--text); transition: border-color .15s; flex-shrink: 0; }
+  .custom-row-inner .custom-tip { flex-shrink: 0; }
+  .custom-row-inner input:focus { border-color: var(--accent); }
+  .custom-row-inner input::placeholder { color: var(--text3); }
+  .custom-row .field-hint { margin-top: 4px; max-width: 520px; }
+  .btn-add-custom { display: flex; align-items: center; gap: 6px; width: 100%; margin-top: 4px; padding: 8px 6px; font-size: 13px; font-weight: 500; font-family: inherit; background: none; border: none; border-radius: var(--radius-sm); color: var(--text3); cursor: pointer; transition: background .15s, color .15s; text-align: left; }
+  .btn-add-custom:hover { background: var(--surface2); color: var(--accent); }
+  .btn-remove-custom { flex-shrink: 0; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border: none; background: none; color: var(--text3); font-size: 16px; cursor: pointer; border-radius: 50%; transition: background .15s, color .15s; }
+  .btn-remove-custom:hover { background: #fdf0ee; color: #c0392b; }
+
+  /* Сворачиваемый блок */
+  .collapse-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 2rem; box-shadow: var(--shadow); overflow: visible; position: relative; }
+  .collapse-card .section-header { border-radius: var(--radius) var(--radius) 0 0; }
+  .collapse-header { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; background: none; border: none; cursor: pointer; gap: 12px; text-align: left; border-radius: var(--radius) var(--radius) 0 0; }
+  .collapse-header:hover { background: var(--surface2); }
+  .collapse-header-left { display: flex; align-items: center; gap: 12px; flex: 1; }
+  .collapse-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .collapse-summary { font-size: 14px; font-weight: 700; color: #065f46; background: #f0faf4; border: 1px solid #a8d9bc; padding: 2px 10px; border-radius: 20px; }
+  .collapse-chevron { color: var(--text3); transition: transform .2s; flex-shrink: 0; }
+  .collapse-chevron.open { transform: rotate(180deg); }
+  .collapse-body { padding: 1rem 1rem 0; border-top: 1px solid var(--border); }
+  .collapse-body.hidden { display: none; }
+  .collapse-total-row { background: #f0faf4; border: 1.5px solid #a8d9bc; border-radius: var(--radius-sm); padding: .85rem 1.25rem; display: flex; justify-content: space-between; align-items: center; margin: .75rem 0 1rem; }
+  .collapse-total-label { font-size: 13px; font-weight: 500; color: #065f46; }
+  .collapse-total-value { font-size: 20px; font-weight: 700; color: #065f46; }
+  .collapse-bottom-btn { display: flex; justify-content: center; width: 100%; background: none; border: none; padding: 0; cursor: pointer; position: absolute; bottom: -16px; left: 0; z-index: 10; }
+  .collapse-bottom-circle { width: 32px; height: 32px; border-radius: 50%; background: var(--surface); border: 1.5px solid var(--border2); display: flex; align-items: center; justify-content: center; color: var(--text2); box-shadow: 0 2px 8px rgba(0,0,0,.1); transition: border-color .15s, color .15s, box-shadow .15s; }
+  .collapse-bottom-btn:hover .collapse-bottom-circle { border-color: var(--accent); color: var(--accent); box-shadow: 0 2px 12px rgba(74,63,199,.25); }
+  .custom-row-inner .custom-price { width: 110px; height: 36px; font-size: 13px; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 0 8px; outline: none; background: var(--surface); color: var(--text); transition: border-color .15s; flex-shrink: 0; -moz-appearance: textfield; }
+  .custom-row-inner .custom-price::-webkit-outer-spin-button,
+  .custom-row-inner .custom-price::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .custom-row-inner input { height: 36px; font-size: 13px; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 0 10px; outline: none; background: var(--surface); color: var(--text); transition: border-color .15s; }
+  .custom-row-inner input:focus { border-color: var(--accent); }
+  .custom-row-inner input::placeholder { color: var(--text3); }
+
+  /* Раздел менеджера */
+  .manager-section { margin-top: 1.5rem; overflow: visible; }
+  .tariff-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; margin-bottom: 1rem; }
+  @media (max-width: 700px) { .tariff-cards { grid-template-columns: 1fr; } }
+  .tariff-card-sel { border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: .9rem 1rem; cursor: pointer; transition: border-color .15s, background .15s; position: relative; }
+  .tariff-card-sel:hover { border-color: var(--border2); }
+  .tariff-card-sel.sel-green { border-color: #a8d9bc; background: #f0faf4; }
+  .tariff-card-sel.sel-blue  { border-color: #93c5fd; background: #eff6ff; }
+  .tariff-card-sel.sel-purple{ border-color: #c4b5fd; background: #f5f3ff; }
+  .tariff-card-sel.selected  { box-shadow: 0 0 0 2px var(--accent); }
+  .tariff-card-sel input[type=radio] { position: absolute; opacity: 0; width: 0; height: 0; }
+  .tc-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; }
+  .tc-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+  .sel-green .tc-badge { background: #d1fae5; color: #065f46; }
+  .sel-blue  .tc-badge { background: #dbeafe; color: #1e40af; }
+  .sel-purple.tc-badge, .sel-purple .tc-badge { background: #ede9fe; color: #5b21b6; }
+  .tc-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .tc-detail { font-size: 11.5px; color: var(--text2); line-height: 1.5; }
+  .tc-detail .sep { color: var(--text3); margin: 0 1px; }
+  .tc-restriction { display: inline-block; margin-top: 7px; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: var(--radius-sm); background: #fdf0ee; border: 1px solid #f5c6c0; color: #c0392b; }
+  .tariff-card-sel.tc-locked { opacity: .45; cursor: not-allowed; pointer-events: none; }
+
+
+  .discount-section { margin-bottom: 1rem; }
+  .discount-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: .75rem; }
+  @media (max-width: 500px) { .discount-grid { grid-template-columns: 1fr; } }
+  .discount-card { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .75rem 1rem; }
+  .discount-stack-note { font-size: 11px; color: var(--text3); margin: -3px 0 .75rem; }
+  .discount-card label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px; }
+  .discount-card select { width: 100%; height: 36px; font-size: 13px; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 0 8px; outline: none; background: var(--surface); color: var(--text); cursor: pointer; }
+  .discount-custom-wrap { border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: .85rem 1rem; background: var(--surface2); }
+  .discount-custom-wrap label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 5px; }
+  .discount-custom-row { display: grid; grid-template-columns: 80px 1fr; gap: 8px; align-items: center; }
+  .discount-custom-row input { height: 36px; font-size: 14px; font-weight: 500; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 0 10px; outline: none; background: var(--surface); color: var(--text); }
+  .discount-custom-hint { font-size: 11px; color: var(--text3); margin-top: 5px; }
+  .discount-custom-warn { font-size: 11.5px; margin: 8px 0 14px; padding: 6px 10px; border-radius: var(--radius-sm); display: none; }
+  .smeta-plain-note { font-size: 11.5px; color: var(--text3); margin: 4px 0 16px; }
+  .discount-custom-warn.warn-low    { display: block; background: #eff6ff; border: 1px solid #93c5fd; color: #1e40af; }
+  .discount-custom-warn.warn-high   { display: block; background: #fdf0ee; border: 1px solid #f5c6c0; color: #c0392b; }
+  .discount-custom-warn.warn-std    { display: block; background: #f0faf4; border: 1px solid #a8d9bc; color: #065f46; }
+
+  /* Смета менеджера */
+  .pay-parts { display: grid; grid-template-columns: repeat(3,1fr); gap: .75rem; margin-bottom: 1rem; }
+  .pay-parts.cols-4 { grid-template-columns: repeat(4,1fr); }
+  @media (max-width: 700px) { .pay-parts.cols-4 { grid-template-columns: repeat(2,1fr); } }
+  @media (max-width: 500px) { .pay-parts, .pay-parts.cols-4 { grid-template-columns: 1fr; } }
+  .pay-part { border-radius: var(--radius-sm); padding: .9rem 1rem; display: flex; flex-direction: column; }
+  .pay-part.pp-green  { background: #f0faf4; border: 1.5px solid #a8d9bc; }
+  .pay-part.pp-blue   { background: #eff6ff; border: 1.5px solid #93c5fd; }
+  .pay-part.pp-purple { background: #f5f3ff; border: 1.5px solid #c4b5fd; }
+  .pay-part.pp-gray   { background: var(--surface2); border: 1px solid var(--border); opacity: .45; }
+  .pay-part.pp-total  { background: var(--surface2); border: 1px solid var(--border2); }
+  .pp-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text2); margin-bottom: 6px; }
+  .pp-amount { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .pp-green .pp-amount { color: #065f46; }
+  .pp-blue  .pp-amount { color: #1e40af; }
+  .pp-purple .pp-amount { color: #5b21b6; }
+  .pp-sub { font-size: 11.5px; color: var(--text2); }
+  .pp-note { font-size: 10.5px; color: var(--text3); margin-top: 6px; line-height: 1.4; }
+  .smeta-pay-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); margin-bottom: .75rem; margin-top: 1.25rem; }
+  .btn-magic { display: flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap; font-size: 11px; font-family: inherit; background: #eff6ff; color: #1e40af; border: 1px solid #93c5fd; border-radius: var(--radius-sm); cursor: pointer; transition: background .15s; margin-top: 8px; padding: 6px 10px; }
+  .btn-magic:hover { background: #dbeafe; }
+  .manager-total-row { display: flex; justify-content: space-between; font-size: 14px; padding: 4px 0; color: var(--text2); }
+  .manager-total-row.final { font-size: 17px; font-weight: 700; color: var(--text); border-top: 1px solid var(--border); padding-top: 8px; margin-top: 4px; }
+  .mass-result { display: none; margin-top: 1rem; }
+  .mass-result.visible { display: block; }
+  @media (max-width: 500px) { .mass-mode-select, .mass-tariff-select { grid-template-columns: 1fr; } }
+  .mass-card { border-radius: var(--radius-sm); padding: 1rem; border: 1.5px solid var(--border); background: var(--surface); }
+  .mass-card.recommended { border-color: #a8d9bc; background: #f0faf4; }
+  .mass-card-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin-bottom: 6px; background: var(--surface2); color: var(--text2); }
+  .mass-card.mass-card-filled .mass-card-badge { background: rgba(255,255,255,.25); color: #fff; }
+  .mass-card.mass-card-filled .mass-card-row .lbl { color: rgba(255,255,255,.8); }
+  .mass-card.mass-card-filled .mass-card-row .val { color: #fff; }
+  .mass-card.mass-card-filled .mass-card-divider { border-top-color: rgba(255,255,255,.3); }
+  .mass-card.mass-card-filled .mass-card-total { color: #fff; }
+  .mass-card.mass-card-filled .mass-card-total .lbl { color: rgba(255,255,255,.85); }
+  .mass-card.mass-card-filled .mass-card-total .val { color: #fff; }
+  .mass-card.recommended .mass-card-badge { background: #d1fae5; color: #065f46; }
+  .mass-card-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; line-height: 1.4; }
+  .mass-card-row { display: flex; justify-content: space-between; font-size: 12.5px; padding: 2px 0; }
+  .mass-card-row .lbl { color: var(--text2); }
+  .mass-card-row .val { color: var(--text); font-weight: 500; }
+  .mass-card-divider { border: none; border-top: 1px solid rgba(0,0,0,.07); margin: 7px 0; }
+  .mass-card-total { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; }
+  .mass-card.recommended .mass-card-total .val { color: #065f46; }
+  .mass-hint { font-size: 12px; color: var(--text2); background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 14px; margin-top: .75rem; line-height: 1.5; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--text); color: #fff; font-size: 13px; padding: 10px 18px; border-radius: 20px; opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none; white-space: nowrap; z-index: 999; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ОБЩИЙ СТИЛЬ ЗАГОЛОВКОВ РАЗДЕЛОВ */
+  .section-header { background: linear-gradient(135deg, #1c1b18 0%, #2d2b24 100%); border-bottom: none; color: #fff; padding: .6rem 1.25rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 52px; }
+  .smeta-top { background: linear-gradient(135deg, #1c1b18 0%, #2d2b24 100%); color: #fff; padding: .6rem 1.25rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 52px; }
+  .section-header-left { display: flex; flex-direction: column; gap: 1px; }
+  .section-header-title { font-size: 14px; font-weight: 600; letter-spacing: -.01em; line-height: 1.3; color: #fff; }
+  .section-header-sub { font-size: 11px; color: rgba(255,255,255,.55); margin-top: 1px; }
+  .section-header-icon { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: rgba(255,255,255,.85); }
+
+  /* СМЕТА */
+  .smeta { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-top: 1.25rem; box-shadow: var(--shadow); overflow: hidden; }
+  .smeta-top-title { font-size: 14px; font-weight: 600; line-height: 1.3; letter-spacing: -.01em; color: #fff; }
+  .smeta-top-date { font-size: 11px; opacity: .5; margin-top: 1px; }
+  .smeta-top-badge { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: rgba(255,255,255,.85); }
+  .smeta-body { padding: 1.25rem 1.5rem; }
+  .smeta-section { margin-bottom: 1.25rem; }
+  .smeta-sec-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); margin-bottom: .5rem; }
+  .smeta-item-name { color: var(--text); flex: 1; padding-right: 12px; }
+  .smeta-item-price { color: var(--text2); white-space: nowrap; }
+  .smeta-item-price.free { color: var(--green); }
+  .smeta-item { display: flex; justify-content: space-between; align-items: baseline; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; }
+  .smeta-item:last-child { border-bottom: none; padding-bottom: 2px; }
+  .smeta-divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+  .smeta-subtotal { display: flex; justify-content: space-between; align-items: center; background: var(--surface2); border-radius: var(--radius-sm); padding: .9rem 1.1rem; margin-bottom: 1.5rem; }
+  .smeta-subtotal.final { background: #f0faf4; border: 1.5px solid #a8d9bc; margin-bottom: 0; }
+  .smeta-subtotal.final .smeta-subtotal-value { color: #065f46; font-size: 20px; }
+  .smeta-subtotal.final .smeta-subtotal-label { color: #065f46; font-weight: 600; }
+  .smeta-subtotal-label { font-size: 14px; color: var(--text2); }
+  .smeta-subtotal-value { font-size: 18px; font-weight: 700; color: var(--text); }
+  .smeta-tariffs-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); margin-bottom: .75rem; }
+  .smeta-tariffs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; margin-bottom: 1.25rem; }
+  @media (max-width: 540px) { .smeta-tariffs-grid { grid-template-columns: 1fr; } }
+  .st-card { border-radius: var(--radius-sm); padding: .9rem 1rem; border: 1.5px solid transparent; }
+  .st-card.green  { background: #f0faf4; border-color: #a8d9bc; }
+  .st-card.blue   { background: #eff6ff; border-color: #93c5fd; }
+  .st-card.purple { background: #f5f3ff; border-color: #c4b5fd; }
+  .st-card.purple.disabled { opacity: .45; }
+  .st-card.st-filled .st-badge { background: rgba(255,255,255,.25); color: #fff; }
+  .st-card.st-filled .st-row .lbl { color: rgba(255,255,255,.8); }
+  .st-card.st-filled .st-row .val { color: #fff; }
+  .st-card.st-filled .st-name { color: #fff; }
+  .st-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin-bottom: 5px; }
+  .green  .st-badge { background: #d1fae5; color: #065f46; }
+  .blue   .st-badge { background: #dbeafe; color: #1e40af; }
+  .purple .st-badge { background: #ede9fe; color: #5b21b6; }
+  .st-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .st-row { display: flex; justify-content: space-between; font-size: 12px; padding: 2px 0; }
+  .st-row .lbl { color: var(--text2); }
+  .st-row .val { color: var(--text); font-weight: 500; }
+  .st-divider { border: none; border-top: 1px solid rgba(0,0,0,.08); margin: 7px 0; }
+  .st-disc-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text3); margin-bottom: 4px; margin-top: 4px; }
+  .st-disc-row { display: flex; justify-content: space-between; font-size: 11.5px; padding: 2px 0; border-bottom: 1px solid rgba(0,0,0,.06); }
+  .st-disc-row:last-child { border-bottom: none; }
+  .st-disc-row .dlbl { color: var(--text2); }
+  .st-disc-row .dval { color: var(--text); font-weight: 500; font-size: 11px; text-align: right; }
+  .st-note { font-size: 11px; color: var(--text3); margin-top: 6px; font-style: italic; }
+  .st-list-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text3); margin-bottom: 3px; margin-top: 6px; }
+  .st-list { font-size: 11px; color: var(--text2); margin: 0; padding-left: 14px; line-height: 1.5; }
+  .st-list li { margin-bottom: 2px; }
+  .smeta-hint { font-size: 11.5px; color: var(--text3); padding-top: .75rem; border-top: 1px solid var(--border); text-align: center; line-height: 1.5; }
+
+  @media print {
+    body { background: white; padding: 0; }
+    .tabs, .calc-section, .status-bar, .mass-result { display: none !important; }
+    .smeta { display: block !important; box-shadow: none; border: 1px solid #ccc; }
+    .smeta-top { background: #1c1b18 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .st-card, .mass-card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <a class="header-eyebrow disabled" id="header-link" target="_blank" rel="noopener">Ссылка появится после сохранения</a>
+    <h1>Калькулятор подбора</h1>
+    <div class="save-indicator" id="save-indicator" style="display:none"></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs" id="main-tabs">
+    <button class="tab tab-vacancies active" id="tab-vacancies" onclick="switchTab('vacancies')">Вакансии</button>
+    <button class="tab" id="tab-expertise" onclick="switchTab('expertise')" style="display:none">Экспертиза вакансии</button>
+    <button class="tab" id="tab-tochechny" onclick="switchTab('tochechny')" style="display:none">Точечный подбор</button>
+    <button class="tab" id="tab-massovy" onclick="switchTab('massovy')" style="display:none">Массовый подбор</button>
+  </div>
+
+  <!-- ===================== ВАКАНСИИ ===================== -->
+  <div id="section-vacancies">
+    <div class="card" style="margin-bottom:1rem">
+      <div class="exp-section" style="margin-bottom:0">
+        <div class="card-title">Название компании</div>
+        <div class="field-wrap">
+          <div class="company-row">
+            <select id="exp-co-type" class="field-empty" onchange="updateCompany(); this.classList.toggle('field-empty', !this.value); this.classList.toggle('filled', !!this.value)">
+              <option value="">— Не выбрано —</option>
+            <option value="brand">Бренд</option>
+              <option value="ip">ИП</option>
+              <option value="ooo">ООО</option>
+              <option value="ao">АО</option>
+              <option value="pao">ПАО</option>
+              <option value="zao">ЗАО</option>
+              <option value="oao">ОАО</option>
+              <option value="up">УП</option>
+              <option value="np">НП</option>
+              <option value="gup">ГУП</option>
+              <option value="mup">МУП</option>
+              <option value="other">Другое</option>
+            </select>
+            <input type="text" id="exp-co-name" placeholder="Название" oninput="updateCompany()">
+          </div>
+          <div class="field-hint" id="exp-co-hint">Выберите формат наименования компании клиента и введите название</div>
+          <div class="ip-error" id="ip-error"></div>
+        </div>
+        <div class="field-wrap" style="margin-bottom:0">
+          <div class="company-result" id="exp-co-result">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="vac-grid" id="vac-grid">
+      <div class="vac-card vac-add" id="vac-add-card" onclick="createNewVacancy()">
+        <div class="vac-add-plus">+</div>
+        <div class="vac-add-label">Новая вакансия</div>
+      </div>
+    </div>
+    <div class="vac-empty-hint" id="vac-loading-hint">Загрузка вакансий…</div>
+
+    <div id="vac-aggregate" style="display:none;margin-top:1.25rem">
+
+      <!-- Переключатель режима сметы -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem">
+        <button id="vac-mode-point" onclick="setVacMode('point')" style="height:44px;border:2px solid #93c5fd;border-radius:var(--radius-sm);background:#eff6ff;color:#1e40af;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s">Точечный подбор</button>
+        <button id="vac-mode-mass" onclick="setVacMode('mass')" style="height:44px;border:2px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text2);font-size:14px;font-weight:600;cursor:pointer;transition:all .15s">Массовый подбор</button>
+      </div>
+
+      <!-- Блок скидок (только точечный) -->
+      <div id="vac-disc-block" class="card" style="margin-bottom:1rem">
+        <div class="card-title">Скидка за кол-во вакансий в 1 договоре</div>
+        <div class="discount-custom-wrap" style="margin:.75rem 0;background:var(--surface);border-color:var(--border2);position:relative">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+            <label>Скидка за кол-во вакансий в 1 договоре которая может быть применена</label>
+            <button class="tip-btn" type="button" onclick="event.stopPropagation();showTip('tip-vac-disc-applied',this)" style="flex-shrink:0">?</button>
+          </div>
+          <div class="tip-popup" id="tip-vac-disc-applied" style="right:0;left:auto">Скидка за количество вакансий в одном договоре:
+• 1 вакансия — без скидки
+• 2 вакансии — −5%
+• 3 вакансии — −10%
+• 4 вакансии — −15%
+• 5 и более вакансий — −20%
+
+Скидки за количество сотрудников и вакансий не суммируются — применяется наибольшая.</div>
+          <div id="vac-disc-auto-display" style="height:36px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);display:flex;align-items:center;padding:0 12px;font-size:13px;color:var(--text2);margin-top:5px">Выберите вакансии выше</div>
+        </div>
+        <div class="discount-custom-wrap" id="vac-disc-manual-wrap" style="background:var(--surface);border-color:var(--border2)">
+          <label id="vac-disc-label">Итоговая скидка за кол-во вакансий</label>
+          <div class="discount-custom-row">
+            <div class="vac-disc-input-wrap" style="position:relative;display:inline-flex;align-items:center">
+              <input type="number" id="vac-disc-custom" min="0" max="50" placeholder="0" oninput="renderVacAggregateTotals()">
+            </div>
+            <span id="vac-disc-hint" style="font-size:13px;color:var(--text2)">% — можно снизить вручную</span>
+          </div>
+        </div>
+        <div id="vac-aggregate-discount-note"></div>
+      </div>
+
+      <!-- Таблица вакансий -->
+      <div class="card" id="vac-table-card">
+        <div class="card-title" style="margin-bottom:.75rem" id="vac-table-title">Детали по вакансиям</div>
+        <div id="vac-table-body"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===================== ЭКСПЕРТИЗА ===================== -->
+  <div id="section-expertise" style="display:none">
+
+    <div class="card">
+
+      <div class="exp-section">
+        <div class="card-title">Название вакансии</div>
+        <div class="field-wrap" style="margin-bottom:0">
+          <input type="text" id="exp-vname" placeholder="Например: Менеджер по продажам" oninput="capitalizeFirst(this); expEdit()">
+          <div class="field-hint">Официальное название или то, как называет вакансию клиент</div>
+        </div>
+      </div>
+
+      <div class="exp-divider"></div>
+
+      <div class="exp-section">
+        <div class="card-title">Зона поиска кандидатов</div>
+        <div class="field-wrap" style="margin-bottom:0">
+          <input type="text" id="exp-region" placeholder="Например: Москва" oninput="capitalizeFirst(this); expEdit()">
+          <div class="field-hint">Город, регион или страна — укажите то, что применимо</div>
+        </div>
+      </div>
+
+      <div class="exp-divider"></div>
+
+      <div class="exp-section">
+        <div class="card-title">Кол-во потенциальных кандидатов</div>
+        <div class="field-wrap" style="margin-bottom:0">
+          <input type="number" id="exp-candidates" placeholder="Количество резюме на рынке" oninput="expEdit()">
+          <div class="field-hint">Оценочное кол-во подходящих резюме в открытом доступе</div>
+        </div>
+      </div>
+
+      <div class="exp-divider"></div>
+
+      <div class="exp-section">
+        <div class="card-title">Конкуренция за сотрудников</div>
+        <div class="field-wrap" style="margin-bottom:0">
+          <select id="exp-competition" onchange="updateCompetition()">
+            <option value="">— Выберите уровень —</option>
+            <option value="50-60">50–60% — умеренная</option>
+            <option value="60-75">60–75% — выше умеренной</option>
+            <option value="75-85">75–85% — высокая</option>
+            <option value="85-95">85–95% — крайне высокая</option>
+          </select>
+          <div id="exp-competition-badge" style="margin-top:6px"></div>
+        </div>
+      </div>
+
+      <div class="exp-divider"></div>
+
+      <div class="exp-section">
+        <div class="card-title">Ориентировочный срок закрытия</div>
+        <div class="field-wrap" style="margin-bottom:0">
+          <select id="exp-deadline" onchange="toggleDeadlineCustom()">
+            <option value="">— Выберите срок —</option>
+            <option value="1">1 неделя</option>
+            <option value="2">2 недели</option>
+            <option value="3">3 недели</option>
+            <option value="4">4 недели</option>
+            <option value="5">5 недель</option>
+            <option value="6">6 недель</option>
+            <option value="7">7 недель</option>
+            <option value="8">8 недель</option>
+            <option value="9">9 недель</option>
+            <option value="10">10 недель</option>
+            <option value="other">Другое</option>
+          </select>
+          <input type="text" id="exp-deadline-custom" placeholder="Укажите срок" oninput="expEdit()" style="display:none;margin-top:8px">
+        </div>
+      </div>
+
+      <div class="exp-divider"></div>
+
+      <div class="exp-section">
+        <div class="card-title">Рекомендуемая ЗП</div>
+        <div id="salary-entries" class="salary-entries"></div>
+        <button class="btn-add-salary" onclick="addSalaryEntry()">+ Добавить вариант ЗП</button>
+      </div>
+
+      <div class="exp-divider"></div>
+
+      <div class="exp-section" style="margin-bottom:0">
+        <div class="card-title">Доп. информация (при наличии)</div>
+        <div class="field-wrap" style="margin-bottom:0">
+          <textarea id="exp-extra" placeholder="Любые дополнительные сведения о вакансии или клиенте, которые стоит учесть при работе..." oninput="expEdit()"></textarea>
+        </div>
+      </div>
+
+
+
+    </div>
+  </div>
+
+  <!-- ===================== ТОЧЕЧНЫЙ ===================== -->
+  <div id="section-tochechny" style="display:none">
+    <div class="calc-section">
+
+      <!-- Сворачиваемый блок расчёта -->
+      <div class="collapse-card" id="calc-collapse">
+        <button class="section-header" style="width:100%;text-align:left;cursor:pointer;border:none" onclick="toggleCalcCollapse()" type="button">
+          <div class="section-header-left">
+            <div class="section-header-title">Расчёт стоимости</div>
+            <div class="section-header-sub">Как правило, заполняется аудитором</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="collapse-summary" id="collapse-summary" style="display:none;font-size:13px;font-weight:700;color:#065f46;background:#f0faf4;border:1px solid #a8d9bc;padding:2px 10px;border-radius:20px"></span>
+            <div id="collapse-chevron" style="transition:transform .2s;color:rgba(255,255,255,.6);display:flex;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
+            <div class="section-header-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg></div>
+          </div>
+        </button>
+        <div class="collapse-body" id="calc-collapse-body">
+          <div class="card" style="margin-bottom:.75rem;box-shadow:none;border-color:var(--border)">
+            <div class="card-title-wrap">
+              <div class="card-title">Базовая стоимость позиции</div>
+              <button class="tip-btn" onclick="toggleSectionTip('tip-base')" type="button">?</button>
+            </div>
+            <div class="tip-popup" id="tip-base">Стоимость нашей работы — сюда входит подготовка к подбору (с созданием воронки найма), маркетинг вакансии (публикации вакансий, покупки баз резюме и иное), работа по поиску кандидатов и работа по подбору кандидатов.</div>
+            <div id="base-list"></div>
+            <div id="base-custom-list"></div>
+            <button class="btn-add-custom" type="button" onclick="addCustomRow('base')">+ Добавить другую позицию</button>
+          </div>
+
+          <div class="card" style="margin-bottom:.75rem;box-shadow:none;border-color:var(--border)">
+            <div class="card-title-wrap">
+              <div class="card-title">Усложняющие критерии поиска</div>
+              <button class="tip-btn" onclick="toggleSectionTip('tip-crit')" type="button">?</button>
+            </div>
+            <div class="tip-popup" id="tip-crit">Некоторые усложняющие критерии можно указать в портрете кандидата как «желательные» — в этом случае доплата не требуется.</div>
+            <div id="crit-list"></div>
+            <div id="crit-custom-list"></div>
+            <button class="btn-add-custom" type="button" onclick="addCustomRow('crit')">+ Добавить другой усложняющий критерий</button>
+          </div>
+
+          <div class="card" style="margin-bottom:0;box-shadow:none;border-color:var(--border)">
+            <div class="card-title-wrap">
+              <div class="card-title">Дополнительные услуги</div>
+              <button class="tip-btn" onclick="toggleSectionTip('tip-extra')" type="button">?</button>
+            </div>
+            <div class="tip-popup" id="tip-extra">Дополнительные услуги — это процессы, увеличивающие нашу работу в процессе подбора: то, что усложняет воронку найма.</div>
+            <div id="extra-list"></div>
+            <div id="extra-custom-list"></div>
+            <button class="btn-add-custom" type="button" onclick="addCustomRow('extra')">+ Добавить другую доп. услугу</button>
+          </div>
+
+          <!-- Итоговая стоимость внутри блока -->
+          <div class="collapse-total-row">
+            <span class="collapse-total-label">Итоговая стоимость</span>
+            <span class="collapse-total-value" id="total-final">0 ₽</span>
+          </div>
+        </div>
+
+        <!-- Кнопка свернуть снизу -->
+        <button class="collapse-bottom-btn" onclick="toggleCalcCollapse()" type="button">
+          <div class="collapse-bottom-circle" id="collapse-chevron-bottom">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </button>
+      </div>
+
+      <!-- РАЗДЕЛ МЕНЕДЖЕРА -->
+      <div class="collapse-card manager-section" id="mgr-collapse">
+        <button class="section-header" style="width:100%;text-align:left;cursor:pointer;border:none" onclick="toggleMgrCollapse()" type="button">
+          <div class="section-header-left">
+            <div class="section-header-title">Тарифы и скидки</div>
+            <div class="section-header-sub">Как правило, заполняется менеджером</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span id="mgr-summary" style="display:none;font-size:13px;font-weight:700;padding:2px 10px;border-radius:20px"></span>
+            <div id="mgr-chevron" style="transition:transform .2s;color:rgba(255,255,255,.6);display:flex;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
+            <div class="section-header-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+          </div>
+        </button>
+        <div class="collapse-body" id="mgr-collapse-body">
+
+        <div class="card-title" style="margin-bottom:.75rem">Объём работы</div>
+        <div class="discount-custom-wrap" style="background:var(--surface);border-color:var(--border2)">
+          <label>Количество сотрудников</label>
+          <div class="discount-custom-row">
+            <input type="number" id="pt-staff" min="1" value="1" oninput="onStaffCountChange()" style="height:36px;font-size:14px;font-weight:500;font-family:inherit">
+            <span style="font-size:13px;color:var(--text2)">чел. — введите сколько сотрудников требуется найти</span>
+          </div>
+          <div id="staff-warn" style="font-size:11.5px;margin-top:6px;display:none"></div>
+        </div>
+
+        <div style="margin-bottom:1rem">
+          <div class="card-title" style="margin-bottom:.75rem;margin-top:1.25rem">Тариф оплаты</div>
+          <div class="tariff-cards">
+            <label class="tariff-card-sel sel-green selected" id="tc-max" onclick="selectManagerTariff('max')">
+              <input type="radio" name="mgr-tariff" value="max" checked>
+              <div class="tc-head">
+                <div class="tc-badge">Максимальный</div>
+                <button class="tip-btn" type="button" onclick="event.stopPropagation(); toggleSectionTip('tip-tc-max')">?</button>
+              </div>
+              <div class="tc-name"><span style="color:var(--text2);font-weight:400;font-size:12px">Максимальный</span> · 100%</div>
+              <div class="tc-detail">Гарантия 365 дней<span class="sep"> · </span>Скидка −5%<span class="sep"> · </span>Бесплатно, если не найдём за 30 дней</div>
+              <div class="tip-popup" id="tip-tc-max">Условия:
+• Оплата вносится одним платежом перед началом оказания услуг
+
+Преимущества:
+• 365 дней гарантии
+• Дополнительная скидка −5%
+• Самая высокая скорость подбора
+• Вся услуга — бесплатно, если не найдём подходящих кандидатов за 30 дней</div>
+            </label>
+            <label class="tariff-card-sel sel-blue" id="tc-mid" onclick="selectManagerTariff('mid')">
+              <input type="radio" name="mgr-tariff" value="mid">
+              <div class="tc-head">
+                <div class="tc-badge">Средний</div>
+                <button class="tip-btn" type="button" onclick="event.stopPropagation(); toggleSectionTip('tip-tc-mid')">?</button>
+              </div>
+              <div class="tc-name"><span style="color:var(--text2);font-weight:400;font-size:12px">Средний</span> · 70% / 30%</div>
+              <div class="tc-detail">Гарантия 150 дней<span class="sep"> · </span>Вторая часть оплаты после завершения подбора</div>
+              <div class="tip-popup" id="tip-tc-mid">Условия:
+• Вторая часть вносится равными частями после подбора каждого сотрудника
+
+Преимущества:
+• 150 дней гарантии
+• Стандартная скорость подбора</div>
+            </label>
+            <label class="tariff-card-sel sel-purple" id="tc-min" onclick="selectManagerTariff('min')">
+              <input type="radio" name="mgr-tariff" value="min">
+              <div class="tc-head">
+                <div class="tc-badge">Минимальный</div>
+                <button class="tip-btn" type="button" onclick="event.stopPropagation(); toggleSectionTip('tip-tc-min')">?</button>
+              </div>
+              <div class="tc-name"><span style="color:var(--text2);font-weight:400;font-size:12px">Минимальный</span> · 50% / 50%</div>
+              <div class="tc-detail">Гарантия 100 дней<span class="sep"> · </span>Вторая часть оплаты после завершения подбора</div>
+              <div class="tc-restriction" id="tc-min-restriction">Только при подборе от 2-х сотрудников</div>
+              <div class="tip-popup" id="tip-tc-min">Условия:
+• Тариф доступен ТОЛЬКО при подборе от 2-х сотрудников по одной вакансии
+• Вторая часть вносится равными частями после подбора каждого сотрудника
+
+Преимущества:
+• 100 дней гарантии
+• Стандартная скорость подбора</div>
+            </label>
+          </div>
+        </div>
+
+        <div class="discount-section">
+          <div class="card-title" style="margin-bottom:.75rem">Скидки</div>
+          <div class="discount-grid">
+            <div class="discount-card" style="position:relative">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+                <label style="font-size:12px;color:var(--text2)">За кол-во сотрудников</label>
+                <button class="tip-btn" type="button" onclick="event.stopPropagation();showTip('tip-disc-staff',this)" style="flex-shrink:0">?</button>
+                <div class="tip-popup" id="tip-disc-staff" style="right:0;left:auto">Скидка за количество сотрудников на одну вакансию:
+• 1 сотрудник — без скидки
+• 2 сотрудника — −10%
+• 3 сотрудника — −15%
+• 4 сотрудника — −20%
+• 5 и более сотрудников — −25%
+
+Скидки из разных категорий не суммируются — выбирается наибольшая.</div>
+              </div>
+              <div id="mgr-disc-staff-display" style="height:36px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);display:flex;align-items:center;padding:0 12px;font-size:13px;color:var(--text2)">Заполняется автоматически</div>
+              <input type="hidden" id="mgr-disc-staff" value="0">
+            </div>
+            <div class="discount-card" style="position:relative">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+                <label style="font-size:12px;color:var(--text2)">За кол-во вакансий</label>
+                <button class="tip-btn" type="button" onclick="event.stopPropagation();showTip('tip-disc-vac',this)" style="flex-shrink:0">?</button>
+                <div class="tip-popup" id="tip-disc-vac" style="right:0;left:auto">Скидка за количество вакансий в одном договоре:
+• 1 вакансия — без скидки
+• 2 вакансии — −5%
+• 3 вакансии — −10%
+• 4 вакансии — −15%
+• 5 и более вакансий — −20%
+
+Скидки из разных категорий не суммируются — выбирается наибольшая.</div>
+              </div>
+              <div id="mgr-disc-staff-display2" style="height:36px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);display:flex;align-items:center;padding:0 12px;font-size:13px;color:var(--text2)">Заполняется из вкладки Вакансии</div>
+              <input type="hidden" id="mgr-disc-vac" value="0">
+            </div>
+          </div>
+          <div class="discount-stack-note">Скидки за количество между собой не суммируются — учитывается наибольшая по проценту.</div>
+          <div class="discount-custom-wrap" style="background:var(--surface);border-color:var(--border2)">
+            <label>Итоговый процент скидки</label>
+            <div class="discount-custom-row">
+              <input type="number" id="mgr-disc-custom" min="0" max="50" placeholder="0" oninput="calcTotal()">
+              <span style="font-size:13px;color:var(--text2)">% — можно снизить вручную</span>
+            </div>
+            <div class="discount-custom-warn" id="mgr-disc-warn"></div>
+          </div>
+        </div>
+        </div>
+
+        <!-- Кнопка свернуть снизу менеджер -->
+        <button class="collapse-bottom-btn" onclick="toggleMgrCollapse()" type="button">
+          <div class="collapse-bottom-circle" id="mgr-chevron-bottom">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <div class="smeta" id="smeta-block">
+      <div class="smeta-top">
+        <div class="section-header-left">
+          <div class="smeta-top-title" id="smeta-title">Смета по вакансии</div>
+          <div class="section-header-sub">Точечный подбор</div>
+        </div>
+        <div class="smeta-top-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg></div>
+      </div>
+      <div class="smeta-body" id="smeta-body"></div>
+    </div>
+
+
+  </div>
+
+  <!-- ===================== МАССОВЫЙ ===================== -->
+  <div id="section-massovy" style="display:none">
+    <div class="calc-section">
+
+      <div class="collapse-card" id="mass-params-collapse">
+        <button class="section-header" style="width:100%;text-align:left;cursor:pointer;border:none" onclick="toggleMassParamsCollapse()" type="button">
+          <div class="section-header-left">
+            <div class="section-header-title">Параметры заказа</div>
+            <div class="section-header-sub">Как правило, заполняется аудитором</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div id="mass-params-chevron" style="transition:transform .2s;color:rgba(255,255,255,.6);display:flex;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
+            <div class="section-header-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg></div>
+          </div>
+        </button>
+        <div class="collapse-body" id="mass-params-body">
+          <div class="card" style="margin-bottom:.75rem;box-shadow:none;border-color:var(--border)">
+            <div class="field-wrap" style="margin-bottom:0">
+              <label for="m-level">Уровень требований к кандидату</label>
+              <select id="m-level" onchange="massCalc()">
+                <option value="1-4">1–4 требования к кандидату</option>
+                <option value="5-8">5–8 требований к кандидату</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapse-card manager-section" id="mass-mgr-collapse">
+        <button class="section-header" style="width:100%;text-align:left;cursor:pointer;border:none" onclick="toggleMassMgrCollapse()" type="button">
+          <div class="section-header-left">
+            <div class="section-header-title">Объём и оплата</div>
+            <div class="section-header-sub">Как правило, заполняется менеджером</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div id="mass-mgr-chevron" style="transition:transform .2s;color:rgba(255,255,255,.6);display:flex;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
+            <div class="section-header-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+          </div>
+        </button>
+        <div class="collapse-body" id="mass-mgr-collapse-body">
+
+      <div class="card">
+        <div class="card-title" style="margin-bottom:.75rem">Объём работы</div>
+
+        <div class="discount-custom-wrap" style="background:var(--surface);border-color:var(--border2);margin-bottom:.75rem">
+          <label>Количество сотрудников</label>
+          <div class="discount-custom-row">
+            <input type="number" id="m-staff" min="1" placeholder="0" oninput="document.getElementById('m-cands').dataset.manual='';massCalc()" style="height:36px;font-size:14px;font-weight:500;font-family:inherit">
+            <span style="font-size:13px;color:var(--text2)">чел. — введите сколько сотрудников требуется найти</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom:.75rem">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <label style="font-size:12px;color:var(--text2)">Кандидатов на 1 сотрудника</label>
+            <span id="m-ratio-val" style="font-size:13px;font-weight:600;color:var(--text)">4</span>
+          </div>
+          <input type="range" id="m-ratio" min="1" max="10" value="4" oninput="document.getElementById('m-cands').dataset.manual='';massCalc()" style="width:100%;accent-color:#2d7a4f">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:2px"><span>1</span><span>10</span></div>
+        </div>
+
+        <div style="margin-bottom:.75rem">
+          <label style="display:block;font-size:12px;color:var(--text2);margin-bottom:5px">Рекомендуемое кол-во кандидатов</label>
+          <div id="m-rec-display" style="height:40px;border:1.5px solid #a8d9bc;border-radius:var(--radius-sm);background:#f0faf4;display:flex;align-items:center;padding:0 12px;font-size:15px;font-weight:600;color:#065f46">—</div>
+          <div class="field-hint" style="color:#065f46">Рассчитывается автоматически исходя из коэффициента выше, но не менее 10 кандидатов</div>
+        </div>
+
+        <div class="discount-custom-wrap" style="border-color:var(--border2);background:var(--surface)">
+          <label>Итоговое кол-во кандидатов</label>
+          <div class="discount-custom-row">
+            <input type="number" id="m-cands" min="1" placeholder="0" oninput="this.dataset.manual='1';updateCandsStyle();massCalc()" style="border-color:#f0e4a0;background:#fffdf0">
+            <span style="font-size:13px;color:var(--text2)">канд. — можно ввести вручную</span>
+          </div>
+          <div id="m-cands-warn" style="font-size:11.5px;margin-top:6px;color:#92400e">Можно указать любое кол-во, вне зависимости от рекомендуемого, но не менее 10 кандидатов</div>
+        </div>
+      </div>
+
+      <div id="mass-result" style="display:none">
+        <div id="mass-error" class="mass-error" style="display:none"></div>
+      </div>
+
+      <div class="card" id="mass-pay-card" style="display:none;margin-top:0">
+        <div class="card-title" id="mass-mode-title" style="margin-bottom:.75rem">Выберите тариф</div>
+        <div id="mass-mode-select" style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem"></div>
+        <div id="mass-pay-section" style="display:none">
+          <div class="card-title" id="mass-pay-title" style="margin-bottom:.75rem">Выберите порядок оплаты</div>
+          <div id="mass-tariff-select" style="display:flex;flex-direction:column;gap:.5rem"></div>
+        </div>
+      </div>
+
+        </div><!-- end collapse-body -->
+      </div><!-- end mass-mgr-collapse -->
+    </div>
+
+    <div class="smeta" id="m-smeta-block">
+      <div class="smeta-top">
+        <div class="section-header-left">
+          <div class="smeta-top-title" id="m-smeta-title">Смета</div>
+        </div>
+        <div class="smeta-top-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg></div>
+      </div>
+      <div class="smeta-body" id="m-smeta-body"></div>
+    </div>
+
+
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwTB9CsIjNYLH1HD6sSUpOAgS3p7p_ra3AlMyvf95rbFg3nafQyxn4R2_VLea-MSk7d/exec';
+
+// Project ID — уникальный для каждого «рабочего пространства»
+function getProjectId() {
+  const params = new URLSearchParams(location.search);
+  let pid = params.get('project');
+  if (!pid) {
+    // Генерируем новый project_id и вписываем в URL
+    pid = Math.random().toString(36).slice(2, 10);
+    const newParams = new URLSearchParams(location.search);
+    newParams.set('project', pid);
+    try { history.replaceState(null, '', '?' + newParams.toString()); } catch(e) {}
+  }
+  return pid;
+}
+const PROJECT_ID = getProjectId();
+
+// ==================== ДАННЫЕ ТОЧЕЧНОГО ====================
+const BASE = [
+  {name:"Рабочая позиция", price:35000, tip:"Сотрудники, выполняющие простые физические или вспомогательные работы, как правило без необходимости общения с клиентами и наличия специальных навыков.\n\nПримеры: грузчики, разнорабочие, подсобные рабочие, уборщики, дворники, сортировщики, фасовщики."},
+  {name:"Линейная позиция", price:40000, tip:"Сотрудники, выполняющие регулярные операционные задачи. Как правило, не требуют узкой специализации, но предполагают взаимодействие с клиентами, коллегами или документацией.\n\nПримеры: продавцы-консультанты, администраторы, диспетчеры, охранники.\n\nВажно: если у позиции есть план продаж или KPI по привлечению клиентов — это продающая позиция. Если требуется профессиональный диплом или узкая экспертиза — профильная."},
+  {name:"Профильная позиция", price:40000, tip:"Сотрудники, выполняющие профессиональные, административные или профильные функции, требующие специальных знаний, навыков или подготовки.\n\nПримеры: бухгалтеры, HR-специалисты, маркетологи, юристы, инженеры, экономисты, проектировщики, специалисты в бьюти-сфере."},
+  {name:"Продающая позиция", price:45000, tip:"Сотрудники, отвечающие за привлечение клиентов, развитие продаж и выполнение коммерческих показателей.\n\nПримеры: менеджеры по продажам, торговые представители, менеджеры по развитию бизнеса, аккаунт-менеджеры."},
+  {name:"Автомобильная позиция", price:45000, tip:"Специалисты в сфере эксплуатации, обслуживания и ремонта транспортных средств.\n\nПримеры: водители, механики, автослесари, автоэлектрики, мастера-приёмщики, диагносты."},
+  {name:"Медицинская позиция", price:50000, tip:"Специалисты, осуществляющие медицинскую деятельность и имеющие соответствующее образование и допуски.\n\nПримеры: врачи, медицинские сёстры, фельдшеры, фармацевты, лаборанты, стоматологи. КРОМЕ администраторов на ресепшен и прочего обслуживающего персонала в больницы/клиники."},
+  {name:"IT позиция", price:50000, tip:"Специалисты в области разработки, сопровождения и внедрения информационных технологий.\n\nПримеры: разработчики, тестировщики, системные администраторы, аналитики, DevOps-инженеры, специалисты по информационной безопасности."},
+  {name:"Руководящая позиция", price:50000, tip:"Сотрудники, отвечающие за управление подразделением, направлением деятельности или организацией в целом.\n\nПримеры: руководители отделов, начальники подразделений, управляющие, коммерческие директора, операционные директора, генеральные директора."},
+];
+const CRIT = [
+  {name:"Узкопрофильный опыт работы", price:5000, tip:"Опыт работы в узкой сфере. Например, нужен маркетолог с опытом работы на пищевом производстве."},
+  {name:"Опыт работы на аналогичной должности от 6 месяцев", price:3000, tip:"Опыт работы в сфере вакансии от 6 месяцев."},
+  {name:"Опыт работы на аналогичной должности от 2 лет", price:5000, tip:"Опыт работы в сфере вакансии от 2 лет."},
+  {name:"Опыт работы на аналогичной должности от 3 лет", price:7000, tip:"Опыт работы в сфере вакансии от 3 лет."},
+  {name:"Опыт работы на аналогичной должности от 5 лет", price:10000, tip:"Опыт работы в сфере вакансии от 5 лет."},
+  {name:"Высшее образование", price:5000, tip:"Проставляется, если вакансия требует наличия высшего образования в любой области."},
+  {name:"Узкопрофильное образование (высшее или среднее)", price:10000, tip:"Проставляется, если вакансия требует высшего или среднего образования в конкретной узкой области — например, химическая технология, нефтегазовое дело, ядерная физика, биотехнологии.\n\nЕсли требуется просто «техническое» или просто «юридическое образование» — это не является узкой сферой."},
+  {name:"Холодные продажи", price:5000, tip:"По большей части касается специалистов в сфере продаж, которым нужно самостоятельно искать клиентов."},
+  {name:"Знание иностранного языка (1 шт.)", price:5000, tip:"Проставляется, если знание иностранного языка является требованием по данной вакансии. Можно включить до 3 языков — каждый учитывается отдельно.", counter:true, maxCount:3},
+  {name:"Наличие водительских прав", price:5000, tip:"Проставляется, если наличие водительских прав является требованием по данной вакансии."},
+  {name:"Собственный автомобиль", price:5000, tip:"Проставляется в том случае, если сотрудник должен иметь собственный автомобиль."},
+  {name:"Менее 500 кандидатов на вакансию (в открытом доступе)", price:5000, tip:"Проставляется если на рынке труда менее 500 кандидатов на данную вакансию.\n\nЕсли во время аудита окажется, что кандидатов более 500, стоимость скорректируется в меньшую сторону."},
+  {name:"Менее 300 кандидатов на вакансию (в открытом доступе)", price:10000, tip:"Проставляется если на рынке труда менее 300 кандидатов на данную вакансию.\n\nЕсли во время аудита окажется, что кандидатов более 300, стоимость скорректируется в меньшую сторону."},
+  {name:"В вакансии от 20 до 30 требований", price:7000, tip:"Проставляется, если в вакансии от 20 до 30 формальных требований к кандидату. Большое число требований сужает выборку и увеличивает объём работы."},
+];
+const EXTRA = [
+  {name:"Внесение корректировок в «портрет кандидата» во время подбора (1 раз)", price:0, free:true, checked:true, tip:"В том случае, если заказчику требуется проводить стажировку/тест кандидатов, подбор не будет остановлен даже после выхода одного из кандидатов на работу."},
+  {name:"Тест кандидата на рабочем месте до 7 календарных дней", price:0, free:true, tip:"Выход кандидата на первый рабочий день не будет означать завершение подбора. Подбор завершится, если пройдёт более 7 дней с момента выхода."},
+  {name:"Тест кандидата на рабочем месте от 7 до 14 календарных дней", price:10000, tip:"Мы замедлим либо остановим подбор (по возможности). Дополнительная оплата закладывается заранее, так как приостановка процесса требует дополнительных средств."},
+  {name:"Ускоренный поиск и подбор кандидатов", price:15000, tip:"Для срочных, «горящих» вакансий. Вакансия получает высокий приоритет, подключается дополнительный рекрутер."},
+  {name:"Проведение профильных тестовых заданий (все кандидаты)", price:15000, tip:"Проверка практических навыков кандидатов через выполнение тестовых заданий, имитирующих рабочие задачи."},
+  {name:"Проведение внутренних собеседований в видео-формате", price:10000, tip:"По стандарту интервью проводится в аудио-формате. С данной опцией — в видео-формате."},
+  {name:"Проверка кандидатов СБ (до 5 кандидатов на выбор заказчика)", price:5000, tip:"Проверяем кандидатов на уголовное/кредитное прошлое — подготавливаем отчёт по запросу."},
+  {name:"Проверка рекомендаций с предыдущих мест работы (до 5 кандидатов)", price:5000, tip:"Находим контакты руководителей с предыдущих мест работы, задаём вопросы и передаём информацию клиенту."},
+  {name:"Увеличение % формального соответствия для усложн. критериев до 100%", price:0, free:true, tip:"ТОЛЬКО ПО ПРОСЬБЕ ЗАКАЗЧИКА! Корректировка может быть внесена в договор."},
+  {name:"Увеличение % формального соответствия до 70%", price:7000, tip:"Чем выше порог, тем больше кандидатов необходимо рассмотреть на этапе резюме — это увеличивает объём работы и затраты на ресурсы."},
+  {name:"Увеличение срока рассмотрения кандидатов до 3 дней", price:0, free:true, tip:"Предоставляется бесплатно."},
+  {name:"Увеличение срока рассмотрения кандидатов до 4–5 дней", price:7000, tip:"Оплачивается дополнительно, так как удлиняет цикл подбора."},
+];
+const DISC_STAFF = [
+  {label:"1 сотрудник", disc:0},
+  {label:"2 сотрудника", disc:10},
+  {label:"3 сотрудника", disc:15},
+  {label:"4 сотрудника", disc:20},
+  {label:"5+ сотрудников", disc:25},
+];
+const DISC_VAC = [
+  {label:"2 вакансии", disc:5},
+  {label:"3 вакансии", disc:10},
+  {label:"4 вакансии", disc:15},
+  {label:"5+ вакансий", disc:20},
+];
+
+// ==================== ДАННЫЕ МАССОВОГО ====================
+const MASS_PRICES = { '1-4': { search: 3750, full: 6500 }, '5-8': { search: 4750, full: 7500 } };
+const MASS_TARIFF_NAMES = { search: 'Только поиск и подбор', full: 'Полный цикл найма' };
+
+const MASS_TARIFF_INCLUDES = {
+  search: '1. Экспертиза вакансии и подготовка подбора\n2. Маркетинг вакансии (120+ площадок)\n3. Поиск кандидатов (тёплый, холодный, хантинг)\n4. Отбор кандидатов по резюме (скрининг)\n5. Подбор кандидатов по требованиям\n6. Проведение собеседований с HR\n7. Подтверждение условий работы\n8. Предоставление полного профиля кандидата',
+  full:   '1–8. Всё из тарифа «Поиск и подбор»\n9. Поддержка и организация очных этапов\n10. Гарантия прохождения очных этапов\n11. Поддержка и организация трудоустройства\n12. Гарантия замены кандидата при увольнении (30 дней)',
+};
+// Скидка только за 100% предоплату
+function massGetDiscount(payMode, cands) { return payMode === 'full_prepay' && cands > 10 ? 0.05 : 0; }
+
+// ==================== ОБЩЕЕ ====================
+let currentId = null;
+let vacanciesData = {};
+let selectedVacancyIds = new Set();
+
+function safeReplaceState(url) {
+  try {
+    history.replaceState(null, '', url);
+  } catch (e) {
+    // В некоторых sandboxed-окружениях (например, превью artifacts) менять URL нельзя — просто игнорируем
+  }
+}
+let currentTab = 'vacancies';
+let salaryCounter = 0;
+
+function fmt(n) { return n.toLocaleString('ru-RU') + ' ₽'; }
+
+// Числительные в родительном падеже (мужской род — для «кандидата»)
+const NUM_WORDS_GEN_M = {1:'одного',2:'двух',3:'трёх',4:'четырёх',5:'пяти',6:'шести',7:'семи',8:'восьми',9:'девяти',10:'десяти',11:'одиннадцати',12:'двенадцати',13:'тринадцати',14:'четырнадцати',15:'пятнадцати',16:'шестнадцати',17:'семнадцати',18:'восемнадцати',19:'девятнадцати',20:'двадцати'};
+// «N (словом) кандидата/кандидатов» в родительном падеже (для «оставшихся N», «предоставления N» и т.п.)
+function candsGen(n) {
+  const word = NUM_WORDS_GEN_M[n] ? ` (${NUM_WORDS_GEN_M[n]})` : '';
+  const noun = (n % 10 === 1 && n % 100 !== 11) ? 'кандидата'
+    : ([2,3,4].includes(n % 10) && ![12,13,14].includes(n % 100)) ? 'кандидата'
+    : 'кандидатов';
+  return `${n}${word} ${noun}`;
+}
+// «оставшегося/оставшихся» согласование
+function remainWord(n) {
+  return (n % 10 === 1 && n % 100 !== 11) ? 'оставшегося' : 'оставшихся';
+}
+
+let vacancyMode = false; // true = внутри вакансии
+
+function openVacancy(id) {
+  currentId = id;
+  vacancyMode = true;
+  ['tab-expertise','tab-tochechny','tab-massovy'].forEach(t => {
+    document.getElementById(t).style.display = '';
+  });
+  loadData(id);
+  switchTab('expertise');
+}
+
+function closeVacancy() {
+  vacancyMode = false;
+  // Скрываем вкладки
+  ['tab-expertise','tab-tochechny','tab-massovy'].forEach(t => {
+    document.getElementById(t).style.display = 'none';
+  });
+  switchTab('vacancies');
+}
+
+function switchTab(tab) {
+  // Если кликаем «Вакансии» из режима вакансии — закрываем вакансию
+  if (tab === 'vacancies' && vacancyMode) {
+    closeVacancy();
+    return;
+  }
+  currentTab = tab;
+  ['vacancies','expertise','tochechny','massovy'].forEach(t => {
+    const sec = document.getElementById('section-' + t);
+    if (sec) sec.style.display = t === tab ? '' : 'none';
+    const btn = document.getElementById('tab-' + t);
+    if (btn) btn.classList.toggle('active', t === tab);
+  });
+  if (tab === 'vacancies') loadVacanciesList();
+}
+
+// ==================== ЭКСПЕРТИЗА ====================
+const COMP_INFO = {
+  '50-60': { label: 'Умеренная', cls: 'comp-low',   desc: 'Рынок достаточно открыт, кандидатов относительно много' },
+  '60-75': { label: 'Выше умеренной', cls: 'comp-mid',  desc: 'Конкуренция заметна, поиск потребует активных действий' },
+  '75-85': { label: 'Высокая', cls: 'comp-high',  desc: 'Кандидаты дефицитны, нужны нестандартные методы поиска' },
+  '85-95': { label: 'Крайне высокая', cls: 'comp-xhigh', desc: 'Острый дефицит кадров, хантинг и холодный поиск обязательны' },
+};
+
+const CO_HINTS = {
+  '':    'Выберите формат наименования компании клиента и введите название',
+  brand: 'Введите торговое название или бренд',
+  ip:    'Введите полное ФИО предпринимателя — например: Мален Кихрен Иванович',
+  ooo:   'Введите название без кавычек',
+  ao:    'Введите название без кавычек',
+  pao:   'Введите название без кавычек',
+  zao:   'Введите название без кавычек',
+  oao:   'Введите название без кавычек',
+  up:    'Введите название',
+  np:    'Введите название',
+  gup:   'Введите название',
+  mup:   'Введите название',
+  other: 'Введите название',
+};
+
+function updateCompany() {
+  const type = document.getElementById('exp-co-type').value;
+  const name = document.getElementById('exp-co-name').value.trim();
+  const hint = document.getElementById('exp-co-hint');
+  const result = document.getElementById('exp-co-result');
+
+  hint.textContent = CO_HINTS[type] || '';
+
+  let formatted = '—';
+  if (name) {
+    const upper = name.toUpperCase();
+    if (type === 'brand') formatted = `«${upper}»`;
+    else if (type === 'ip')  formatted = `ИП ${upper}`;
+    else if (type === 'ooo') formatted = `ООО «${upper}»`;
+    else if (type === 'ao')  formatted = `АО «${upper}»`;
+    else if (type === 'pao') formatted = `ПАО «${upper}»`;
+    else if (type === 'zao') formatted = `ЗАО «${upper}»`;
+    else if (type === 'oao') formatted = `ОАО «${upper}»`;
+    else if (type === 'up')  formatted = `УП «${upper}»`;
+    else if (type === 'np')  formatted = `НП «${upper}»`;
+    else if (type === 'gup') formatted = `ГУП «${upper}»`;
+    else if (type === 'mup') formatted = `МУП «${upper}»`;
+    else formatted = upper;
+  }
+  result.textContent = formatted;
+  result.classList.remove('filled'); // убираем при изменении
+  validateIP();
+  expEdit();
+  scheduleAutoSave();
+}
+
+function updateCompetition() {
+  const val = document.getElementById('exp-competition').value;
+  const badge = document.getElementById('exp-competition-badge');
+  if (val && COMP_INFO[val]) {
+    const info = COMP_INFO[val];
+    badge.innerHTML = `<span class="competition-badge ${info.cls}">${info.label}</span> <span style="font-size:12px;color:var(--text2);margin-left:6px">${info.desc}</span>`;
+  } else {
+    badge.innerHTML = '';
+  }
+  expEdit();
+}
+
+function toggleDeadlineCustom() {
+  const sel = document.getElementById('exp-deadline');
+  const custom = document.getElementById('exp-deadline-custom');
+  custom.style.display = sel.value === 'other' ? '' : 'none';
+  expEdit();
+}
+
+// Зарплата
+function addSalaryEntry(data) {
+  const id = salaryCounter++;
+  const container = document.getElementById('salary-entries');
+  const div = document.createElement('div');
+  div.className = 'salary-entry';
+  div.id = `salary-${id}`;
+  div.innerHTML = `
+    <button class="btn-remove-salary" onclick="removeSalaryEntry(${id})" title="Удалить">×</button>
+    <div class="salary-inner-amount">
+      <input type="number" id="salary-amount-${id}" placeholder="Сумма" value="${data?.amount||''}" oninput="expEdit()">
+      <select id="salary-cur-${id}" onchange="expEdit()">
+        <option value="RUB" ${(!data?.cur||data?.cur==='RUB')?'selected':''}>₽ RUB</option>
+        <option value="USD" ${data?.cur==='USD'?'selected':''}>$ USD</option>
+        <option value="EUR" ${data?.cur==='EUR'?'selected':''}>€ EUR</option>
+        <option value="CNY" ${data?.cur==='CNY'?'selected':''}>¥ CNY</option>
+        <option value="GBP" ${data?.cur==='GBP'?'selected':''}>£ GBP</option>
+        <option value="AED" ${data?.cur==='AED'?'selected':''}>AED</option>
+        <option value="TRY" ${data?.cur==='TRY'?'selected':''}>₺ TRY</option>
+        <option value="KZT" ${data?.cur==='KZT'?'selected':''}>₸ KZT</option>
+        <option value="BYN" ${data?.cur==='BYN'?'selected':''}>Br BYN</option>
+        <option value="UZS" ${data?.cur==='UZS'?'selected':''}>UZS</option>
+      </select>
+    </div>
+    <div class="salary-inner-note">
+      <textarea id="salary-note-${id}" placeholder="Примечание — например: для кандидатов из Москвы" oninput="expEdit()" rows="1" tabindex="-1">${data?.note||''}</textarea>
+    </div>`;
+  container.appendChild(div);
+  const amountInput = div.querySelector('input[type=number]');
+  const curSelect   = div.querySelector('select');
+  if (amountInput) {
+    amountInput.addEventListener('focus', () => {
+      amountInput.classList.remove('salary-amount-filled');
+      if (curSelect) curSelect.classList.remove('salary-cur-filled');
+    });
+    amountInput.addEventListener('blur', () => {
+      const filled = !!amountInput.value;
+      amountInput.classList.toggle('salary-amount-filled', filled);
+      if (curSelect) curSelect.classList.toggle('salary-cur-filled', filled);
+    });
+  }
+  const noteEl = div.querySelector('.salary-inner-note textarea');
+  if (noteEl) {
+    noteEl.addEventListener('focus', () => noteEl.classList.remove('salary-note-filled'));
+    noteEl.addEventListener('blur',  () => noteEl.classList.toggle('salary-note-filled', !!noteEl.value.trim()));
+  }
+  const ta = div.querySelector('textarea');
+  ta.addEventListener('input', () => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; });
+  if (data?.note) { setTimeout(() => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; }, 0); }
+  expEdit();
+}
+
+function removeSalaryEntry(id) {
+  const el = document.getElementById(`salary-${id}`);
+  if (el) el.remove();
+  expEdit();
+}
+
+function getSalaries() {
+  const entries = document.querySelectorAll('.salary-entry');
+  return Array.from(entries).map(el => {
+    const id = el.id.replace('salary-','');
+    const amount = parseFloat(document.getElementById(`salary-amount-${id}`)?.value) || 0;
+    const cur    = document.getElementById(`salary-cur-${id}`)?.value || 'RUB';
+    const note   = document.getElementById(`salary-note-${id}`)?.value || '';
+    return {amount, cur, note};
+  }).filter(s => s.amount > 0 || s.note);
+}
+
+function capitalizeFirst(el) {
+  const v = el.value;
+  if (v && v[0] !== v[0].toUpperCase()) el.value = v[0].toUpperCase() + v.slice(1);
+}
+
+function attachBlurListeners() {
+  ['exp-vname','exp-region','exp-candidates','exp-extra'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add('field-empty');
+    el.addEventListener('focus', () => { el.classList.remove('filled'); el.classList.remove('field-empty'); });
+    el.addEventListener('blur',  () => {
+      const v = !!el.value.trim();
+      el.classList.toggle('filled', v);
+      el.classList.toggle('field-empty', !v);
+    });
+  });
+  const coName = document.getElementById('exp-co-name');
+  if (coName) {
+    coName.classList.add('field-empty');
+    coName.addEventListener('focus', () => {
+      coName.classList.remove('filled');
+      coName.classList.remove('field-empty');
+      const result = document.getElementById('exp-co-result');
+      if (result) result.classList.remove('filled');
+    });
+    coName.addEventListener('blur', () => {
+      coName.classList.remove('filled');
+      coName.classList.toggle('field-empty', !coName.value.trim());
+      const result = document.getElementById('exp-co-result');
+      if (result) result.classList.toggle('filled', !!coName.value.trim());
+    });
+  }
+  ['exp-competition','exp-deadline'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.add('field-empty');
+    el.addEventListener('focus', () => { el.classList.remove('field-empty'); });
+    el.addEventListener('change', () => {
+      el.classList.toggle('filled', !!el.value);
+      el.classList.toggle('field-empty', !el.value);
+    });
+  });
+}
+
+function validateIP() {
+  const type = document.getElementById('exp-co-type').value;
+  const name = document.getElementById('exp-co-name').value.trim();
+  const errEl = document.getElementById('ip-error');
+  if (!errEl) return;
+  if (type === 'ip' && name) {
+    const words = name.trim().split(/\s+/);
+    // Полный формат: минимум 3 слова
+    const isFullFormat = words.length >= 3;
+    // Формат с инициалами: Фамилия + минимум одна часть с точкой (И. или И.О.)
+    const hasInitials = words.length >= 2 && words.slice(1).some(w => /^[А-ЯЁA-Zа-яёa-z]\./.test(w));
+    if (!isFullFormat && !hasInitials) {
+      errEl.textContent = 'У ИП должно быть заполнено полное ФИО (фамилия, имя и отчество) либо в формате Фамилия И.О.';
+      errEl.classList.add('visible');
+    } else {
+      errEl.classList.remove('visible');
+    }
+  } else {
+    errEl.classList.remove('visible');
+  }
+}
+
+function expEdit() {
+  calcTotal(); // обновляет название вакансии внутри сметы
+  scheduleAutoSave();
+}
+
+function getExpState() {
+  return {
+    vname:       document.getElementById('exp-vname')?.value || '',
+    coType:      document.getElementById('exp-co-type')?.value || '',
+    coName:      document.getElementById('exp-co-name')?.value || '',
+    region:      document.getElementById('exp-region')?.value || '',
+    candidates:  document.getElementById('exp-candidates')?.value || '',
+    competition: document.getElementById('exp-competition')?.value || '',
+    deadline:    document.getElementById('exp-deadline')?.value || '',
+    deadlineCustom: document.getElementById('exp-deadline-custom')?.value || '',
+    salaries:    getSalaries(),
+    extra:       document.getElementById('exp-extra')?.value || '',
+  };
+}
+
+function setExpState(s) {
+  if (!s) return;
+  if (s.vname !== undefined)      document.getElementById('exp-vname').value       = s.vname;
+  if (s.coType)                   document.getElementById('exp-co-type').value     = s.coType;
+  if (s.coName !== undefined)     document.getElementById('exp-co-name').value     = s.coName;
+  if (s.region !== undefined)     document.getElementById('exp-region').value      = s.region;
+  if (s.candidates !== undefined) document.getElementById('exp-candidates').value  = s.candidates;
+  if (s.competition)              document.getElementById('exp-competition').value = s.competition;
+  if (s.deadline)                 document.getElementById('exp-deadline').value    = s.deadline;
+  if (s.deadlineCustom !== undefined) { document.getElementById('exp-deadline-custom').value = s.deadlineCustom; toggleDeadlineCustom(); }
+  if (s.extra !== undefined)      document.getElementById('exp-extra').value       = s.extra;
+  // salaries
+  document.getElementById('salary-entries').innerHTML = '';
+  salaryCounter = 0;
+  (s.salaries || []).forEach(sal => addSalaryEntry(sal));
+  updateCompany();
+  updateCompetition();
+}
+
+// ==================== TIPS ====================
+let activeTip = null;
+function toggleSectionTip(id) {
+  const p = document.getElementById(id);
+  if (activeTip && activeTip !== p) activeTip.classList.remove('visible');
+  p.classList.toggle('visible');
+  activeTip = p.classList.contains('visible') ? p : null;
+}
+function showTip(id, btn) {
+  const p = document.getElementById(id);
+  if (activeTip && activeTip !== p) activeTip.classList.remove('visible');
+  p.classList.add('visible');
+  activeTip = p;
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.tip-btn') && !e.target.closest('.tip-popup')) {
+    document.querySelectorAll('.tip-popup.visible').forEach(p => p.classList.remove('visible'));
+    activeTip = null;
+  }
+});
+
+// ==================== ТОЧЕЧНЫЙ ====================
+function buildList(arr, prefix, containerId, exclusive) {
+  const container = document.getElementById(containerId);
+  const changeHandler = exclusive ? `enforceBaseExclusivity(this); onEdit()` : `onEdit()`;
+  arr.forEach((item, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'row-wrap';
+    const div = document.createElement('div');
+    div.className = 'row';
+    const tipHtml = item.tip ? `<button class="tip-btn" type="button" onclick="event.stopPropagation(); showTip('tip-${prefix}-${i}', this)">?</button>` : '';
+
+    if (item.counter) {
+      // Counter row (e.g. languages)
+      div.innerHTML = `<input type="checkbox" class="row-check" id="${prefix}-${i}" onchange="${changeHandler}" ${item.checked ? 'checked' : ''}><label for="${prefix}-${i}" class="row-name">${item.name.replace('(1 шт.)','').trim()} <div class="row-counter" style="display:inline-flex;vertical-align:middle;margin-left:6px"><button type="button" onclick="changeCounter('${prefix}',${i},-1)" id="${prefix}-${i}-minus" disabled>−</button><span id="${prefix}-${i}-label" style="font-size:12px;color:var(--text3);min-width:28px;text-align:center">1 шт.</span><button type="button" onclick="changeCounter('${prefix}',${i},1)" id="${prefix}-${i}-plus">+</button></div></label><span class="row-price" id="${prefix}-${i}-price">${fmt(item.price)}</span>${tipHtml}`;
+    } else {
+      div.innerHTML = `<input type="checkbox" class="row-check" id="${prefix}-${i}" onchange="${changeHandler}" ${item.checked ? 'checked' : ''}><label for="${prefix}-${i}" class="row-name">${item.name}</label><span class="row-price${item.free?' free':''}">${item.free ? 'Бесплатно' : fmt(item.price)}</span>${tipHtml}`;
+    }
+
+    wrap.appendChild(div);
+    if (item.tip) {
+      const popup = document.createElement('div');
+      popup.className = 'tip-popup';
+      popup.id = `tip-${prefix}-${i}`;
+      popup.textContent = item.tip;
+      wrap.appendChild(popup);
+    }
+    container.appendChild(wrap);
+  });
+}
+
+function enforceBaseExclusivity(currentEl) {
+  if (!currentEl || !currentEl.checked) return;
+  document.querySelectorAll('#base-list .row-check, #base-custom-list .row-check').forEach(cb => {
+    if (cb !== currentEl) cb.checked = false;
+  });
+}
+
+function changeCounter(prefix, i, delta) {
+  const item = prefix === 'b' ? BASE[i] : prefix === 'c' ? CRIT[i] : EXTRA[i];
+  const labelEl  = document.getElementById(`${prefix}-${i}-label`);
+  const minusBtn = document.getElementById(`${prefix}-${i}-minus`);
+  const plusBtn  = document.getElementById(`${prefix}-${i}-plus`);
+  const priceEl  = document.getElementById(`${prefix}-${i}-price`);
+  const checkbox = document.getElementById(`${prefix}-${i}`);
+  const currentCount = labelEl ? parseInt(labelEl.textContent) : 1;
+  let count = currentCount + delta;
+  count = Math.max(1, Math.min(item.maxCount || 3, count));
+  if (labelEl) labelEl.textContent = count + ' шт.';
+  minusBtn.disabled = count <= 1;
+  plusBtn.disabled  = count >= (item.maxCount || 3);
+  if (priceEl) priceEl.textContent = fmt(item.price * count);
+  if (count > 1) checkbox.checked = true;
+  onEdit();
+}
+
+function getCounterValue(prefix, i) {
+  const el = document.getElementById(`${prefix}-${i}-label`);
+  return el ? parseInt(el.textContent) : 1;
+}
+buildList(BASE,  'b', 'base-list', true);
+buildList(CRIT,  'c', 'crit-list');
+buildList(EXTRA, 'e', 'extra-list');
+
+function getChecked(arr, prefix) { return arr.filter((_, i) => document.getElementById(`${prefix}-${i}`)?.checked); }
+
+function getSummary() {
+  const hasPointSelection = !!(getChecked(BASE,'b').length || getCustomItems('base').length);
+  const staffCount = parseInt(document.getElementById('pt-staff')?.value) || 1;
+  const pointFinalEl = document.querySelector('#smeta-body .smeta-subtotal.final .smeta-subtotal-value');
+  const pointCost = hasPointSelection && pointFinalEl ? parseNum(pointFinalEl.textContent) : null;
+
+  // Тариф и скидка точечного
+  const mgrTariffVal = mgrTariff || 'max';
+  const tariffNames = { max: 'Максимальный · 100%', mid: 'Средний · 70% / 30%', min: 'Минимальный · 50% / 50%' };
+  const discPct = parseInt(document.getElementById('mgr-disc-custom')?.value) || 0;
+  const pointDiscount = discPct;
+
+  // Платежи из сметы точечного
+  const smetaItems = Array.from(document.querySelectorAll('#smeta-body .smeta-item')).map(el => ({
+    name: el.querySelector('.smeta-item-name')?.textContent || '',
+    price: el.querySelector('.smeta-item-price')?.textContent || ''
+  }));
+
+  const candsInputEl = document.getElementById('m-cands');
+  const massVisible = candsInputEl && parseInt(candsInputEl.value) > 0;
+  let massCands = null, massCostMin = null, massCostMax = null;
+  let massTariffName = null, massPayLabel = null, massPayMode = null;
+  if (massVisible) {
+    massCands = parseInt(candsInputEl.value) || null;
+    const level = document.getElementById('m-level')?.value || '1-4';
+    const ppc = MASS_PRICES[level][massModeSelected || 'search'];
+    massCostMin = ppc * massCands;
+    massCostMax = massCostMin;
+    const MASS_NAMES = { search: 'Только поиск и подбор', full: 'Полный цикл найма' };
+    massTariffName = MASS_NAMES[massModeSelected] || null;
+    const PAY_LABELS = { per10: 'Предоплата за каждые 10 кандидатов', per20: 'Предоплата за каждые 20 кандидатов', full_prepay: '100% предоплата', under10: `Предоплата за ${massCands} кандидатов` };
+    massPayLabel = PAY_LABELS[massTariffSelected] || null;
+    massPayMode = massTariffSelected;
+  }
+
+  return {
+    staffCount: hasPointSelection ? staffCount : null,
+    pointCost,
+    pointTariff: hasPointSelection ? mgrTariffVal : null,
+    pointTariffName: hasPointSelection ? (tariffNames[mgrTariffVal] || '') : null,
+    pointDiscount: hasPointSelection ? pointDiscount : null,
+    smetaItems: hasPointSelection ? smetaItems : [],
+    massCands,
+    massCostMin,
+    massCostMax,
+    massTariffName,
+    massPayLabel,
+    massPayMode,
+    massStaff: massCands ? (parseInt(document.getElementById('m-staff')?.value) || null) : null,
+    massLevel: massCands ? (document.getElementById('m-level')?.value || '1-4') : null,
+    massModeKey: massCands ? (massModeSelected || 'search') : null,
+  };
+}
+
+function parseNum(str) {
+  const n = parseFloat(String(str).replace(/[^\d.,-]/g, '').replace(',', '.'));
+  return isNaN(n) ? null : n;
+}
+
+function getState() {
+  return {
+    exp:   getExpState(),
+    ptStaff: document.getElementById('pt-staff')?.value || '1',
+    base:  BASE.map((_,i)  => document.getElementById(`b-${i}`)?.checked ? 1 : 0),
+    crit:  CRIT.map((_,i)  => document.getElementById(`c-${i}`)?.checked ? 1 : 0),
+    extra: EXTRA.map((_,i) => document.getElementById(`e-${i}`)?.checked ? 1 : 0),
+    mass:  { level: document.getElementById('m-level')?.value, staff: document.getElementById('m-staff')?.value, cands: document.getElementById('m-cands')?.value, ratio: document.getElementById('m-ratio')?.value },
+    tab:   currentTab,
+  };
+}
+
+function setState(state) {
+  if (!state) return;
+  if (state.exp) setExpState(state.exp);
+  if (state.ptStaff !== undefined) { document.getElementById('pt-staff').value = state.ptStaff || '1'; onStaffCountChange(); }
+  (state.base  || []).forEach((v,i) => { const el = document.getElementById(`b-${i}`);  if(el) el.checked = !!v; });
+  (state.crit  || []).forEach((v,i) => { const el = document.getElementById(`c-${i}`);  if(el) el.checked = !!v; });
+  (state.extra || []).forEach((v,i) => { const el = document.getElementById(`e-${i}`);  if(el) el.checked = !!v; });
+  if (state.mass) {
+    if (state.mass.level)  document.getElementById('m-level').value  = state.mass.level;
+    if (state.mass.staff)  document.getElementById('m-staff').value  = state.mass.staff;
+    if (state.mass.cands)  document.getElementById('m-cands').value  = state.mass.cands;
+    if (state.mass.ratio && document.getElementById('m-ratio')) document.getElementById('m-ratio').value = state.mass.ratio;
+  }
+}
+
+
+function getCustomItems(category) {
+  const container = document.getElementById(category + '-custom-list');
+  const items = [];
+  if (!container) return items;
+  container.querySelectorAll('.custom-row-inner').forEach(row => {
+    const checkbox = row.querySelector('.row-check');
+    const nameEl = row.querySelector('.custom-name');
+    const priceEl = row.querySelector('.custom-price');
+    if (checkbox?.checked) {
+      const name = nameEl?.value.trim();
+      const price = parseFloat(priceEl?.value) || 0;
+      if (name) items.push({ name, price });
+    }
+  });
+  return items;
+}
+
+function calcTotal() {
+  const bases  = getChecked(BASE,  'b');
+  const crits  = getChecked(CRIT,  'c');
+  const extras = getChecked(EXTRA, 'e');
+  const baseSum  = bases.reduce((s,x) => s + x.price, 0);
+  const critSum  = crits.reduce((s,x) => {
+    const i = CRIT.indexOf(x);
+    const count = x.counter ? getCounterValue('c', i) : 1;
+    return s + x.price * count;
+  }, 0);
+  const extraSum = extras.filter(x=>!x.free).reduce((s,x) => s + x.price, 0);
+  const baseCustomItems  = getCustomItems('base');
+  const critCustomItems  = getCustomItems('crit');
+  const extraCustomItems = getCustomItems('extra');
+  const baseCustomSum  = baseCustomItems.reduce((s,x) => s + x.price, 0);
+  const critCustomSum  = critCustomItems.reduce((s,x) => s + x.price, 0);
+  const extraCustomSum = extraCustomItems.reduce((s,x) => s + x.price, 0);
+  const subtotal = baseSum + critSum + extraSum + baseCustomSum + critCustomSum + extraCustomSum;
+  document.getElementById('total-final').textContent = fmt(subtotal);
+  // обновить summary в свёрнутом блоке
+  if (calcCollapsed) {
+    const s = document.getElementById('collapse-summary');
+    if (s) s.textContent = fmt(subtotal);
+  }
+  renderSmeta(bases, crits, extras, subtotal);
+  return subtotal;
+}
+
+// Enter в textarea с Ctrl/Cmd/Shift — вставка новой строки
+document.addEventListener('keydown', function(e) {
+  if (e.key !== 'Enter') return;
+  const el = e.target;
+  if (el.tagName === 'TEXTAREA' && (e.ctrlKey || e.metaKey || e.shiftKey)) {
+    e.preventDefault();
+    const start = el.selectionStart, end = el.selectionEnd;
+    el.value = el.value.slice(0, start) + '\n' + el.value.slice(end);
+    el.selectionStart = el.selectionEnd = start + 1;
+    el.dispatchEvent(new Event('input'));
+  }
+});
+setTimeout(() => {
+  const c1 = document.getElementById('collapse-chevron');
+  if (c1) c1.style.transform = 'rotate(180deg)';
+  const c2 = document.getElementById('mgr-chevron');
+  if (c2) c2.style.transform = 'rotate(180deg)';
+  const cb = document.getElementById('collapse-chevron-bottom');
+  if (cb) cb.style.transform = 'rotate(180deg)';
+  const mb = document.getElementById('mgr-chevron-bottom');
+  if (mb) mb.style.transform = 'rotate(180deg)';
+  const mc = document.getElementById('mass-params-chevron');
+  if (mc) mc.style.transform = 'rotate(180deg)';
+  const mmc = document.getElementById('mass-mgr-chevron');
+  if (mmc) mmc.style.transform = 'rotate(180deg)';
+}, 10);
+let mgrCollapsed = false;
+let mgrTariff = 'max';
+function toggleMgrCollapse() {
+  mgrCollapsed = !mgrCollapsed;
+  document.getElementById('mgr-collapse-body').classList.toggle('hidden', mgrCollapsed);
+  const hdr = document.querySelector('#mgr-collapse .section-header');
+  if (hdr) hdr.style.borderRadius = mgrCollapsed ? 'var(--radius)' : 'var(--radius) var(--radius) 0 0';
+  const chev = document.getElementById('mgr-chevron');
+  if (chev) chev.style.transform = mgrCollapsed ? 'rotate(0deg)' : 'rotate(180deg)';
+  const chevBot = document.getElementById('mgr-chevron-bottom');
+  if (chevBot) chevBot.style.transform = mgrCollapsed ? 'rotate(0deg)' : 'rotate(180deg)';
+  const summary = document.getElementById('mgr-summary');
+  if (summary) {
+    if (mgrCollapsed) {
+      const tariffLabels = { max: 'Максимальный · 100%', mid: 'Средний · 70% / 30%', min: 'Минимальный · 50% / 50%' };
+      const tariffStyles = {
+        max: 'color:#065f46;background:#f0faf4;border:1px solid #a8d9bc',
+        mid: 'color:#1e40af;background:#eff6ff;border:1px solid #93c5fd',
+        min: 'color:#5b21b6;background:#f5f3ff;border:1px solid #c4b5fd',
+      };
+      summary.textContent = tariffLabels[mgrTariff] || '—';
+      summary.style.cssText = `display:inline;font-size:13px;font-weight:700;padding:2px 10px;border-radius:20px;${tariffStyles[mgrTariff]}`;
+    } else {
+      summary.style.display = 'none';
+    }
+  }
+}
+
+let calcCollapsed = false;
+let massParamsCollapsed = false;
+let massMgrCollapsed = false;
+function toggleMassParamsCollapse() {
+  massParamsCollapsed = !massParamsCollapsed;
+  const body = document.getElementById('mass-params-body');
+  const hdr = document.querySelector('#mass-params-collapse .section-header');
+  const chev = document.getElementById('mass-params-chevron');
+  if (body) body.classList.toggle('hidden', massParamsCollapsed);
+  if (hdr) hdr.style.borderRadius = massParamsCollapsed ? 'var(--radius)' : 'var(--radius) var(--radius) 0 0';
+  if (chev) chev.style.transform = massParamsCollapsed ? 'rotate(0deg)' : 'rotate(180deg)';
+}
+function toggleMassMgrCollapse() {
+  massMgrCollapsed = !massMgrCollapsed;
+  const body = document.getElementById('mass-mgr-collapse-body');
+  const hdr = document.querySelector('#mass-mgr-collapse .section-header');
+  const chev = document.getElementById('mass-mgr-chevron');
+  if (body) body.classList.toggle('hidden', massMgrCollapsed);
+  if (hdr) hdr.style.borderRadius = massMgrCollapsed ? 'var(--radius)' : 'var(--radius) var(--radius) 0 0';
+  if (chev) chev.style.transform = massMgrCollapsed ? 'rotate(0deg)' : 'rotate(180deg)';
+}
+function toggleCalcCollapse() {
+  calcCollapsed = !calcCollapsed;
+  document.getElementById('calc-collapse-body').classList.toggle('hidden', calcCollapsed);
+  const hdr = document.querySelector('#calc-collapse .section-header');
+  if (hdr) hdr.style.borderRadius = calcCollapsed ? 'var(--radius)' : 'var(--radius) var(--radius) 0 0';
+  // Обе стрелки: вниз=0deg когда закрыто, вверх=180deg когда открыто
+  const chev = document.getElementById('collapse-chevron');
+  if (chev) chev.style.transform = calcCollapsed ? 'rotate(0deg)' : 'rotate(180deg)';
+  const bottomCircle = document.getElementById('collapse-chevron-bottom');
+  if (bottomCircle) bottomCircle.style.transform = calcCollapsed ? 'rotate(0deg)' : 'rotate(180deg)';
+  const summary = document.getElementById('collapse-summary');
+  if (calcCollapsed) {
+    const val = document.getElementById('total-final')?.textContent || '0 ₽';
+    summary.textContent = val;
+    summary.style.display = '';
+  } else {
+    summary.style.display = 'none';
+  }
+}
+
+function onEdit() { calcTotal(); scheduleAutoSave(); }
+
+function autoCheckCustom(checkboxId, nameId, priceId) {
+  const name  = document.getElementById(nameId)?.value.trim();
+  const price = document.getElementById(priceId)?.value;
+  const cb = document.getElementById(checkboxId);
+  if (!cb) return;
+  const bothFilled = !!(name && price);
+  const wasBothFilled = cb.dataset.wasFilled === '1';
+  if (bothFilled && !wasBothFilled) {
+    cb.checked = true;
+    if (cb.closest('#base-custom-list')) enforceBaseExclusivity(cb);
+  } else if (!bothFilled) {
+    cb.checked = false;
+  }
+  cb.dataset.wasFilled = bothFilled ? '1' : '0';
+}
+
+const customRowCounters = { base: 0, crit: 0, extra: 0 };
+const customPlaceholders = {
+  base:  'Своя позиция',
+  crit:  'Свой критерий',
+  extra: 'Своя услуга'
+};
+
+function addCustomRow(category, data) {
+  const id = customRowCounters[category]++;
+  const container = document.getElementById(category + '-custom-list');
+  if (!container) return id;
+  const checkId  = `${category}-custom-check-${id}`;
+  const nameId   = `${category}-custom-name-${id}`;
+  const priceId  = `${category}-custom-price-${id}`;
+  const changeHandler = category === 'base' ? `enforceBaseExclusivity(this); calcTotal()` : `calcTotal()`;
+  const div = document.createElement('div');
+  div.className = 'custom-row';
+  div.id = `${category}-custom-row-${id}`;
+  div.innerHTML = `
+    <div class="custom-row-inner">
+      <input type="checkbox" class="row-check" id="${checkId}" onchange="${changeHandler}" style="accent-color:#2d7a4f">
+      <input class="custom-name" type="text" id="${nameId}" placeholder="${customPlaceholders[category]}" oninput="autoCheckCustom('${checkId}','${nameId}','${priceId}'); calcTotal()">
+      <input class="custom-price" type="number" id="${priceId}" placeholder="Стоимость" oninput="autoCheckCustom('${checkId}','${nameId}','${priceId}'); calcTotal()">
+      <button class="btn-remove-custom" type="button" onclick="removeCustomRow('${category}', ${id})" title="Удалить">×</button>
+    </div>
+  `;
+  container.appendChild(div);
+  if (data) {
+    if (data.name)  div.querySelector('.custom-name').value = data.name;
+    if (data.price !== undefined && data.price !== null) div.querySelector('.custom-price').value = data.price;
+    if (data.checked) div.querySelector('.row-check').checked = true;
+  }
+  return id;
+}
+
+function removeCustomRow(category, id) {
+  const el = document.getElementById(`${category}-custom-row-${id}`);
+  if (el) el.remove();
+  calcTotal();
+}
+
+// ==================== МЕНЕДЖЕР ====================
+let mgrMagicP1 = null; // для среднего тарифа (70/30) — первая часть
+
+function selectManagerTariff(t) {
+  mgrTariff = t;
+  mgrMagicP1 = null;
+  scheduleAutoSave();
+  ['max','mid','min'].forEach(id => {
+    const el = document.getElementById('tc-' + id);
+    if (el) el.classList.toggle('selected', id === t);
+  });
+  onDiscountChange();
+}
+
+function getStdDiscount() {
+  const discStaff  = parseInt(document.getElementById('mgr-disc-staff')?.value)  || 0;
+  const discVac    = parseInt(document.getElementById('mgr-disc-vac')?.value)    || 0;
+  const volDisc    = Math.max(discStaff, discVac);
+  const tariffDisc = mgrTariff === 'max' ? 5 : 0;
+  return { volDisc, tariffDisc, total: Math.min(volDisc + tariffDisc, 50) };
+}
+
+function getDiscountLabel(volDisc, tariffDisc) {
+  const parts = [];
+  if (tariffDisc > 0) parts.push('скидка тарифа −' + tariffDisc + '%');
+  if (volDisc > 0) {
+    const staffVal = parseInt(document.getElementById('mgr-disc-staff')?.value) || 0;
+    const vacVal   = parseInt(document.getElementById('mgr-disc-vac')?.value)   || 0;
+    if (staffVal >= vacVal && staffVal > 0) parts.push('скидка за кол-во сотрудников −' + staffVal + '%');
+    else if (vacVal > 0) parts.push('скидка за кол-во вакансий −' + vacVal + '%');
+  }
+  return parts.length ? parts.join(' + ') : 'без скидки';
+}
+
+function onDiscountChange() {
+  mgrMagicP1 = null;
+  const std = getStdDiscount();
+  const input = document.getElementById('mgr-disc-custom');
+  if (input) input.value = std.total > 0 ? std.total : '';
+  calcTotal();
+}
+
+function staffCountToTier(n) {
+  if (n >= 5) return 25;
+  if (n === 4) return 20;
+  if (n === 3) return 15;
+  if (n === 2) return 10;
+  return 0;
+}
+
+function updateMinTariffAvailability(n) {
+  const available = n >= 2;
+  const card  = document.getElementById('tc-min');
+  const badge = document.getElementById('tc-min-restriction');
+  const radio = card ? card.querySelector('input[type=radio]') : null;
+  if (card)  card.classList.toggle('tc-locked', !available);
+  if (badge) badge.style.display = available ? 'none' : 'inline-block';
+  if (radio) radio.disabled = !available;
+  if (!available && mgrTariff === 'min') selectManagerTariff('mid');
+}
+
+function onStaffCountChange() {
+  const n = parseInt(document.getElementById('pt-staff')?.value) || 1;
+  const tier = staffCountToTier(n);
+  const hidden = document.getElementById('mgr-disc-staff');
+  if (hidden) hidden.value = String(tier);
+  const display = document.getElementById('mgr-disc-staff-display');
+  if (display) {
+    let label;
+    if (tier === 0) label = 'без скидки';
+    else if (n >= 5) label = `−${tier}% (5+ сотрудников)`;
+    else label = `−${tier}% (${n} ${n === 2 ? 'сотрудника' : n === 3 ? 'сотрудника' : n === 4 ? 'сотрудника' : 'сотрудников'})`;
+    display.textContent = label;
+    display.style.color = tier > 0 ? '#065f46' : 'var(--text2)';
+    display.style.background = tier > 0 ? '#f0faf4' : 'var(--surface2)';
+    display.style.borderColor = tier > 0 ? '#a8d9bc' : 'var(--border2)';
+  }
+  updateMinTariffAvailability(n);
+  onDiscountChange();
+}
+
+function beautifyMid(total) {
+  const p1raw = Math.round(total * 0.7);
+  mgrMagicP1 = Math.floor(p1raw / 100) * 100; // только вниз до ближайших 100
+  calcTotal();
+}
+function beautifyMin(total) {
+  const p1raw = Math.round(total * 0.5);
+  mgrMagicP1 = Math.floor(p1raw / 100) * 100;
+  calcTotal();
+}
+
+// ==================== МАССОВЫЙ ====================
+function updateCandsStyle() {
+  const input = document.getElementById('m-cands');
+  const warn  = document.getElementById('m-cands-warn');
+  if (!input) return;
+  const val = parseInt(input.value) || 0;
+  if (val < 10 && input.value !== '') {
+    input.style.borderColor = '#f5c6c0';
+    input.style.background  = '#fdf0ee';
+    if (warn) {
+      warn.style.background   = '#fdf0ee';
+      warn.style.border       = '1px solid #f5c6c0';
+      warn.style.borderRadius = '6px';
+      warn.style.padding      = '6px 10px';
+      warn.style.color        = '#c0392b';
+      warn.style.fontWeight   = '500';
+      warn.textContent = '⚠ Указано кол-во менее минимального (10 кандидатов) — необходимо согласование с руководством';
+    }
+  } else {
+    input.style.borderColor = '#f0e4a0';
+    input.style.background  = '#fffdf0';
+    if (warn) {
+      warn.style.background   = '';
+      warn.style.border       = '';
+      warn.style.borderRadius = '';
+      warn.style.padding      = '';
+      warn.style.color        = '#c0392b';
+      warn.style.fontWeight   = '';
+      warn.textContent = 'Можно указать любое кол-во, вне зависимости от рекомендуемого, но не менее 10 кандидатов';
+    }
+  }
+}
+
+let massTariffSelected = 'per10'; // способ оплаты
+let massModeSelected = 'search'; // тариф услуги
+
+const MASS_TARIFF_COLORS = {
+  search: { bg: '#f5f3ff', border: '#c4b5fd', text: '#5b21b6', badge_bg: '#ede9fe', badge_text: '#5b21b6' },
+  full:   { bg: '#f0faf4', border: '#a8d9bc', text: '#065f46', badge_bg: '#d1fae5', badge_text: '#065f46' },
+};
+
+function massPayBreakdown(total_cands, batch) {
+  const full_batches = Math.floor(total_cands / batch);
+  const remainder    = total_cands % batch;
+  const parts = [];
+  if (full_batches > 0) parts.push(`${full_batches} пак. × ${batch} канд.`);
+  if (remainder > 0)    parts.push(`1 пак. × ${remainder} канд.`);
+  return parts.join(' + ');
+}
+
+function massCalc() {
+  const staff  = parseInt(document.getElementById('m-staff').value) || 0;
+  const ratio  = parseInt(document.getElementById('m-ratio')?.value) || 4;
+  const level  = document.getElementById('m-level').value;
+
+  // Ползунок
+  const ratioVal = document.getElementById('m-ratio-val');
+  if (ratioVal) ratioVal.textContent = ratio;
+
+  // Рекомендация
+  const recDisp = document.getElementById('m-rec-display');
+  const recVal = staff > 0 ? Math.max(10, Math.round(staff * ratio)) : null;
+  if (recDisp) recDisp.textContent = recVal ? recVal + ' кандидатов' : '—';
+
+  const candsInput = document.getElementById('m-cands');
+  if (candsInput && recVal && !candsInput.dataset.manual) candsInput.value = recVal;
+  const cands = parseInt(candsInput?.value) || recVal || 0;
+
+  const result = document.getElementById('mass-result');
+  if (cands < 10 && cands > 0) {
+    // Рендерим смету с предупреждением и тариф, но без стандартного порядка оплаты
+    renderMassSmeta(level, staff, cands, massTariffSelected, 0);
+    renderMassModeSelect(level, cands);
+    renderMassTariffSelect(level, cands, 0, massModeSelected);
+    const payCard = document.getElementById('mass-pay-card');
+    if (payCard) payCard.style.display = '';
+    const vname = document.getElementById('exp-vname')?.value?.trim();
+    const mTitle = document.getElementById('m-smeta-title');
+    if (mTitle) mTitle.textContent = 'Массовый подбор — смета';
+    return;
+  }
+  if (cands === 0) {
+    const payCard = document.getElementById('mass-pay-card');
+    if (payCard) payCard.style.display = 'none';
+    return;
+  }
+
+  // Тариф услуги и способ оплаты — сначала тариф, потом оплата
+  renderMassModeSelect(level, cands);
+  renderMassTariffSelect(level, cands, massGetDiscount(massTariffSelected, cands), massModeSelected);
+  const payCard = document.getElementById('mass-pay-card');
+  if (payCard) payCard.style.display = '';
+
+  const massHintEl = document.getElementById('mass-hint');
+  if (massHintEl) massHintEl.style.display = 'none';
+
+  const disc = massGetDiscount(massTariffSelected, cands);
+  const ppc = MASS_PRICES[level][massModeSelected || 'search'];
+  const total = ppc * cands;
+  const totalDisc = Math.round(total * (1 - disc));
+  renderMassSmeta(level, staff, cands, massTariffSelected, massGetDiscount(massTariffSelected, cands));
+
+  const vname = document.getElementById('exp-vname')?.value?.trim();
+  const mTitle = document.getElementById('m-smeta-title');
+  if (mTitle) mTitle.textContent = 'Массовый подбор — смета';
+  scheduleAutoSave();
+}
+
+// ==================== СМЕТА ТОЧЕЧНЫЙ ====================
+function renderSmeta(bases, crits, extras, subtotal) {
+  const exp = getExpState();
+  const vname = exp.vname || 'Смета по вакансии';
+  document.getElementById('smeta-title').textContent = 'Смета по вакансии';
+  const staffCount = parseInt(document.getElementById('pt-staff')?.value) || 1;
+  let html = '';
+  // Экспертиза в смете
+  const coResult = document.getElementById('exp-co-result')?.textContent;
+  if (exp.vname || coResult !== '—') {
+    html += `<div class="smeta-section"><div class="smeta-sec-title">Вакансия</div>`;
+    const liveVname = document.getElementById('exp-vname')?.value?.trim() || exp.vname || '';
+    if (liveVname) html += `<div class="smeta-item"><span class="smeta-item-name">Название вакансии</span><span class="smeta-item-price">${liveVname}</span></div>`;
+    if (coResult && coResult !== '—') html += `<div class="smeta-item"><span class="smeta-item-name">Компания</span><span class="smeta-item-price">${coResult}</span></div>`;
+    if (exp.region) html += `<div class="smeta-item"><span class="smeta-item-name">Регион</span><span class="smeta-item-price">${exp.region}</span></div>`;
+    html += `<div class="smeta-item"><span class="smeta-item-name">Кол-во сотрудников</span><span class="smeta-item-price">${staffCount}</span></div>`;
+    html += `</div>`;
+  }
+  const baseCustomItems = getCustomItems('base');
+  if (bases.length || baseCustomItems.length) {
+    html += `<div class="smeta-section"><div class="smeta-sec-title">Базовая стоимость</div>`;
+    bases.forEach(x => { html += `<div class="smeta-item"><span class="smeta-item-name">${x.name}</span><span class="smeta-item-price">${fmt(x.price)}</span></div>`; });
+    baseCustomItems.forEach(x => { html += `<div class="smeta-item"><span class="smeta-item-name">${x.name}</span><span class="smeta-item-price">${fmt(x.price)}</span></div>`; });
+    html += `</div>`;
+  }
+  const critCustomItems = getCustomItems('crit');
+  if (crits.length || critCustomItems.length) {
+    html += `<div class="smeta-section"><div class="smeta-sec-title">Усложняющие критерии</div>`;
+    crits.forEach(x => {
+      const i = CRIT.indexOf(x);
+      const count = x.counter ? getCounterValue('c', i) : 1;
+      const name = x.counter ? x.name.replace('(1 шт.)', '').trim() + (count > 1 ? ` (${count} шт.)` : '') : x.name;
+      html += `<div class="smeta-item"><span class="smeta-item-name">${name}</span><span class="smeta-item-price">${fmt(x.price * count)}</span></div>`;
+    });
+    critCustomItems.forEach(x => { html += `<div class="smeta-item"><span class="smeta-item-name">${x.name}</span><span class="smeta-item-price">${fmt(x.price)}</span></div>`; });
+    html += `</div>`;
+  }
+  const ep = extras.filter(x=>!x.free), ef = extras.filter(x=>x.free);
+  const extraCustomItems = getCustomItems('extra');
+  if (ep.length || ef.length || extraCustomItems.length) {
+    html += `<div class="smeta-section"><div class="smeta-sec-title">Дополнительные услуги</div>`;
+    ep.forEach(x => { html += `<div class="smeta-item"><span class="smeta-item-name">${x.name}</span><span class="smeta-item-price">${fmt(x.price)}</span></div>`; });
+    ef.forEach(x => { html += `<div class="smeta-item"><span class="smeta-item-name">${x.name}</span><span class="smeta-item-price free">Бесплатно</span></div>`; });
+    extraCustomItems.forEach(x => { html += `<div class="smeta-item"><span class="smeta-item-name">${x.name}</span><span class="smeta-item-price">${fmt(x.price)}</span></div>`; });
+    html += `</div>`;
+  }
+
+  // Стоимость до скидки = цена за 1 сотрудника × кол-во сотрудников
+  const subtotalBeforeDiscount = Math.round(subtotal * staffCount);
+  const beforeLabel = staffCount > 1 ? `Стоимость до скидки (${staffCount} сотр.)` : 'Стоимость до скидки';
+  html += `<div class="smeta-subtotal"><span class="smeta-subtotal-label">${beforeLabel}</span><span class="smeta-subtotal-value">${fmt(subtotalBeforeDiscount)}</span></div>`;
+
+  // Расчёт скидки
+  const std = getStdDiscount();
+  const customInput = document.getElementById('mgr-disc-custom');
+  const customVal = customInput && customInput.value !== '' ? parseFloat(customInput.value) : std.total;
+  const usedDisc = isNaN(customVal) ? std.total : customVal;
+  const discLabel = getDiscountLabel(std.volDisc, std.tariffDisc);
+  const discStatus = usedDisc > std.total ? 'custom' : usedDisc < std.total ? 'lowered' : 'std';
+
+  if (usedDisc > 0) {
+    html += `<div class="smeta-item"><span class="smeta-item-name">Скидка −${usedDisc}%</span><span class="smeta-item-price">−${fmt(Math.round(subtotalBeforeDiscount * usedDisc / 100))}</span></div>`;
+    if (discStatus === 'custom')  html += `<div class="discount-custom-warn warn-high">⚠ Нестандартная скидка — необходимо согласование с руководством</div>`;
+    else if (discStatus === 'lowered') html += `<div class="discount-custom-warn warn-low">⚠ Скидка снижена вручную — скорректируйте слайд скидки в КП</div>`;
+    else html += `<div class="smeta-plain-note">Скидка: ${discLabel}</div>`;
+  }
+
+  // Обновить warn в разделе менеджера
+  const warnEl = document.getElementById('mgr-disc-warn');
+  if (warnEl) {
+    if (discStatus === 'custom')  { warnEl.className = 'discount-custom-warn warn-high'; warnEl.textContent = '⚠ Нестандартная скидка — необходимо согласование с руководством'; }
+    else if (discStatus === 'lowered') { warnEl.className = 'discount-custom-warn warn-low'; warnEl.textContent = '⚠ Скидка снижена вручную — скорректируйте слайд скидки в КП'; }
+    else { warnEl.className = usedDisc > 0 ? 'discount-custom-warn warn-std' : 'discount-custom-warn'; warnEl.textContent = usedDisc > 0 ? 'Скидка: ' + discLabel : ''; }
+  }
+
+  // Итого к оплате
+  const finalPrice = Math.round(subtotalBeforeDiscount * (1 - usedDisc / 100));
+  const finalLabel = staffCount > 1 ? `Итого к оплате (${staffCount} сотр.)` : 'Итого к оплате';
+  html += `<div class="smeta-subtotal final"><span class="smeta-subtotal-label">${finalLabel}</span><span class="smeta-subtotal-value">${fmt(finalPrice)}</span></div>`;
+
+  // Разделение платежей
+  html += renderPaymentSplit(finalPrice, staffCount);
+
+  document.getElementById('smeta-body').innerHTML = html;
+}
+
+function renderPaymentSplit(finalPrice, staffCount) {
+  let parts = '';
+  let guaranteeDays = '150';
+
+  if (mgrTariff === 'max') {
+    guaranteeDays = '365';
+    parts += `<div class="pay-part pp-green">
+        <div class="pp-label">100% предоплата</div>
+        <div class="pp-amount">${fmt(finalPrice)}</div>
+        <div class="pp-sub">До начала оказания услуг</div>
+      </div>`;
+  } else {
+    const mid = mgrTariff === 'mid';
+    guaranteeDays = mid ? '150' : '100';
+    const ratio = mid ? 0.7 : 0.5;
+    const pctLabel1 = mid ? '70%' : '50%';
+    const pctLabel2 = mid ? '30%' : '50%';
+    const colorClass = mid ? 'pp-blue' : 'pp-purple';
+    const p1 = (mgrMagicP1 !== null) ? mgrMagicP1 : Math.round(finalPrice * ratio);
+    const p2 = finalPrice - p1;
+    const needMagic = mgrMagicP1 === null && p1 % 100 !== 0;
+
+    parts += `<div class="pay-part pp-green">
+        <div class="pp-label">Общая стоимость</div>
+        <div class="pp-amount" style="color:#065f46">${fmt(finalPrice)}</div>
+      </div>`;
+    parts += `<div class="pay-part ${colorClass}">
+        <div class="pp-label">1-я часть (${pctLabel1})</div>
+        <div class="pp-amount" id="sm-p1">${fmt(p1)}</div>
+        <div class="pp-sub">Предоплата</div>
+        ${needMagic ? `<button class="btn-magic" onclick="beautify${mid ? 'Mid' : 'Min'}(${finalPrice})">✨ Сделать красиво</button>` : ''}
+      </div>`;
+
+    if (staffCount > 1) {
+      const perEmployee = Math.round(p2 / staffCount);
+      parts += `<div class="pay-part ${colorClass}">
+          <div class="pp-label">2-я часть (${pctLabel2})</div>
+          <div class="pp-amount" id="sm-p2">${fmt(perEmployee)}</div>
+          <div class="pp-sub">После подбора каждого сотрудника</div>
+          <div class="pp-note">Общая сумма 2-й части: ${fmt(p2)} (без разделения на платежи)</div>
+        </div>`;
+    } else {
+      parts += `<div class="pay-part ${colorClass}">
+          <div class="pp-label">2-я часть (${pctLabel2})</div>
+          <div class="pp-amount" id="sm-p2">${fmt(p2)}</div>
+          <div class="pp-sub">После завершения подбора</div>
+        </div>`;
+    }
+  }
+
+  const guarColor = mgrTariff === 'max' ? 'pp-green' : mgrTariff === 'mid' ? 'pp-blue' : 'pp-purple';
+  const guarTextColor = mgrTariff === 'max' ? '#065f46' : mgrTariff === 'mid' ? '#1e40af' : '#5b21b6';
+  parts += `<div class="pay-part ${guarColor}"><div class="pp-label">Гарантия</div><div class="pp-amount" style="font-size:16px;color:${guarTextColor}">${guaranteeDays} дней</div></div>`;
+
+  const colsClass = mgrTariff === 'max' ? '' : ' cols-4';
+  return `<div class="smeta-pay-label">Разделение платежей</div><div class="pay-parts${colsClass}">${parts}</div>`;
+}
+
+// ==================== СМЕТА МАССОВЫЙ ====================
+function renderMassModeSelect(level, cands) {
+  const sel = document.getElementById('mass-mode-select');
+  if (!sel) return;
+  const modes = [
+    { id: 'search', label: MASS_TARIFF_NAMES['search'] },
+    { id: 'full',   label: MASS_TARIFF_NAMES['full']   },
+  ];
+  const c_search = MASS_TARIFF_COLORS['search'];
+  const c_full   = MASS_TARIFF_COLORS['full'];
+  sel.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">` + modes.map(m => {
+    const isSel = massModeSelected === m.id;
+    const c = MASS_TARIFF_COLORS[m.id];
+    const ppc = MASS_PRICES[level][m.id];
+    return `<div onclick="massModeSelected='${m.id}';massCalc()" style="padding:1rem;border:2px solid ${isSel?c.border:'var(--border)'};border-radius:var(--radius-sm);background:${isSel?c.bg:'var(--surface)'};cursor:pointer;transition:border-color .15s,background .15s">
+      <div style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:${c.badge_bg};color:${c.badge_text};display:inline-block;margin-bottom:8px">${m.label}</div>
+      <div style="font-size:18px;font-weight:700;color:${isSel?c.text:'var(--text)'}">${fmt(ppc)}</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:2px">за кандидата</div>
+      ${cands>0?`<div style="font-size:12px;margin-top:6px;color:${isSel?c.text:'var(--text2)'}">Итого: ${fmt(ppc * cands)}</div>`:''}
+    </div>`;
+  }).join('') + `</div>`;
+
+  // Обновляем цвет карточки и заголовков под выбранный тариф
+  const selC = MASS_TARIFF_COLORS[massModeSelected || 'search'];
+  const payCard = document.getElementById('mass-pay-card');
+  if (payCard) {
+    payCard.style.display = '';
+  }
+  // заголовки нейтральные
+
+  // Показываем способ оплаты только если тариф выбран
+  const paySection = document.getElementById('mass-pay-section');
+  if (paySection) paySection.style.display = '';
+}
+
+function renderMassTariffSelect(level, cands, discount, forcedMode) {
+  const tariffSel = document.getElementById('mass-tariff-select');
+  if (!tariffSel) return;
+  const isUnder10 = cands > 0 && cands < 10;
+  const payModes = isUnder10 ? [
+    { id: 'under10', label: `Предоплата за ${cands} кандидатов`, batch: 0, avail: true },
+  ] : [
+    { id: 'per10', label: cands === 10 ? 'Предоплата за 10 кандидатов' : 'Предоплата за каждые 10 кандидатов', batch: 10, avail: cands >= 10 },
+    { id: 'per20', label: 'Предоплата за каждые 20 кандидатов', batch: 20, avail: cands >= 40 },
+    { id: 'full_prepay', label: '100% предоплата', batch: 0, avail: cands > 10 },
+  ];
+  if (isUnder10) massTariffSelected = 'under10';
+  else if (massTariffSelected === 'per20' && cands < 40) massTariffSelected = 'per10';
+  else if (massTariffSelected === 'under10') massTariffSelected = 'per10';
+  const currentMode = forcedMode || massModeSelected || 'search';
+  const ppc   = MASS_PRICES[level][currentMode];
+  const total = ppc * cands;
+  const mc    = {...MASS_TARIFF_COLORS[currentMode]};
+
+  tariffSel.innerHTML = payModes.filter(pm => pm.avail).map(pm => {
+    const sel = massTariffSelected === pm.id;
+    const fullBatches_lbl = pm.batch > 0 ? Math.floor(cands / pm.batch) : 0;
+    const rem_lbl = pm.batch > 0 ? cands % pm.batch : 0;
+    function pluralPay(n) {
+      if (n === 1) return '1 платёж';
+      if (n >= 2 && n <= 4) return n + ' платежа';
+      return n + ' платежей';
+    }
+    let sublabel;
+    if (pm.batch > 0) {
+      if (fullBatches_lbl <= 1) {
+        if (rem_lbl > 0 && fullBatches_lbl === 1) {
+          const plurC = (n) => n % 10 === 1 && n % 100 !== 11 ? n + ' кандидата' : [2,3,4].includes(n%10) && ![12,13,14].includes(n%100) ? n + ' кандидата' : n + ' кандидатов';
+          const labelText = `Предоплата за ${plurC(pm.batch)}, далее за ${plurC(rem_lbl)}`;
+          sublabel = `${fmt(ppc * pm.batch)} за ${plurC(pm.batch)} + ${fmt(ppc * rem_lbl)} за ${plurC(rem_lbl)}`;
+          pm = {...pm, label: labelText};
+        } else {
+          sublabel = `Предоплата за ${Math.min(cands, pm.batch)} кандидатов`;
+        }
+      } else {
+        sublabel = `${pluralPay(fullBatches_lbl)} по ${fmt(ppc * pm.batch)} за ${pm.batch} канд.` + (rem_lbl > 0 ? ` + последний ${fmt(ppc * rem_lbl)} за ${rem_lbl} канд.` : '');
+      }
+    } else {
+      sublabel = cands > 10 ? `Единый платёж ${fmt(Math.round(total * 0.95))} со скидкой` : `Единый платёж ${fmt(total)}`;
+    }
+    return `<label style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1.5px solid ${sel?mc.border:'var(--border)'};border-radius:var(--radius-sm);background:${sel?mc.bg:'var(--surface)'};cursor:pointer;transition:border-color .15s,background .15s" onclick="massTariffSelected='${pm.id}';massCalc()">
+      <input type="radio" name="mass-pay-radio" value="${pm.id}" ${sel?'checked':''} style="accent-color:${mc.text};flex-shrink:0;margin-top:3px">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="font-size:13px;font-weight:600;color:${sel?mc.text:'var(--text)'}">${pm.label}</div>
+          ${pm.id === 'full_prepay' && cands > 10 ? `<span style="font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px;background:#d1fae5;color:#065f46">скидка 5%</span>` : ''}
+        </div>
+        <div style="font-size:11.5px;color:var(--text2);margin-top:2px">${sublabel}</div>
+      </div>
+    </label>`;
+  }).join('');
+
+  // Детальный расчёт по выбранному варианту
+  const selMode = payModes.find(pm => pm.id === massTariffSelected);
+  tariffSel.innerHTML += '';
+}
+
+function renderMassSmeta(level, staff, cands, payMode, discount) {
+  const exp = getExpState();
+  const vname = exp.vname || 'Смета по вакансии';
+  document.getElementById('m-smeta-title').textContent = 'Массовый подбор — смета';
+  const discPct   = Math.round(discount * 100);
+  const levelName = level === '1-4' ? '1–4 требования' : '5–8 требований';
+  const mode      = massModeSelected || 'search';
+  const ppc       = MASS_PRICES[level][mode];
+  const total     = ppc * cands;
+  const totalDisc = Math.round(total * (1 - discount));
+  const c         = MASS_TARIFF_COLORS[mode];
+
+  // Способ оплаты
+  const pluralCandsFn = (n) => [2,3,4].includes(n%10) && ![12,13,14].includes(n%100) ? n+' кандидата' : n+(n%10===1&&n%100!==11?' кандидата':' кандидатов');
+  const payLabels = { per10: cands === 10 ? 'Предоплата за 10 кандидатов' : 'Предоплата за каждые 10 кандидатов', per20: 'Предоплата за каждые 20 кандидатов', full_prepay: '100% предоплата', under10: `Предоплата за ${pluralCandsFn(cands)}` };
+  const payLabel  = payLabels[payMode] || '—';
+  const batchSize = payMode === 'per20' ? 20 : payMode === 'per10' ? 10 : 0;
+  const breakdown = batchSize > 0 ? massPayBreakdown(cands, batchSize) : '—';
+  const prepayAmt = batchSize > 0 ? fmt(ppc * Math.min(batchSize, cands)) : fmt(totalDisc);
+
+  let html = '';
+  const tc = MASS_TARIFF_COLORS[mode];
+
+  // Параметры
+  html += `<div class="smeta-section"><div class="smeta-sec-title">Параметры заказа</div>`;
+  const massVname = document.getElementById('exp-vname')?.value?.trim() || '';
+  if (massVname) html += `<div class="smeta-item"><span class="smeta-item-name">Название вакансии</span><span class="smeta-item-price">${massVname}</span></div>`;
+  html += `<div class="smeta-item"><span class="smeta-item-name">Уровень требований</span><span class="smeta-item-price">${levelName}</span></div>`;
+  if (staff > 0) html += `<div class="smeta-item"><span class="smeta-item-name">Сотрудников</span><span class="smeta-item-price">${staff}</span></div>`;
+  const candsColor = cands < 10 ? 'color:#c0392b;font-weight:600' : '';
+  const candsWarn  = cands < 10 ? ' ⚠' : '';
+  html += `<div class="smeta-item"><span class="smeta-item-name" style="${candsColor}">Кандидатов в подбор${candsWarn}</span><span class="smeta-item-price" style="${candsColor}">${cands}</span></div>`;
+  html += `<div class="smeta-item"><span class="smeta-item-name">Тариф</span><span class="smeta-item-price">${MASS_TARIFF_NAMES[mode]}</span></div>`;
+  html += `<div class="smeta-item"><span class="smeta-item-name">Стоимость 1 кандидата</span><span class="smeta-item-price">${fmt(ppc)}</span></div>`;
+  html += `<div class="smeta-item"><span class="smeta-item-name">Итого</span><span class="smeta-item-price" style="font-weight:700">${fmt(total)}</span></div>`;
+  if (discount > 0) {
+    html += `<div class="smeta-item"><span class="smeta-item-name">Скидка за 100% предоплату −${discPct}%</span><span class="smeta-item-price" style="color:#065f46">−${fmt(Math.round(total*discount))}</span></div>`;
+    html += `<div class="smeta-item"><span class="smeta-item-name">Итого со скидкой</span><span class="smeta-item-price" style="color:#065f46;font-weight:700">${fmt(totalDisc)}</span></div>`;
+  }
+  html += `</div><hr class="smeta-divider">`;
+
+  // Порядок оплаты
+  html += `<div class="smeta-sec-title" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:.5rem">Порядок оплаты</div>`;
+  html += `<div class="smeta-item" style="margin-bottom:.5rem"><span class="smeta-item-name">Формат</span><span class="smeta-item-price">${payLabel}</span></div>`;
+  html += `<div class="smeta-sec-title" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin:.75rem 0 .4rem">Порядок платежей</div>`;
+  if (batchSize > 0 && cands >= 10) {
+    const fullBatches = Math.floor(cands / batchSize);
+    const remainder   = cands % batchSize;
+    const batchAmt    = ppc * batchSize;
+    // Формат описания — группируем одинаковые платежи
+    const totalPayments = fullBatches + (remainder > 0 ? 1 : 0);
+    // Первый платёж
+    html += `<div class="smeta-item"><span class="smeta-item-name">Платёж 1 · Платёж для начала оказания услуг</span><span class="smeta-item-price" style="font-weight:600">${fmt(batchAmt)}</span></div>`;
+    // Одинаковые платежи (2..fullBatches)
+    if (fullBatches > 1) {
+      const repeatCount = fullBatches - 1;
+      if (repeatCount === 1) {
+        html += `<div class="smeta-item"><span class="smeta-item-name">Платёж 2 · Платеж после предоставления ${candsGen(batchSize)}</span><span class="smeta-item-price" style="font-weight:600">${fmt(batchAmt)}</span></div>`;
+      } else {
+        html += `<div class="smeta-item"><span class="smeta-item-name">Платежи 2–${fullBatches} · Платеж после предоставления каждых ${candsGen(batchSize)}</span><span class="smeta-item-price" style="font-weight:600">${fmt(batchAmt)} × ${repeatCount}</span></div>`;
+      }
+    }
+    // Последний нестандартный платёж
+    if (remainder > 0) {
+      html += `<div class="smeta-item"><span class="smeta-item-name">Платёж ${totalPayments} · Платеж перед предоставлением ${remainWord(remainder)} ${candsGen(remainder)}</span><span class="smeta-item-price" style="font-weight:600">${fmt(ppc * remainder)}</span></div>`;
+    }
+    // Итого
+    html += `<div class="smeta-item" style="font-weight:700"><span class="smeta-item-name">Итого</span><span class="smeta-item-price" style="color:#065f46">${fmt(total)}</span></div>`;
+  } else if (cands < 10 && cands > 0) {
+    html += `<div class="smeta-item"><span class="smeta-item-name" style="color:#c0392b">Платёж 1 · Платёж для начала оказания услуг · за ${candsGen(cands)}</span><span class="smeta-item-price" style="color:#c0392b;font-weight:600">${fmt(ppc * cands)}</span></div>`;
+    html += `<div class="smeta-item"><span class="smeta-item-name" style="color:#c0392b;font-size:11.5px">⚠ Нестандартный объём — требуется согласование с руководством</span></div>`;
+  } else {
+    html += `<div class="smeta-item"><span class="smeta-item-name">Платёж 1 · Платёж для начала оказания услуг</span><span class="smeta-item-price" style="font-weight:600">${fmt(discount > 0 ? totalDisc : total)}</span></div>`;
+  }
+
+  document.getElementById('m-smeta-body').innerHTML = html;
+}
+
+// ==================== TOAST & STATUS ====================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+// ==================== API ====================
+async function api(params) {
+  const url = SCRIPT_URL + '?' + new URLSearchParams(params).toString();
+  const res = await fetch(url);
+  return res.json();
+}
+
+// ==================== АВТОСОХРАНЕНИЕ ====================
+let autoSaveTimer = null;
+let isSaving = false;        // идёт ли сейчас запрос на сервер
+let pendingSave = false;     // пришло ли новое изменение, пока шёл предыдущий запрос
+let suppressAutoSave = false; // временно отключает автосейв (при программном изменении полей)
+
+function scheduleAutoSave() {
+  if (suppressAutoSave) return;            // не сохраняем во время загрузки/сброса
+  if (!vacancyMode && !currentId) return;  // нет активной вакансии — нечего сохранять
+  setSaveIndicator('pending');
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(runAutoSave, 600);
+}
+
+async function runAutoSave() {
+  // если уже идёт сохранение — поставим в очередь и выйдем
+  if (isSaving) { pendingSave = true; return; }
+  isSaving = true;
+  setSaveIndicator('saving');
+  let ok = false;
+  try {
+    ok = await saveData(true);
+  } finally {
+    isSaving = false;
+  }
+  setSaveIndicator(ok ? 'saved' : 'error');
+  // если за время запроса были новые изменения — сохраняем ещё раз
+  if (pendingSave) {
+    pendingSave = false;
+    scheduleAutoSave();
+  }
+}
+
+function setSaveIndicator(state) {
+  const el = document.getElementById('save-indicator');
+  if (!el) return;
+  const map = {
+    pending: { t: 'Изменения не сохранены', c: 'si-pending' },
+    saving:  { t: 'Сохранение…',            c: 'si-saving' },
+    saved:   { t: 'Все изменения сохранены', c: 'si-saved' },
+    error:   { t: 'Ошибка сохранения',       c: 'si-error' },
+    idle:    { t: '',                        c: '' },
+  };
+  const m = map[state] || map.idle;
+  el.textContent = m.t;
+  el.className = 'save-indicator' + (m.c ? ' ' + m.c : '');
+  el.style.display = m.t ? 'inline-flex' : 'none';
+}
+
+// Возвращает true при успешном сохранении, false при ошибке
+async function saveData(silent) {
+  const exp = getExpState();
+  const vacancy = exp.vname || 'Без названия';
+  const data = JSON.stringify(getState());
+  const summary = JSON.stringify(getSummary());
+  try {
+    let result;
+    if (currentId) {
+      result = await api({action:'save', id:currentId, vacancy, author:'', data, summary});
+    } else {
+      if (window._creatingVacancy) {
+        pendingSave = true;
+        return false;
+      }
+      window._creatingVacancy = true;
+      // сбрасываем флаг через 10 сек на случай зависания
+      const createTimeout = setTimeout(() => { window._creatingVacancy = false; }, 10000);
+      try {
+        result = await api({action:'create', vacancy, author:'', data, summary, project_id: PROJECT_ID});
+      } finally {
+        window._creatingVacancy = false;
+        clearTimeout(createTimeout);
+      }
+      if (result && result.success) {
+        currentId = result.id;
+        safeReplaceState('?id=' + currentId);
+        document.querySelectorAll('.btn-copy-link').forEach(b => { b.style.display = 'inline-flex'; });
+      }
+    }
+    if (result && result.success) {
+      updateHeaderLink();
+      return true;
+    }
+    return false;
+  } catch(e) {
+    return false;
+  }
+}
+
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function vacCountToDiscount(n) {
+  if (n >= 5) return 20;
+  if (n === 4) return 15;
+  if (n === 3) return 10;
+  if (n === 2) return 5;
+  return 0;
+}
+
+function toggleVacancyActive(id, checked) {
+  if (checked) selectedVacancyIds.add(id); else selectedVacancyIds.delete(id);
+  // подсветить выбранные карточки по фактическому набору выбранных id
+  document.querySelectorAll('#vac-grid .vac-card:not(.vac-add)').forEach(card => {
+    const cb = card.querySelector('.vac-card-check input');
+    if (!cb) return;
+    const cardId = cb.getAttribute('onchange')?.match(/'([^']+)'/)?.[1];
+    const sel = cardId ? selectedVacancyIds.has(cardId) : cb.checked;
+    cb.checked = sel;
+    card.classList.toggle('is-selected', sel);
+  });
+  renderVacAggregate();
+}
+
+let vacMode = 'point'; // 'point' | 'mass'
+
+function setVacMode(mode) {
+  vacMode = mode;
+  const pBtn = document.getElementById('vac-mode-point');
+  const mBtn = document.getElementById('vac-mode-mass');
+  if (pBtn) {
+    pBtn.style.borderColor = mode === 'point' ? '#93c5fd' : 'var(--border)';
+    pBtn.style.background  = mode === 'point' ? '#eff6ff' : 'var(--surface)';
+    pBtn.style.color       = mode === 'point' ? '#1e40af' : 'var(--text2)';
+  }
+  if (mBtn) {
+    mBtn.style.borderColor = mode === 'mass' ? '#a8d9bc' : 'var(--border)';
+    mBtn.style.background  = mode === 'mass' ? '#f0faf4' : 'var(--surface)';
+    mBtn.style.color       = mode === 'mass' ? '#065f46' : 'var(--text2)';
+  }
+  const discBlock = document.getElementById('vac-disc-block');
+  if (discBlock) discBlock.style.display = mode === 'point' ? '' : 'none';
+  renderVacTable();
+}
+
+function renderVacTable() {
+  const ids = Array.from(selectedVacancyIds).filter(id => vacanciesData[id]);
+  const tableBody = document.getElementById('vac-table-body');
+  const tableTitle = document.getElementById('vac-table-title');
+  if (!tableBody) return;
+
+  const vacDiscRaw = document.getElementById('vac-disc-custom')?.value;
+  const vacDisc = (vacDiscRaw !== undefined && vacDiscRaw !== '' && !isNaN(parseFloat(vacDiscRaw)))
+    ? parseFloat(vacDiscRaw)
+    : vacCountToDiscount(ids.length);
+
+  if (vacMode === 'point') {
+    if (tableTitle) tableTitle.textContent = 'Итоговая смета по договору';
+    let html = '';
+    let totalSum = 0;
+    ids.forEach(id => {
+      const x = vacanciesData[id];
+      const s = x.summary || {};
+      if (!s.staffCount) return;
+      const staffDisc = staffCountToTier(s.staffCount);
+      const volDisc = Math.max(staffDisc, vacDisc);
+      const tariffBonus = s.pointTariff === 'max' ? 5 : 0;
+      const appliedDisc = Math.min(volDisc + tariffBonus, 50);
+      const cost = s.pointCost || 0;
+      const discAmt = Math.round(cost * appliedDisc / 100);
+      const final = cost - discAmt;
+      totalSum += final;
+      // Платежи из smetaItems
+      const payItems = (s.smetaItems || []).filter(i => i.name.includes('Платёж') || i.name.includes('платёж'));
+      const payHtml = payItems.length
+        ? payItems.map(i => `<div style="font-size:11px;color:var(--text2)">${i.name}: ${i.price}</div>`).join('')
+        : `<div style="font-size:11px;color:var(--text2)">${s.pointTariffName || '—'}</div>`;
+      const discParts = [];
+      if (volDisc > 0) {
+        discParts.push(staffDisc >= vacDisc && staffDisc > 0
+          ? `−${staffDisc}% (за кол-во сотрудников на 1 вакансию)`
+          : `−${vacDisc}% (за кол-во вакансий в 1 договоре)`);
+      }
+      if (tariffBonus > 0) {
+        discParts.push(`−${tariffBonus}% (за тариф «Максимальный»)`);
+      }
+      const discLabel = discParts.length ? discParts.join(' + ') : 'без скидки';
+      // Первый платёж из tariff
+      const pt1 = s.pointCost || 0;
+      const discAmt1 = Math.round(pt1 * appliedDisc / 100);
+      const finalCost = pt1 - discAmt1;
+      let firstPayVal = '—';
+      if (s.pointTariff === 'max') {
+        firstPayVal = fmt(finalCost); // 100% предоплата
+      } else if (s.pointTariff === 'mid') {
+        firstPayVal = fmt(Math.round(finalCost * 0.7)); // 70%
+      } else if (s.pointTariff === 'min') {
+        firstPayVal = fmt(Math.round(finalCost * 0.5)); // 50%
+      }
+      const isFullPrepay = s.pointTariff === 'max';
+      const rightCol = isFullPrepay
+        ? `<div style="font-size:10.5px;color:var(--text3);margin-bottom:2px">Итоговая стоимость</div>
+          <div style="font-size:14px;font-weight:700;color:#065f46">${fmt(final)}</div>`
+        : `<div style="font-size:10.5px;color:var(--text3);margin-bottom:2px">1-й платёж</div>
+          <div style="font-size:14px;font-weight:700;color:#065f46">${firstPayVal}</div>
+          <div style="font-size:10.5px;color:var(--text3);margin-top:10px;margin-bottom:2px">Итоговая стоимость</div>
+          <div style="font-size:14px;font-weight:700;color:#065f46">${fmt(final)}</div>`;
+      html += `<div style="border-bottom:1px solid var(--border);padding:.85rem 0;display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:700;margin-bottom:6px">${escapeHtml(x.name)}</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.8">
+            <div>Сотрудников: <b>${s.staffCount}</b></div>
+            <div>Тариф: <b>${s.pointTariffName || '—'}</b></div>
+            <div>Стоимость без скидок: <b>${fmt(cost)}</b></div>
+            <div>Скидки: <b>${discLabel}</b></div>
+          </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;padding-top:2px">
+          ${rightCol}
+        </div>
+      </div>`;
+    });
+    if (!html) html = '<div style="color:var(--text3);font-size:13px;padding:.5rem 0">Нет вакансий с точечным подбором</div>';
+    html += `<div class="smeta-subtotal final" style="margin-top:.75rem"><span class="smeta-subtotal-label">Итого по договору</span><span class="smeta-subtotal-value">${fmt(totalSum)}</span></div>`;
+    tableBody.innerHTML = html;
+  } else {
+    if (tableTitle) tableTitle.textContent = 'Массовый подбор — смета по договору';
+    let html = '';
+    let totalSum = 0;
+    ids.forEach(id => {
+      const x = vacanciesData[id];
+      const s = x.summary || {};
+      if (!s.massCands) return;
+      const cost = s.massCostMin || 0;
+      totalSum += cost;
+
+      const batchSize = s.massPayMode === 'per20' ? 20 : s.massPayMode === 'per10' ? 10 : 0;
+      const level = s.massLevel || '1-4';
+      const modeKey = s.massModeKey || 'search';
+      const ppc = (MASS_PRICES[level] || {})[modeKey] || 0;
+      const firstPayment = batchSize > 0 ? ppc * Math.min(batchSize, s.massCands) : cost;
+      const levelName = level === '1-4' ? '1–4 требования' : '5–8 требований';
+      const payLabel = s.massPayLabel || '—';
+
+      // Полный график платежей
+      let scheduleHtml = '';
+      if (batchSize > 0) {
+        const fullBatches = Math.floor(s.massCands / batchSize);
+        const remainder = s.massCands % batchSize;
+        const batchAmt = ppc * batchSize;
+        scheduleHtml += `<div style="font-size:11.5px;margin-top:1px">Платёж 1 · Платёж для начала оказания услуг — <b>${fmt(batchAmt)}</b></div>`;
+        if (fullBatches > 1) {
+          const repeatCount = fullBatches - 1;
+          const label = repeatCount === 1 ? `Платёж 2` : `Платежи 2–${fullBatches}`;
+          scheduleHtml += `<div style="font-size:11.5px;margin-top:1px">${label} · Платеж после каждых ${candsGen(batchSize)} — <b>${fmt(batchAmt)}</b>${repeatCount > 1 ? ` × ${repeatCount}` : ''}</div>`;
+        }
+        if (remainder > 0) {
+          scheduleHtml += `<div style="font-size:11.5px;margin-top:1px">Платёж ${fullBatches + 1} · Платеж после ${remainWord(remainder)} ${candsGen(remainder)} — <b>${fmt(ppc * remainder)}</b></div>`;
+        }
+      } else {
+        scheduleHtml = `<div style="font-size:11.5px;margin-top:1px">100% предоплата · единый платёж — <b>${fmt(cost)}</b></div>`;
+      }
+
+      html += `<div style="border-bottom:1px solid var(--border);padding:.85rem 0;display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:700;margin-bottom:6px">${escapeHtml(x.name)}</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.8">
+            <div>Сотрудников: <b>${s.massStaff || '—'}</b></div>
+            <div>Кандидатов: <b>${s.massCands}</b></div>
+            <div>Уровень: <b>${levelName}</b></div>
+            <div>Тариф: <b>${s.massTariffName || '—'}</b></div>
+            <div>Стоимость кандидата: <b>${fmt(ppc)}</b></div>
+          </div>
+          <div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:4px">График платежей</div>
+            <div style="color:var(--text2)">${scheduleHtml}</div>
+          </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;padding-top:2px">
+          ${batchSize === 0
+            ? `<div style="font-size:10.5px;color:var(--text3);margin-bottom:2px">Полная сумма</div>
+          <div style="font-size:14px;font-weight:700;color:#065f46">${fmt(cost)}</div>`
+            : `<div style="font-size:10.5px;color:var(--text3);margin-bottom:2px">1-й платёж</div>
+          <div style="font-size:14px;font-weight:700;color:#065f46">${fmt(firstPayment)}</div>
+          <div style="font-size:10.5px;color:var(--text3);margin-top:10px;margin-bottom:2px">Полная сумма</div>
+          <div style="font-size:14px;font-weight:700;color:#065f46">${fmt(cost)}</div>`}
+        </div>
+      </div>`;
+    });
+    if (!html) html = '<div style="color:var(--text3);font-size:13px;padding:.5rem 0">Нет вакансий с массовым подбором</div>';
+    html += `<div class="smeta-subtotal final" style="margin-top:.75rem"><span class="smeta-subtotal-label">Итого по договору</span><span class="smeta-subtotal-value">${fmt(totalSum)}</span></div>`;
+    tableBody.innerHTML = html;
+  }
+}
+
+function renderVacAggregate() {
+  const wrap = document.getElementById('vac-aggregate');
+  const ids = Array.from(selectedVacancyIds).filter(id => vacanciesData[id]);
+  if (!ids.length) { if (wrap) wrap.style.display = 'none'; return; }
+  if (wrap) wrap.style.display = '';
+
+  const stdDisc = vacCountToDiscount(ids.length);
+  const vacN = ids.length;
+  const vacWord = vacN % 10 === 1 && vacN % 100 !== 11 ? 'вакансия'
+    : [2,3,4].includes(vacN % 10) && ![12,13,14].includes(vacN % 100) ? 'вакансии'
+    : 'вакансий';
+  const discInp = document.getElementById('vac-disc-custom');
+  discInp.value = stdDisc > 0 ? stdDisc : '';
+  // Автодисплей скидки за вакансии
+  const autoDisp = document.getElementById('vac-disc-auto-display');
+  if (autoDisp) {
+    const vacDiscLabel = stdDisc > 0
+      ? (vacN >= 5 ? `−${stdDisc}% (5+ вакансий)` : `−${stdDisc}% (${vacN} ${vacWord})`)
+      : 'без скидки';
+    autoDisp.textContent = vacDiscLabel;
+    autoDisp.style.color = stdDisc > 0 ? '#065f46' : 'var(--text2)';
+    autoDisp.style.background = stdDisc > 0 ? '#f0faf4' : 'var(--surface2)';
+    autoDisp.style.borderColor = stdDisc > 0 ? '#a8d9bc' : 'var(--border2)';
+  }
+  // Подсветка поля и примечание
+  if (stdDisc > 0) {
+    discInp.style.borderColor = '#f0e4a0';
+    discInp.style.background = '#fffdf0';
+    // Собираем инфо по скидкам сотрудников
+    const affectedIds = Array.from(selectedVacancyIds).filter(id => vacanciesData[id]);
+    const willApply = affectedIds.filter(id => {
+      const s = vacanciesData[id].summary || {};
+      const sD = s.staffCount ? staffCountToTier(s.staffCount) : 0;
+      return sD < stdDisc;
+    });
+    const wontApply = affectedIds.filter(id => {
+      const s = vacanciesData[id].summary || {};
+      const sD = s.staffCount ? staffCountToTier(s.staffCount) : 0;
+      return sD >= stdDisc;
+    });
+    let noteText = '';
+    if (wontApply.length > 0 && willApply.length > 0) {
+      const willNames = willApply.map(id => `"${vacanciesData[id].name || 'Без названия'}"`).join(', ');
+      const wontNames = wontApply.map(id => `"${vacanciesData[id].name || 'Без названия'}"`).join(', ');
+      noteText = `⚠ Скидка за кол-во вакансий применится только к этим вакансиям: ${willNames}, так как в этих вакансиях: ${wontNames}, уже применена бо́льшая по размеру скидка за кол-во сотрудников.`;
+    } else if (wontApply.length === affectedIds.length) {
+      noteText = '⚠ Скидка за кол-во вакансий не применится ни к одной вакансии — по каждой из них уже действует бо́льшая или равная по размеру скидка за кол-во сотрудников.';
+    } else {
+      noteText = `Скидка за кол-во вакансий (${stdDisc}%) может быть применена ко всем ${willApply.length} вакансиям.`;
+    }
+    let noteEl = document.getElementById('vac-disc-note');
+    if (!noteEl) {
+      noteEl = document.createElement('div');
+      noteEl.id = 'vac-disc-note';
+      noteEl.style.cssText = 'font-size:11.5px;margin-top:6px;padding:6px 10px;border-radius:6px;font-weight:500';
+      discInp.closest('.discount-custom-wrap').appendChild(noteEl);
+    }
+    const isWarn = noteText.startsWith('⚠');
+    noteEl.style.background = isWarn ? '#fdf0ee' : '#f0faf4';
+    noteEl.style.color = isWarn ? '#c0392b' : '#065f46';
+    noteEl.textContent = noteText;
+    noteEl.style.display = '';
+    // Блокируем ввод если скидка не применяется ни к одной вакансии
+    const locked = wontApply.length === affectedIds.length;
+    setVacDiscLock(locked);
+  } else {
+    discInp.style.borderColor = '';
+    discInp.style.background = '';
+    const noteEl = document.getElementById('vac-disc-note');
+    if (noteEl) noteEl.style.display = 'none';
+    // Если выбрана только 1 вакансия — скидка за количество неприменима, блокируем поле
+    setVacDiscLock(ids.length < 2);
+  }
+
+  setVacMode(vacMode); // применяет кнопки и вызывает renderVacTable
+  renderVacAggregateTotals();
+}
+
+function setVacDiscLock(locked) {
+  // locked === true → скидка за количество неприменима (1 вакансия или у всех уже бо́льшая скидка)
+  // В этом случае просто скрываем секцию ручного ввода целиком
+  const wrap = document.getElementById('vac-disc-manual-wrap');
+  const discInp = document.getElementById('vac-disc-custom');
+  if (wrap) wrap.style.display = locked ? 'none' : '';
+  if (locked && discInp) discInp.value = ''; // сбрасываем значение, чтобы не влияло на расчёт
+}
+
+function renderVacAggregateTotals() {
+  const ids = Array.from(selectedVacancyIds).filter(id => vacanciesData[id]);
+  if (!ids.length) return;
+  const items = ids.map(id => vacanciesData[id]);
+  const subtotal = items.reduce((s,x) => s + (x.cost || 0), 0);
+  const stdDisc = vacCountToDiscount(ids.length);
+
+  const customInput = document.getElementById('vac-disc-custom');
+  const customVal = customInput && customInput.value !== '' ? parseFloat(customInput.value) : stdDisc;
+  const usedDisc = isNaN(customVal) ? stdDisc : customVal;
+  const discStatus = usedDisc > stdDisc ? 'custom' : usedDisc < stdDisc ? 'lowered' : 'std';
+
+  let noteHtml = '';
+  if (discStatus === 'custom') {
+    noteHtml += `<div class="discount-custom-warn warn-high">⚠ Нестандартная скидка — необходимо согласование с руководством</div>`;
+  } else if (discStatus === 'lowered') {
+    noteHtml += `<div class="discount-custom-warn warn-low">⚠ Скидка снижена вручную - необходимо изменить слайд со скидками в КП</div>`;
+  }
+  document.getElementById('vac-aggregate-discount-note').innerHTML = noteHtml;
+  // Пересчитать смету по вакансиям с учётом изменённой вручную скидки
+  renderVacTable();
+}
+let _vacListLoading = false;
+async function loadVacanciesList() {
+  if (_vacListLoading) return;
+  _vacListLoading = true;
+  const grid = document.getElementById('vac-grid');
+  const hint = document.getElementById('vac-loading-hint');
+  const addCard = document.getElementById('vac-add-card');
+  hint.textContent = 'Загрузка вакансий…';
+  hint.style.display = '';
+  try {
+    const result = await api({ action: 'list', project_id: PROJECT_ID });
+    if (!result.success) throw new Error(result.error || 'unknown');
+    const items = result.items || [];
+    grid.querySelectorAll('.vac-card:not(.vac-add)').forEach(el => el.remove());
+    vacanciesData = {};
+    items.forEach(item => {
+      const card = document.createElement('div');
+      const checked = selectedVacancyIds.has(item.id);
+      card.className = 'vac-card' + (checked ? ' is-selected' : '');
+      card.dataset.id = item.id;
+      card.onclick = (ev) => { if (!ev.target.closest('.vac-card-check') && !ev.target.closest('.vac-card-del')) openVacancy(item.id); };
+      let summary = null;
+      try { summary = item.summary ? JSON.parse(item.summary) : null; } catch(e) {}
+      let infoHtml = '';
+      let repCost = 0;
+      const hasPoint = summary && summary.staffCount != null && summary.pointCost != null;
+      const hasMass  = summary && summary.massCands != null && (summary.massCostMin != null || summary.massCostMax != null);
+
+      if (hasPoint) {
+        const ptName = { max: 'Максимальный 100%', mid: 'Средний 70% / 30%', min: 'Минимальный 50% / 50%' }[summary.pointTariff] || '';
+        const ptClass = { max: 'is-point-max', mid: 'is-point-mid', min: 'is-point-min' }[summary.pointTariff] || 'is-point-max';
+        infoHtml += `<div class="vac-card-info ${ptClass}">
+          <div class="vac-card-info-head">
+            <span class="vac-card-info-type">Точечный</span>
+            <span class="vac-card-info-meta">${summary.staffCount} сотр.</span>
+          </div>
+          ${ptName ? `<span class="vac-card-info-sub">${ptName}</span>` : ''}
+          ${summary.staffCount > 0 ? `<span class="vac-card-info-sub" style="color:var(--text3)">${fmt(Math.round(summary.pointCost / summary.staffCount))} / сотр.</span>` : ''}
+          <span class="vac-card-info-val" style="color:${summary.pointTariff==='mid'?'#1e40af':summary.pointTariff==='min'?'#5b21b6':'#065f46'}">${fmt(summary.pointCost)}</span>
+        </div>`;
+        repCost = summary.pointCost;
+      }
+      if (hasMass) {
+        const massVal = summary.massCostMin || summary.massCostMax;
+        const massFmt = summary.massTariffName || '';
+        const massClass = summary.massTariffName && summary.massTariffName.toLowerCase().includes('полный') ? 'is-mass-full' : 'is-mass-search';
+        infoHtml += `<div class="vac-card-info ${massClass}">
+          <div class="vac-card-info-head">
+            <span class="vac-card-info-type">Массовый</span>
+            <span class="vac-card-info-meta">${summary.massCands} канд.</span>
+          </div>
+          ${massFmt ? `<span class="vac-card-info-sub">${escapeHtml(massFmt)}</span>` : ''}
+          ${summary.massCands && massVal ? `<span class="vac-card-info-sub" style="color:var(--text3)">${fmt(Math.round(massVal / summary.massCands))} / канд.</span>` : ''}
+          <span class="vac-card-info-val">${fmt(massVal)}</span>
+        </div>`;
+        if (!repCost) repCost = massVal || 0;
+      }
+      if (!hasPoint && !hasMass) {
+        infoHtml = `<div class="vac-card-empty">Расчёт не заполнен</div>`;
+      }
+
+      vacanciesData[item.id] = { name: item.vacancy || 'Без названия', cost: repCost, summary: summary || {} };
+      if (checked) card.classList.add('selected');
+      const dateStr = (function(d){if(!d)return'';try{const dt=new Date(d);return dt.toLocaleDateString('ru-RU')+' '+dt.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})}catch(e){return d}})(item.modified);
+      card.innerHTML = `
+        <button class="vac-card-del" title="Удалить" onclick="event.stopPropagation(); deleteVacancy('${item.id}')">×</button>
+        <div class="vac-card-body">
+          <div class="vac-card-head">
+            <label class="vac-card-check" onclick="event.stopPropagation()" title="Выбрать для общей сметы">
+              <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleVacancyActive('${item.id}', this.checked)">
+            </label>
+            <div class="vac-card-name">${escapeHtml(item.vacancy || 'Без названия')}</div>
+          </div>
+          <div class="vac-card-info-wrap">${infoHtml}</div>
+        </div>
+        <div class="vac-card-foot">
+          <span class="vac-card-date">${dateStr ? 'Изменено: ' + dateStr : ''}</span>
+          <span class="vac-card-open">Открыть →</span>
+        </div>
+      `;
+      grid.insertBefore(card, addCard);
+    });
+    // убрать выбор у вакансий, которых больше нет в списке
+    Array.from(selectedVacancyIds).forEach(id => { if (!vacanciesData[id]) selectedVacancyIds.delete(id); });
+    renderVacAggregate();
+    hint.style.display = items.length ? 'none' : '';
+    if (!items.length) hint.textContent = 'Пока нет сохранённых вакансий — нажмите «+», чтобы создать первую';
+  } catch (e) {
+    hint.textContent = 'Не удалось загрузить список вакансий';
+    hint.style.display = '';
+  } finally {
+    _vacListLoading = false;
+  }
+}
+
+async function createNewVacancy() {
+  resetCalculator();
+  vacancyMode = true;
+  ['tab-expertise','tab-tochechny','tab-massovy'].forEach(t => {
+    document.getElementById(t).style.display = '';
+  });
+  switchTab('expertise');
+  // Сразу создаём запись, чтобы вакансия существовала и все правки писались в неё
+  setSaveIndicator('saving');
+  const ok = await saveData(true);
+  setSaveIndicator(ok ? 'saved' : 'error');
+}
+
+async function deleteVacancy(id) {
+  if (!confirm('Вы уверены, что хотите удалить вакансию?')) return;
+  try {
+    const result = await api({ action: 'delete', id });
+    if (result.success) {
+      if (currentId === id) resetCalculator();
+      loadVacanciesList();
+    } else {
+      showToast('Не удалось удалить');
+    }
+  } catch (e) {
+    showToast('Не удалось удалить');
+  }
+}
+
+function resetCalculator() {
+  suppressAutoSave = true;
+  try {
+  // Экспертиза
+  ['exp-vname','exp-region','exp-candidates','exp-deadline-custom','exp-co-name'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  const extraEl = document.getElementById('exp-extra'); if (extraEl) extraEl.value = '';
+  const coType = document.getElementById('exp-co-type');
+  if (coType) { coType.value = ''; coType.classList.add('field-empty'); coType.classList.remove('filled'); }
+  updateCompany();
+  const compEl = document.getElementById('exp-competition'); if (compEl) compEl.value = '';
+  updateCompetition();
+  const deadlineEl = document.getElementById('exp-deadline'); if (deadlineEl) deadlineEl.value = '';
+  toggleDeadlineCustom();
+  document.getElementById('ip-error')?.classList.remove('visible');
+
+  // Зарплаты
+  const salaryWrap = document.getElementById('salary-entries');
+  if (salaryWrap) salaryWrap.innerHTML = '';
+  salaryCounter = 0;
+  addSalaryEntry();
+
+  // Точечный: базовая стоимость / критерии / услуги
+  BASE.forEach((_,i) => { const el = document.getElementById(`b-${i}`); if (el) el.checked = false; });
+  CRIT.forEach((_,i) => {
+    const el = document.getElementById(`c-${i}`); if (el) el.checked = false;
+    const label = document.getElementById(`c-${i}-label`);
+    if (label) {
+      label.textContent = '1 шт.';
+      const priceEl = document.getElementById(`c-${i}-price`); if (priceEl) priceEl.textContent = fmt(CRIT[i].price);
+      const minus = document.getElementById(`c-${i}-minus`); if (minus) minus.disabled = true;
+      const plus  = document.getElementById(`c-${i}-plus`);  if (plus)  plus.disabled  = false;
+    }
+  });
+  EXTRA.forEach((_,i) => { const el = document.getElementById(`e-${i}`); if (el) el.checked = false; });
+
+  // Свои позиции (свободный ввод)
+  ['base','crit','extra'].forEach(cat => {
+    const list = document.getElementById(cat + '-custom-list');
+    if (list) list.innerHTML = '';
+  });
+
+  // Кол-во сотрудников и тариф
+  const staffEl = document.getElementById('pt-staff'); if (staffEl) staffEl.value = '1';
+  selectManagerTariff('max');
+  const discStaff = document.getElementById('mgr-disc-staff'); if (discStaff) discStaff.value = '0';
+  const discVac   = document.getElementById('mgr-disc-vac');   if (discVac)   discVac.value   = '0';
+  const discCustom = document.getElementById('mgr-disc-custom'); if (discCustom) discCustom.value = '';
+  onStaffCountChange();
+
+  // Массовый — полный сброс
+  const mStaff = document.getElementById('m-staff'); if (mStaff) mStaff.value = '';
+  const mCands = document.getElementById('m-cands'); if (mCands) { mCands.value = ''; mCands.dataset.manual = ''; }
+  const mRatio = document.getElementById('m-ratio'); if (mRatio) mRatio.value = '4';
+  const mRatioVal = document.getElementById('m-ratio-val'); if (mRatioVal) mRatioVal.textContent = '4';
+  const mLevel = document.getElementById('m-level'); if (mLevel) mLevel.value = '1-4';
+  const mRecDisp = document.getElementById('m-rec-display'); if (mRecDisp) mRecDisp.textContent = '—';
+  massModeSelected = 'search';
+  massTariffSelected = 'per10';
+  const mResult = document.getElementById('mass-result'); if (mResult) mResult.style.display = 'none';
+  const mPayCard = document.getElementById('mass-pay-card'); if (mPayCard) mPayCard.style.display = 'none';
+  const mSmetaBody = document.getElementById('m-smeta-body'); if (mSmetaBody) mSmetaBody.innerHTML = '';
+  updateCandsStyle();
+
+  currentId = null;
+  safeReplaceState(location.pathname);
+  updateHeaderLink();
+  document.querySelectorAll('.btn-copy-link').forEach(b => { b.style.display = 'none'; });
+  calcTotal();
+  massCalc();
+  } finally {
+    suppressAutoSave = false;
+  }
+  setSaveIndicator('idle');
+}
+
+function updateHeaderLink() {
+  const el = document.getElementById('header-link');
+  if (!el) return;
+  if (currentId) {
+    const url = location.href.split('?')[0] + '?project=' + PROJECT_ID + '&id=' + currentId;
+    el.href = url;
+    el.textContent = url.replace(/^https?:\/\//, '');
+    el.classList.remove('disabled');
+  } else {
+    el.removeAttribute('href');
+    el.textContent = 'Ссылка появится после сохранения';
+    el.classList.add('disabled');
+  }
+}
+
+// ==================== INIT ====================
+async function loadData(id) {
+  try {
+    const result = await api({action:'get', id});
+    if (result.success) {
+      currentId = result.id;
+      vacancyMode = true;
+      ['tab-expertise','tab-tochechny','tab-massovy'].forEach(t => {
+        const el = document.getElementById(t);
+        if (el) el.style.display = '';
+      });
+      let state = null;
+      try { state = JSON.parse(result.data); } catch(e) {}
+      suppressAutoSave = true;
+      try {
+        if (state) {
+          setState(state);
+        }
+        calcTotal();
+        massCalc();
+      } finally {
+        suppressAutoSave = false;
+      }
+      // Показываем вкладки (режим вакансии)
+      vacancyMode = true;
+      ['tab-expertise','tab-tochechny','tab-massovy'].forEach(t => {
+        const el = document.getElementById(t);
+        if (el) el.style.display = '';
+      });
+      const targetTab = (state && state.tab && state.tab !== 'vacancies') ? state.tab : 'expertise';
+      switchTab(targetTab);
+      updateHeaderLink();
+      document.querySelectorAll('.btn-copy-link').forEach(b => { b.style.display = 'inline-flex'; });
+      safeReplaceState('?id=' + currentId);
+      setSaveIndicator('saved');
+    } else {
+      calcTotal();
+    }
+  } catch(e) {
+    calcTotal();
+  }
+}
+
+// Enter -> переход к следующему полю
+document.addEventListener('keydown', function(e) {
+  if (e.key !== 'Enter') return;
+  const el = e.target;
+  if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'SELECT')) return;
+  if (el.tagName === 'INPUT' && ['checkbox','radio','button'].includes(el.type)) return;
+  if (el.closest('.custom-row-inner')) return; // поля свободного ввода в смете — без автоперехода
+  e.preventDefault();
+  // Поле суммы зарплаты — перескок к доп. информации
+  if (el.closest('.salary-entry')) {
+    document.getElementById('exp-extra')?.focus();
+    return;
+  }
+  const focusable = Array.from(document.querySelectorAll(
+    'input:not([type=checkbox]):not([type=radio]):not([disabled]), select:not([disabled]), textarea:not([disabled])'
+  )).filter(node => node.offsetParent !== null);
+  const idx = focusable.indexOf(el);
+  if (idx > -1 && idx < focusable.length - 1) {
+    const next = focusable[idx + 1];
+    next.focus();
+    if (typeof next.select === 'function' && next.tagName !== 'SELECT') next.select();
+  }
+});
+
+// Init salary with one empty entry
+addSalaryEntry();
+attachBlurListeners();
+onStaffCountChange();
+
+// Глобальный перехват любых изменений — гарантирует автосохранение
+// при изменении абсолютно любого поля (в т.ч. добавленного динамически).
+document.addEventListener('input', handleGlobalChange, true);
+document.addEventListener('change', handleGlobalChange, true);
+function handleGlobalChange(e) {
+  const t = e.target;
+  if (!t) return;
+  // реагируем только на реальные поля ввода
+  if (!['INPUT','SELECT','TEXTAREA'].includes(t.tagName)) return;
+  scheduleAutoSave();
+}
+
+const urlId = new URLSearchParams(location.search).get('id');
+if (urlId) {
+  loadData(urlId);
+} else {
+  calcTotal();
+  loadVacanciesList();
+}
+</script>
+</body>
+</html>
