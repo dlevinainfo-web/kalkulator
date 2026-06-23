@@ -16,13 +16,18 @@
   }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; min-height: 100vh; padding: 2rem 1rem 4rem; }
   .page { max-width: 760px; margin: 0 auto; }
-  .header { margin-bottom: 1.5rem; }
-  .save-indicator { margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 20px; transition: background .2s, color .2s; }
-  .save-indicator::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
-  .save-indicator.si-pending { background: #fef6e7; color: #b7791f; }
-  .save-indicator.si-saving  { background: #eef2ff; color: #4f56d3; }
-  .save-indicator.si-saved   { background: #ecfdf3; color: #1c8a4e; }
-  .save-indicator.si-error   { background: #fdf0ee; color: #c0392b; }
+  .header { margin-bottom: 1rem; }
+  .save-indicator { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 20px; border: 1px solid; transition: background .2s, color .2s; font-family: inherit; line-height: 1.4; white-space: nowrap; flex-shrink: 0; min-width: 0; }
+  .copy-link-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 20px; border: 1px solid #93c5fd; background: #eff6ff; color: #1e40af; cursor: pointer; font-family: inherit; transition: background .15s; line-height: 1.4; white-space: nowrap; flex-shrink: 0; min-width: 0; }
+  .copy-link-btn:hover { background: #dbeafe; }
+  .save-indicator::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+  .save-indicator.si-pending { background: #fef6e7; color: #b7791f; border-color: #f6d860; }
+  .save-indicator.si-saving  { background: #eef2ff; color: #4f56d3; border-color: #a5b4fc; }
+  .save-indicator.si-saved   { background: #ecfdf3; color: #1c8a4e; border-color: #6ee7b7; }
+  .save-indicator.si-error   { background: #fdf0ee; color: #c0392b; border-color: #fca5a5; }
+  .nav-btn { display: inline-flex; align-items: center; font-size: 12px; font-weight: 500; color: var(--text3); background: var(--surface2); border: 1px solid var(--border2); border-radius: 20px; padding: 4px 12px; cursor: pointer; transition: background .15s; font-family: inherit; line-height: 1.4; white-space: nowrap; flex-shrink: 0; min-width: 0; }
+  .nav-btn:hover { background: var(--surface); color: var(--text2); }
+  .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: .75rem; gap: .5rem; }
   .header-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: .5rem; display: inline-block; text-decoration: none; cursor: pointer; }
   .header-eyebrow:hover { text-decoration: underline; }
   .header-eyebrow.disabled { cursor: default; opacity: .55; pointer-events: none; text-transform: none; letter-spacing: normal; font-weight: 500; }
@@ -84,10 +89,10 @@
   .vac-card.is-selected .vac-card-del { opacity: 1; background: rgba(255,255,255,.9); color: var(--text3); border-color: rgba(255,255,255,.5); }
   .vac-card.is-selected .vac-card-del:hover { background: #fdf0ee; color: #c0392b; }
   .vac-card-top-stripe { display: none !important; }
-  .vac-add { background: var(--surface2); border: 2px dashed var(--border2); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; min-height: 172px; transition: border-color .18s, background .18s, transform .12s; }
+  .vac-add { background: var(--surface2); border: 2px dashed var(--border2); display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 10px; min-height: 172px; height: 100%; transition: border-color .18s, background .18s, transform .12s; padding: 0; text-align: center; }
   .vac-add::before { display: none; }
   .vac-add:hover { border-color: var(--accent); background: var(--accent-light); transform: translateY(-3px); }
-  .vac-add-plus { font-size: 30px; font-weight: 300; color: var(--text3); line-height: 1; width: 54px; height: 54px; border-radius: 50%; background: var(--surface); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); transition: color .18s, transform .18s; }
+  .vac-add-plus { font-size: 28px; font-weight: 300; color: var(--text3); line-height: 1; width: 54px; height: 54px; border-radius: 50%; background: var(--surface); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); transition: color .18s, transform .18s; padding-bottom: 2px; }
   .vac-add:hover .vac-add-plus { color: var(--accent); transform: scale(1.05); }
   .vac-add-label { font-size: 12.5px; font-weight: 650; color: var(--text2); }
   .vac-add:hover .vac-add-label { color: var(--accent); }
@@ -139,7 +144,15 @@
 
   /* Filled/empty field states */
   .field-wrap input.filled, .field-wrap select.filled, .field-wrap textarea.filled { border-color: #a8d9bc; background: #f8fdfb; }
+  input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus,
+  textarea:-webkit-autofill, select:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px #f8fdfb inset !important;
+    box-shadow: 0 0 0 1000px #f8fdfb inset !important;
+    -webkit-text-fill-color: var(--text) !important;
+    border-color: #a8d9bc !important;
+  }
   .field-wrap input.field-empty, .field-wrap select.field-empty, .field-wrap textarea.field-empty { border-color: #f0e4a0; background: #fffdf0; }
+  .field-wrap input:focus, .field-wrap select:focus, .field-wrap textarea:focus { border-color: var(--accent) !important; background: var(--surface) !important; }
   .company-result.filled { border: 1.5px solid #a8d9bc; background: #f0faf4; color: var(--text); font-weight: 600; }
   .salary-amount-filled { border-color: #a8d9bc !important; background: #f8fdfb !important; }
   .salary-note { color: var(--text3); }
@@ -338,15 +351,17 @@
   .smeta-top-badge { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: rgba(255,255,255,.85); }
   .smeta-body { padding: 1.25rem 1.5rem; }
   .smeta-section { margin-bottom: 1.25rem; }
-  .smeta-sec-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); margin-bottom: .5rem; }
+  .smeta-section .smeta-item:last-child { border-bottom: 1px solid var(--border); }
+  .smeta-sec-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); margin-top: 1.1rem; margin-bottom: .5rem; }
+  .smeta-sec-title:first-child { margin-top: 0; }
   .smeta-item-name { color: var(--text); flex: 1; padding-right: 12px; }
   .smeta-item-price { color: var(--text2); white-space: nowrap; }
   .smeta-item-price.free { color: var(--green); }
   .smeta-item { display: flex; justify-content: space-between; align-items: baseline; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; }
   .smeta-item:last-child { border-bottom: none; padding-bottom: 2px; }
   .smeta-divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
-  .smeta-subtotal { display: flex; justify-content: space-between; align-items: center; background: var(--surface2); border-radius: var(--radius-sm); padding: .9rem 1.1rem; margin-bottom: 1.5rem; }
-  .smeta-subtotal.final { background: #f0faf4; border: 1.5px solid #a8d9bc; margin-bottom: 0; }
+  .smeta-subtotal { display: flex; justify-content: space-between; align-items: center; background: var(--surface2); border-radius: var(--radius-sm); padding: .9rem 1.1rem; margin-top: .5rem; margin-bottom: 1.25rem; }
+  .smeta-subtotal.final { background: #f0faf4; border: 1.5px solid #a8d9bc; margin-bottom: 0; margin-top: 1.25rem; }
   .smeta-subtotal.final .smeta-subtotal-value { color: #065f46; font-size: 20px; }
   .smeta-subtotal.final .smeta-subtotal-label { color: #065f46; font-weight: 600; }
   .smeta-subtotal-label { font-size: 14px; color: var(--text2); }
@@ -395,9 +410,13 @@
 <body>
 <div class="page">
   <div class="header">
-    <a class="header-eyebrow disabled" id="header-link" target="_blank" rel="noopener">Ссылка появится после сохранения</a>
-    <h1>Калькулятор подбора</h1>
-    <div class="save-indicator" id="save-indicator" style="display:none"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+      <h1 style="margin:0">Калькулятор подбора</h1>
+      <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:nowrap;min-width:0;flex:1;justify-content:flex-end">
+        <div class="save-indicator" id="save-indicator" style="display:none"></div>
+        <button id="btn-copy-link" onclick="copyLink()" class="copy-link-btn" style="display:none"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Скопировать ссылку</button>
+      </div>
+    </div>
   </div>
 
   <!-- Tabs -->
@@ -410,15 +429,25 @@
 
   <!-- ===================== ВАКАНСИИ ===================== -->
   <div id="section-vacancies">
-    <div class="card" style="margin-bottom:1rem">
-      <div class="exp-section" style="margin-bottom:0">
-        <div class="card-title">Название компании</div>
-        <div class="field-wrap">
-          <div class="company-row">
-            <select id="exp-co-type" class="field-empty" onchange="updateCompany(); this.classList.toggle('field-empty', !this.value); this.classList.toggle('filled', !!this.value)">
-              <option value="">— Не выбрано —</option>
-            <option value="brand">Бренд</option>
-              <option value="ip">ИП</option>
+    <div class="collapse-card" id="vac-company-collapse" style="margin-bottom:1rem">
+      <div class="section-header" style="border-radius:var(--radius) var(--radius) 0 0">
+        <div class="section-header-left">
+          <div class="section-header-title">Компания</div>
+          <div class="section-header-sub">Информация о компании заказчика</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div class="section-header-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
+        </div>
+      </div>
+      <div class="collapse-body" id="vac-company-body" style="padding:0;border-top:none">
+        <div class="card" style="margin:0;border-radius:0 0 var(--radius) var(--radius);border-top:none;box-shadow:none">
+          <div class="exp-section" style="margin-bottom:0">
+            <div class="field-wrap">
+              <div class="company-row">
+                <select id="exp-co-type" class="field-empty" onchange="updateCompany(); this.classList.toggle('field-empty', !this.value); this.classList.toggle('filled', !!this.value)">
+                  <option value="">— Не выбрано —</option>
+                <option value="brand">Бренд</option>
+                  <option value="ip">ИП</option>
               <option value="ooo">ООО</option>
               <option value="ao">АО</option>
               <option value="pao">ПАО</option>
@@ -439,23 +468,49 @@
           <div class="company-result" id="exp-co-result">—</div>
         </div>
       </div>
-    </div>
+        </div><!-- end inner -->
+      </div><!-- end collapse-body -->
+    </div><!-- end vac-company-collapse -->
 
-    <div class="vac-grid" id="vac-grid">
-      <div class="vac-card vac-add" id="vac-add-card" onclick="createNewVacancy()">
-        <div class="vac-add-plus">+</div>
-        <div class="vac-add-label">Новая вакансия</div>
+    <!-- Раздел: Вакансии -->
+    <div class="collapse-card" style="margin-bottom:1rem">
+      <div class="section-header" style="border-radius:var(--radius) var(--radius) 0 0">
+        <div class="section-header-left">
+          <div class="section-header-title">Вакансии</div>
+          <div class="section-header-sub">Вакансии компании</div>
+        </div>
+        <div class="section-header-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+      </div>
+      <div class="collapse-body" style="padding:0;border-top:none">
+        <div style="padding:1rem">
+          <div class="vac-grid" id="vac-grid">
+            <div class="vac-card vac-add" id="vac-add-card" onclick="createNewVacancy()">
+              <div class="vac-add-plus">+</div>
+              <div class="vac-add-label">Новая вакансия</div>
+            </div>
+          </div>
+          <div class="vac-empty-hint" id="vac-loading-hint">Загрузка вакансий…</div>
+        </div>
       </div>
     </div>
-    <div class="vac-empty-hint" id="vac-loading-hint">Загрузка вакансий…</div>
 
-    <div id="vac-aggregate" style="display:none;margin-top:1.25rem">
-
-      <!-- Переключатель режима сметы -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem">
-        <button id="vac-mode-point" onclick="setVacMode('point')" style="height:44px;border:2px solid #93c5fd;border-radius:var(--radius-sm);background:#eff6ff;color:#1e40af;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s">Точечный подбор</button>
-        <button id="vac-mode-mass" onclick="setVacMode('mass')" style="height:44px;border:2px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text2);font-size:14px;font-weight:600;cursor:pointer;transition:all .15s">Массовый подбор</button>
+    <!-- Раздел: Смета по договору -->
+    <div class="collapse-card" id="vac-smeta-section" style="display:none">
+      <div class="section-header" style="border-radius:var(--radius) var(--radius) 0 0">
+        <div class="section-header-left">
+          <div class="section-header-title">Смета по договору</div>
+          <div class="section-header-sub">Расчёт сметы по выбранным вакансиям</div>
+        </div>
+        <div class="section-header-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg></div>
       </div>
+      <div class="collapse-body" style="padding:0;border-top:none">
+        <div style="padding:1rem">
+          <div id="vac-aggregate">
+            <!-- Переключатель режима сметы -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem">
+              <button id="vac-mode-point" onclick="setVacMode('point')" style="height:44px;border:2px solid #93c5fd;border-radius:var(--radius-sm);background:#eff6ff;color:#1e40af;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s">Точечный подбор</button>
+              <button id="vac-mode-mass" onclick="setVacMode('mass')" style="height:44px;border:2px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text2);font-size:14px;font-weight:600;cursor:pointer;transition:all .15s">Массовый подбор</button>
+            </div>
 
       <!-- Блок скидок (только точечный) -->
       <div id="vac-disc-block" class="card" style="margin-bottom:1rem">
@@ -491,15 +546,30 @@
       <div class="card" id="vac-table-card">
         <div class="card-title" style="margin-bottom:.75rem" id="vac-table-title">Детали по вакансиям</div>
         <div id="vac-table-body"></div>
-      </div>
+      </div><!-- end vac-table-card -->
 
-    </div>
+          </div><!-- end vac-aggregate -->
+        </div><!-- end padding -->
+      </div><!-- end collapse-body -->
+    </div><!-- end vac-smeta-section -->
   </div>
 
   <!-- ===================== ЭКСПЕРТИЗА ===================== -->
   <div id="section-expertise" style="display:none">
 
-    <div class="card">
+    <div class="collapse-card" id="exp-collapse">
+      <div class="section-header" style="border-radius:var(--radius) var(--radius) 0 0">
+        <div class="section-header-left">
+          <div class="section-header-title">Экспертиза вакансии</div>
+          <div class="section-header-sub">Как правило, заполняется аудитором</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div class="section-header-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg></div>
+        </div>
+      </div>
+      <div class="collapse-body" id="exp-collapse-body" style="padding:0;border-top:none">
+
+    <div class="card" style="margin:0;border-radius:0 0 var(--radius) var(--radius);border-top:none;box-shadow:none">
 
       <div class="exp-section">
         <div class="card-title">Название вакансии</div>
@@ -587,10 +657,18 @@
 
 
 
+    </div><!-- end inner -->
+      </div><!-- end collapse-body -->
+    </div><!-- end exp-collapse -->
+    <div class="nav-row">
+      <div style="flex:0 0 auto;visibility:hidden"><button class="nav-btn">Далее к точечному подбору →</button></div>
+      <div style="flex:1;display:flex;justify-content:center;align-items:center;gap:.5rem;min-width:0;overflow:hidden">
+        <div class="save-indicator si-saved copy-link-bottom" style="display:none">Все изменения сохранены</div>
+        <button onclick="copyLink()" class="copy-link-bottom copy-link-btn" style="display:none"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Скопировать ссылку</button>
+      </div>
+      <button class="nav-btn" onclick="switchTab('tochechny')">Далее к точечному подбору →</button>
     </div>
   </div>
-
-  <!-- ===================== ТОЧЕЧНЫЙ ===================== -->
   <div id="section-tochechny" style="display:none">
     <div class="calc-section">
 
@@ -658,17 +736,16 @@
 
       <!-- РАЗДЕЛ МЕНЕДЖЕРА -->
       <div class="collapse-card manager-section" id="mgr-collapse">
-        <button class="section-header" style="width:100%;text-align:left;cursor:pointer;border:none" onclick="toggleMgrCollapse()" type="button">
+        <div class="section-header" style="border-radius:var(--radius) var(--radius) 0 0">
           <div class="section-header-left">
             <div class="section-header-title">Тарифы и скидки</div>
             <div class="section-header-sub">Как правило, заполняется менеджером</div>
           </div>
           <div style="display:flex;align-items:center;gap:6px">
             <span id="mgr-summary" style="display:none;font-size:13px;font-weight:700;padding:2px 10px;border-radius:20px"></span>
-            <div id="mgr-chevron" style="transition:transform .2s;color:rgba(255,255,255,.6);display:flex;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
             <div class="section-header-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
           </div>
-        </button>
+        </div>
         <div class="collapse-body" id="mgr-collapse-body">
 
         <div class="card-title" style="margin-bottom:.75rem">Объём работы</div>
@@ -785,11 +862,6 @@
         </div>
 
         <!-- Кнопка свернуть снизу менеджер -->
-        <button class="collapse-bottom-btn" onclick="toggleMgrCollapse()" type="button">
-          <div class="collapse-bottom-circle" id="mgr-chevron-bottom">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-        </button>
       </div>
     </div>
 
@@ -805,6 +877,14 @@
     </div>
 
 
+    <div class="nav-row">
+      <button class="nav-btn" onclick="switchTab('expertise')">← Назад к экспертизе</button>
+      <div style="display:flex;align-items:center;gap:.5rem;min-width:0;overflow:hidden">
+        <div class="save-indicator si-saved copy-link-bottom" style="display:none">Все изменения сохранены</div>
+        <button onclick="copyLink()" class="copy-link-bottom copy-link-btn" style="display:none"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Скопировать ссылку</button>
+        <button class="nav-btn" onclick="switchTab('massovy')">Далее к массовому подбору →</button>
+      </div>
+    </div>
   </div>
 
   <!-- ===================== МАССОВЫЙ ===================== -->
@@ -812,16 +892,15 @@
     <div class="calc-section">
 
       <div class="collapse-card" id="mass-params-collapse">
-        <button class="section-header" style="width:100%;text-align:left;cursor:pointer;border:none" onclick="toggleMassParamsCollapse()" type="button">
+        <div class="section-header" style="border-radius:var(--radius) var(--radius) 0 0">
           <div class="section-header-left">
             <div class="section-header-title">Параметры заказа</div>
             <div class="section-header-sub">Как правило, заполняется аудитором</div>
           </div>
           <div style="display:flex;align-items:center;gap:6px">
-            <div id="mass-params-chevron" style="transition:transform .2s;color:rgba(255,255,255,.6);display:flex;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
             <div class="section-header-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg></div>
           </div>
-        </button>
+        </div>
         <div class="collapse-body" id="mass-params-body">
           <div class="card" style="margin-bottom:.75rem;box-shadow:none;border-color:var(--border)">
             <div class="field-wrap" style="margin-bottom:0">
@@ -836,16 +915,15 @@
       </div>
 
       <div class="collapse-card manager-section" id="mass-mgr-collapse">
-        <button class="section-header" style="width:100%;text-align:left;cursor:pointer;border:none" onclick="toggleMassMgrCollapse()" type="button">
+        <div class="section-header" style="border-radius:var(--radius) var(--radius) 0 0">
           <div class="section-header-left">
             <div class="section-header-title">Объём и оплата</div>
             <div class="section-header-sub">Как правило, заполняется менеджером</div>
           </div>
           <div style="display:flex;align-items:center;gap:6px">
-            <div id="mass-mgr-chevron" style="transition:transform .2s;color:rgba(255,255,255,.6);display:flex;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
             <div class="section-header-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
           </div>
-        </button>
+        </div>
         <div class="collapse-body" id="mass-mgr-collapse-body">
 
       <div class="card">
@@ -905,12 +983,21 @@
       <div class="smeta-top">
         <div class="section-header-left">
           <div class="smeta-top-title" id="m-smeta-title">Смета</div>
+          <div class="section-header-sub">Массовый подбор</div>
         </div>
         <div class="smeta-top-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg></div>
       </div>
       <div class="smeta-body" id="m-smeta-body"></div>
     </div>
 
+    <div class="nav-row">
+      <button class="nav-btn" onclick="switchTab('tochechny')">← Назад к точечному подбору</button>
+      <div style="flex:1;display:flex;justify-content:center;align-items:center;gap:.5rem;min-width:0;overflow:hidden">
+        <div class="save-indicator si-saved copy-link-bottom" style="display:none">Все изменения сохранены</div>
+        <button onclick="copyLink()" class="copy-link-bottom copy-link-btn" style="display:none"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Скопировать ссылку</button>
+      </div>
+      <div style="flex:0 0 auto;visibility:hidden"><button class="nav-btn">← Назад к точечному подбору</button></div>
+    </div>
 
   </div>
 
@@ -1030,7 +1117,7 @@ function candsGen(n) {
 }
 // «оставшегося/оставшихся» согласование
 function remainWord(n) {
-  return (n % 10 === 1 && n % 100 !== 11) ? 'оставшегося' : 'оставшихся';
+  return (n % 10 === 1 && n % 100 !== 11) ? 'последнего' : 'последних';
 }
 
 let vacancyMode = false; // true = внутри вакансии
@@ -1041,12 +1128,14 @@ function openVacancy(id) {
   ['tab-expertise','tab-tochechny','tab-massovy'].forEach(t => {
     document.getElementById(t).style.display = '';
   });
-  loadData(id);
-  switchTab('expertise');
+  loadData(id); // loadData сам вызовет switchTab с сохранённой вкладкой
 }
 
 function closeVacancy() {
   vacancyMode = false;
+  // Re-apply field-empty to selects that show 'not selected'
+  const coType = document.getElementById('exp-co-type');
+  if (coType && !coType.value) { coType.classList.add('field-empty'); coType.classList.remove('filled'); }
   // Скрываем вкладки
   ['tab-expertise','tab-tochechny','tab-massovy'].forEach(t => {
     document.getElementById(t).style.display = 'none';
@@ -1068,6 +1157,8 @@ function switchTab(tab) {
     if (btn) btn.classList.toggle('active', t === tab);
   });
   if (tab === 'vacancies') loadVacanciesList();
+  // Прокрутка вверх при переходе
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ==================== ЭКСПЕРТИЗА ====================
@@ -1223,7 +1314,7 @@ function attachBlurListeners() {
     const el = document.getElementById(id);
     if (!el) return;
     el.classList.add('field-empty');
-    el.addEventListener('focus', () => { el.classList.remove('filled'); el.classList.remove('field-empty'); });
+    el.addEventListener('focus', () => { el.classList.remove('filled'); el.classList.remove('field-empty'); }); // removed on focus, restored on blur
     el.addEventListener('blur',  () => {
       const v = !!el.value.trim();
       el.classList.toggle('filled', v);
@@ -1250,7 +1341,6 @@ function attachBlurListeners() {
     const el = document.getElementById(id);
     if (!el) return;
     el.classList.add('field-empty');
-    el.addEventListener('focus', () => { el.classList.remove('field-empty'); });
     el.addEventListener('change', () => {
       el.classList.toggle('filled', !!el.value);
       el.classList.toggle('field-empty', !el.value);
@@ -1562,6 +1652,10 @@ setTimeout(() => {
   if (mc) mc.style.transform = 'rotate(180deg)';
   const mmc = document.getElementById('mass-mgr-chevron');
   if (mmc) mmc.style.transform = 'rotate(180deg)';
+  const vcc = document.getElementById('vac-company-chevron');
+  if (vcc) vcc.style.transform = 'rotate(180deg)';
+  const ecc = document.getElementById('exp-collapse-chevron');
+  if (ecc) ecc.style.transform = 'rotate(180deg)';
 }, 10);
 let mgrCollapsed = false;
 let mgrTariff = 'max';
@@ -1592,6 +1686,26 @@ function toggleMgrCollapse() {
 }
 
 let calcCollapsed = false;
+let vacCompanyCollapsed = false;
+let expCollapsed = false;
+function toggleVacCompanyCollapse() {
+  vacCompanyCollapsed = !vacCompanyCollapsed;
+  const body = document.getElementById('vac-company-body');
+  const hdr = document.querySelector('#vac-company-collapse .section-header');
+  const chev = document.getElementById('vac-company-chevron');
+  if (body) body.classList.toggle('hidden', vacCompanyCollapsed);
+  if (hdr) hdr.style.borderRadius = vacCompanyCollapsed ? 'var(--radius)' : 'var(--radius) var(--radius) 0 0';
+  if (chev) chev.style.transform = vacCompanyCollapsed ? 'rotate(0deg)' : 'rotate(180deg)';
+}
+function toggleExpCollapse() {
+  expCollapsed = !expCollapsed;
+  const body = document.getElementById('exp-collapse-body');
+  const hdr = document.querySelector('#exp-collapse .section-header');
+  const chev = document.getElementById('exp-collapse-chevron');
+  if (body) body.classList.toggle('hidden', expCollapsed);
+  if (hdr) hdr.style.borderRadius = expCollapsed ? 'var(--radius)' : 'var(--radius) var(--radius) 0 0';
+  if (chev) chev.style.transform = expCollapsed ? 'rotate(0deg)' : 'rotate(180deg)';
+}
 let massParamsCollapsed = false;
 let massMgrCollapsed = false;
 function toggleMassParamsCollapse() {
@@ -1681,6 +1795,9 @@ function addCustomRow(category, data) {
     if (data.name)  div.querySelector('.custom-name').value = data.name;
     if (data.price !== undefined && data.price !== null) div.querySelector('.custom-price').value = data.price;
     if (data.checked) div.querySelector('.row-check').checked = true;
+  } else {
+    // Новая строка — сразу фокус на название
+    setTimeout(() => div.querySelector('.custom-name')?.focus(), 0);
   }
   return id;
 }
@@ -1848,7 +1965,10 @@ function massCalc() {
   if (recDisp) recDisp.textContent = recVal ? recVal + ' кандидатов' : '—';
 
   const candsInput = document.getElementById('m-cands');
-  if (candsInput && recVal && !candsInput.dataset.manual) candsInput.value = recVal;
+  if (candsInput && recVal && !candsInput.dataset.manual) {
+    candsInput.value = recVal;
+    updateCandsStyle(); // сбрасываем красный цвет если авто
+  }
   const cands = parseInt(candsInput?.value) || recVal || 0;
 
   const result = document.getElementById('mass-result');
@@ -1861,7 +1981,7 @@ function massCalc() {
     if (payCard) payCard.style.display = '';
     const vname = document.getElementById('exp-vname')?.value?.trim();
     const mTitle = document.getElementById('m-smeta-title');
-    if (mTitle) mTitle.textContent = 'Массовый подбор — смета';
+    if (mTitle) mTitle.textContent = 'Смета';
     return;
   }
   if (cands === 0) {
@@ -1887,7 +2007,7 @@ function massCalc() {
 
   const vname = document.getElementById('exp-vname')?.value?.trim();
   const mTitle = document.getElementById('m-smeta-title');
-  if (mTitle) mTitle.textContent = 'Массовый подбор — смета';
+  if (mTitle) mTitle.textContent = 'Смета';
   scheduleAutoSave();
 }
 
@@ -1938,31 +2058,57 @@ function renderSmeta(bases, crits, extras, subtotal) {
     html += `</div>`;
   }
 
-  // Стоимость до скидки = цена за 1 сотрудника × кол-во сотрудников
-  const subtotalBeforeDiscount = Math.round(subtotal * staffCount);
-  const beforeLabel = staffCount > 1 ? `Стоимость до скидки (${staffCount} сотр.)` : 'Стоимость до скидки';
-  html += `<div class="smeta-subtotal"><span class="smeta-subtotal-label">${beforeLabel}</span><span class="smeta-subtotal-value">${fmt(subtotalBeforeDiscount)}</span></div>`;
-
   // Расчёт скидки
   const std = getStdDiscount();
   const customInput = document.getElementById('mgr-disc-custom');
   const customVal = customInput && customInput.value !== '' ? parseFloat(customInput.value) : std.total;
   const usedDisc = isNaN(customVal) ? std.total : customVal;
   const discLabel = getDiscountLabel(std.volDisc, std.tariffDisc);
-  const discStatus = usedDisc > std.total ? 'custom' : usedDisc < std.total ? 'lowered' : 'std';
+  // discStatus: сравниваем с std.total, но если вручную ввели 0 при std>0 — это lowered
+  const manuallyZero = customInput && customInput.value !== '' && usedDisc === 0 && std.total > 0;
+  const discStatus = usedDisc > std.total ? 'custom' : (usedDisc < std.total ? 'lowered' : 'std');
+
+  // Стоимость до скидки — только если скидка есть или предусмотрена
+  const subtotalBeforeDiscount = Math.round(subtotal * staffCount);
+  if (std.total > 0) {
+    const beforeLabel = staffCount > 1 ? `Стоимость до скидки (${staffCount} сотр.)` : 'Стоимость до скидки';
+    html += `<div class="smeta-subtotal"><span class="smeta-subtotal-label">${beforeLabel}</span><span class="smeta-subtotal-value">${fmt(subtotalBeforeDiscount)}</span></div>`;
+  }
 
   if (usedDisc > 0) {
-    html += `<div class="smeta-item"><span class="smeta-item-name">Скидка −${usedDisc}%</span><span class="smeta-item-price">−${fmt(Math.round(subtotalBeforeDiscount * usedDisc / 100))}</span></div>`;
+    html += `<div class="smeta-sec-title" style="margin-top:.75rem">Итоговая стоимость</div>`;
+    if (discStatus === 'custom' || discStatus === 'lowered') {
+      html += `<div class="smeta-item"><span class="smeta-item-name">Итоговая скидка −${usedDisc}%</span><span class="smeta-item-price" style="color:#065f46">−${fmt(Math.round(subtotalBeforeDiscount * usedDisc / 100))}</span></div>`;
+    } else {
+      if (std.tariffDisc > 0) {
+        const tariffAmt = Math.round(subtotalBeforeDiscount * std.tariffDisc / 100);
+        html += `<div class="smeta-item"><span class="smeta-item-name">Скидка тарифа «Максимальный» −${std.tariffDisc}%</span><span class="smeta-item-price" style="color:#065f46">−${fmt(tariffAmt)}</span></div>`;
+      }
+      if (std.volDisc > 0) {
+        const discStaff = parseInt(document.getElementById('mgr-disc-staff')?.value) || 0;
+        const discVac   = parseInt(document.getElementById('mgr-disc-vac')?.value)   || 0;
+        const volAmt = Math.round(subtotalBeforeDiscount * std.volDisc / 100);
+        if (discStaff >= discVac && discStaff > 0) {
+          const n = parseInt(document.getElementById('pt-staff')?.value) || 1;
+          const nLabel = n >= 5 ? '5+ сотрудников' : `${n} ${n===1?'сотрудник':n<5?'сотрудника':'сотрудников'}`;
+          html += `<div class="smeta-item"><span class="smeta-item-name">Скидка за кол-во сотрудников (${nLabel}) −${discStaff}%</span><span class="smeta-item-price" style="color:#065f46">−${fmt(volAmt)}</span></div>`;
+        } else if (discVac > 0) {
+          html += `<div class="smeta-item"><span class="smeta-item-name">Скидка за кол-во вакансий в договоре −${discVac}%</span><span class="smeta-item-price" style="color:#065f46">−${fmt(volAmt)}</span></div>`;
+        }
+      }
+    }
     if (discStatus === 'custom')  html += `<div class="discount-custom-warn warn-high">⚠ Нестандартная скидка — необходимо согласование с руководством</div>`;
-    else if (discStatus === 'lowered') html += `<div class="discount-custom-warn warn-low">⚠ Скидка снижена вручную — скорректируйте слайд скидки в КП</div>`;
-    else html += `<div class="smeta-plain-note">Скидка: ${discLabel}</div>`;
+    else if (discStatus === 'lowered') html += `<div class="discount-custom-warn warn-low">⚠ Скидка снижена вручную — скорректируйте слайд со скидками в КП</div>`;
+  } else if (manuallyZero) {
+    // Скидка предусмотрена, но вручную выставлена в 0
+    html += `<div class="discount-custom-warn warn-low" style="margin-top:.5rem">⚠ Скидка снижена вручную до 0% — скорректируйте слайд со скидками в КП</div>`;
   }
 
   // Обновить warn в разделе менеджера
   const warnEl = document.getElementById('mgr-disc-warn');
   if (warnEl) {
     if (discStatus === 'custom')  { warnEl.className = 'discount-custom-warn warn-high'; warnEl.textContent = '⚠ Нестандартная скидка — необходимо согласование с руководством'; }
-    else if (discStatus === 'lowered') { warnEl.className = 'discount-custom-warn warn-low'; warnEl.textContent = '⚠ Скидка снижена вручную — скорректируйте слайд скидки в КП'; }
+    else if (discStatus === 'lowered') { warnEl.className = 'discount-custom-warn warn-low'; warnEl.textContent = '⚠ Скидка снижена вручную — скорректируйте слайд со скидками в КП'; }
     else { warnEl.className = usedDisc > 0 ? 'discount-custom-warn warn-std' : 'discount-custom-warn'; warnEl.textContent = usedDisc > 0 ? 'Скидка: ' + discLabel : ''; }
   }
 
@@ -1986,7 +2132,7 @@ function renderPaymentSplit(finalPrice, staffCount) {
     parts += `<div class="pay-part pp-green">
         <div class="pp-label">100% предоплата</div>
         <div class="pp-amount">${fmt(finalPrice)}</div>
-        <div class="pp-sub">До начала оказания услуг</div>
+        ${staffCount > 1 ? `<div class="pp-sub">${fmt(Math.round(finalPrice / staffCount))} / сотрудник</div>` : ''}
       </div>`;
   } else {
     const mid = mgrTariff === 'mid';
@@ -2002,11 +2148,12 @@ function renderPaymentSplit(finalPrice, staffCount) {
     parts += `<div class="pay-part pp-green">
         <div class="pp-label">Общая стоимость</div>
         <div class="pp-amount" style="color:#065f46">${fmt(finalPrice)}</div>
+        ${staffCount > 1 ? `<div class="pp-sub">${fmt(Math.round(finalPrice / staffCount))} / сотрудник</div>` : ''}
       </div>`;
     parts += `<div class="pay-part ${colorClass}">
         <div class="pp-label">1-я часть (${pctLabel1})</div>
         <div class="pp-amount" id="sm-p1">${fmt(p1)}</div>
-        <div class="pp-sub">Предоплата</div>
+        <div class="pp-sub">Для начала оказания услуг</div>
         ${needMagic ? `<button class="btn-magic" onclick="beautify${mid ? 'Mid' : 'Min'}(${finalPrice})">✨ Сделать красиво</button>` : ''}
       </div>`;
 
@@ -2135,7 +2282,7 @@ function renderMassTariffSelect(level, cands, discount, forcedMode) {
 function renderMassSmeta(level, staff, cands, payMode, discount) {
   const exp = getExpState();
   const vname = exp.vname || 'Смета по вакансии';
-  document.getElementById('m-smeta-title').textContent = 'Массовый подбор — смета';
+  // m-smeta-title фиксирован в HTML
   const discPct   = Math.round(discount * 100);
   const levelName = level === '1-4' ? '1–4 требования' : '5–8 требований';
   const mode      = massModeSelected || 'search';
@@ -2166,26 +2313,28 @@ function renderMassSmeta(level, staff, cands, payMode, discount) {
   html += `<div class="smeta-item"><span class="smeta-item-name" style="${candsColor}">Кандидатов в подбор${candsWarn}</span><span class="smeta-item-price" style="${candsColor}">${cands}</span></div>`;
   html += `<div class="smeta-item"><span class="smeta-item-name">Тариф</span><span class="smeta-item-price">${MASS_TARIFF_NAMES[mode]}</span></div>`;
   html += `<div class="smeta-item"><span class="smeta-item-name">Стоимость 1 кандидата</span><span class="smeta-item-price">${fmt(ppc)}</span></div>`;
-  html += `<div class="smeta-item"><span class="smeta-item-name">Итого</span><span class="smeta-item-price" style="font-weight:700">${fmt(total)}</span></div>`;
+  html += `</div>`;
+
+  // Итого — как заголовок раздела (без hr перед ним)
+  html += `<div class="smeta-sec-title">Итого</div>`;
+  html += `<div class="smeta-item"><span class="smeta-item-name">Стоимость без скидки</span><span class="smeta-item-price" style="font-weight:700">${fmt(total)}</span></div>`;
   if (discount > 0) {
     html += `<div class="smeta-item"><span class="smeta-item-name">Скидка за 100% предоплату −${discPct}%</span><span class="smeta-item-price" style="color:#065f46">−${fmt(Math.round(total*discount))}</span></div>`;
-    html += `<div class="smeta-item"><span class="smeta-item-name">Итого со скидкой</span><span class="smeta-item-price" style="color:#065f46;font-weight:700">${fmt(totalDisc)}</span></div>`;
+    html += `<div class="smeta-item"><span class="smeta-item-name">Итого к оплате</span><span class="smeta-item-price" style="color:#065f46;font-weight:700">${fmt(totalDisc)}</span></div>`;
+  } else {
+    html += `<div class="smeta-item"><span class="smeta-item-name">Итого к оплате</span><span class="smeta-item-price" style="color:#065f46;font-weight:700">${fmt(total)}</span></div>`;
   }
-  html += `</div><hr class="smeta-divider">`;
 
-  // Порядок оплаты
-  html += `<div class="smeta-sec-title" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:.5rem">Порядок оплаты</div>`;
+  // Порядок оплаты — без hr перед ним
+  html += `<div class="smeta-sec-title">Порядок оплаты</div>`;
   html += `<div class="smeta-item" style="margin-bottom:.5rem"><span class="smeta-item-name">Формат</span><span class="smeta-item-price">${payLabel}</span></div>`;
-  html += `<div class="smeta-sec-title" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin:.75rem 0 .4rem">Порядок платежей</div>`;
+  html += `<div class="smeta-sec-title">Порядок платежей</div>`;
   if (batchSize > 0 && cands >= 10) {
     const fullBatches = Math.floor(cands / batchSize);
     const remainder   = cands % batchSize;
     const batchAmt    = ppc * batchSize;
-    // Формат описания — группируем одинаковые платежи
     const totalPayments = fullBatches + (remainder > 0 ? 1 : 0);
-    // Первый платёж
     html += `<div class="smeta-item"><span class="smeta-item-name">Платёж 1 · Платёж для начала оказания услуг</span><span class="smeta-item-price" style="font-weight:600">${fmt(batchAmt)}</span></div>`;
-    // Одинаковые платежи (2..fullBatches)
     if (fullBatches > 1) {
       const repeatCount = fullBatches - 1;
       if (repeatCount === 1) {
@@ -2194,12 +2343,9 @@ function renderMassSmeta(level, staff, cands, payMode, discount) {
         html += `<div class="smeta-item"><span class="smeta-item-name">Платежи 2–${fullBatches} · Платеж после предоставления каждых ${candsGen(batchSize)}</span><span class="smeta-item-price" style="font-weight:600">${fmt(batchAmt)} × ${repeatCount}</span></div>`;
       }
     }
-    // Последний нестандартный платёж
     if (remainder > 0) {
       html += `<div class="smeta-item"><span class="smeta-item-name">Платёж ${totalPayments} · Платеж перед предоставлением ${remainWord(remainder)} ${candsGen(remainder)}</span><span class="smeta-item-price" style="font-weight:600">${fmt(ppc * remainder)}</span></div>`;
     }
-    // Итого
-    html += `<div class="smeta-item" style="font-weight:700"><span class="smeta-item-name">Итого</span><span class="smeta-item-price" style="color:#065f46">${fmt(total)}</span></div>`;
   } else if (cands < 10 && cands > 0) {
     html += `<div class="smeta-item"><span class="smeta-item-name" style="color:#c0392b">Платёж 1 · Платёж для начала оказания услуг · за ${candsGen(cands)}</span><span class="smeta-item-price" style="color:#c0392b;font-weight:600">${fmt(ppc * cands)}</span></div>`;
     html += `<div class="smeta-item"><span class="smeta-item-name" style="color:#c0392b;font-size:11.5px">⚠ Нестандартный объём — требуется согласование с руководством</span></div>`;
@@ -2268,7 +2414,7 @@ function setSaveIndicator(state) {
     idle:    { t: '',                        c: '' },
   };
   const m = map[state] || map.idle;
-  el.textContent = m.t;
+  el.innerHTML = m.t ? `<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0">${m.t}</span>` : '';
   el.className = 'save-indicator' + (m.c ? ' ' + m.c : '');
   el.style.display = m.t ? 'inline-flex' : 'none';
 }
@@ -2300,7 +2446,7 @@ async function saveData(silent) {
       if (result && result.success) {
         currentId = result.id;
         safeReplaceState('?id=' + currentId);
-        document.querySelectorAll('.btn-copy-link').forEach(b => { b.style.display = 'inline-flex'; });
+        const copyBtn = document.getElementById('btn-copy-link'); if (copyBtn) copyBtn.style.display = 'inline-flex';
       }
     }
     if (result && result.success) {
@@ -2417,11 +2563,9 @@ function renderVacTable() {
         firstPayVal = fmt(Math.round(finalCost * 0.5)); // 50%
       }
       const isFullPrepay = s.pointTariff === 'max';
-      const rightCol = isFullPrepay
-        ? `<div style="font-size:10.5px;color:var(--text3);margin-bottom:2px">Итоговая стоимость</div>
-          <div style="font-size:14px;font-weight:700;color:#065f46">${fmt(final)}</div>`
-        : `<div style="font-size:10.5px;color:var(--text3);margin-bottom:2px">1-й платёж</div>
-          <div style="font-size:14px;font-weight:700;color:#065f46">${firstPayVal}</div>
+      const tariffColor = s.pointTariff === 'mid' ? '#1e40af' : s.pointTariff === 'min' ? '#5b21b6' : '#065f46';
+      const rightCol = `<div style="font-size:10.5px;color:#1e40af;font-weight:600;margin-bottom:2px">1-й платёж</div>
+          <div style="font-size:14px;font-weight:700;color:#1e40af">${firstPayVal}</div>
           <div style="font-size:10.5px;color:var(--text3);margin-top:10px;margin-bottom:2px">Итоговая стоимость</div>
           <div style="font-size:14px;font-weight:700;color:#065f46">${fmt(final)}</div>`;
       html += `<div style="border-bottom:1px solid var(--border);padding:.85rem 0;display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
@@ -2429,9 +2573,9 @@ function renderVacTable() {
           <div style="font-size:13px;font-weight:700;margin-bottom:6px">${escapeHtml(x.name)}</div>
           <div style="font-size:12px;color:var(--text2);line-height:1.8">
             <div>Сотрудников: <b>${s.staffCount}</b></div>
-            <div>Тариф: <b>${s.pointTariffName || '—'}</b></div>
+            <div>Тариф: <b style="color:${tariffColor}">${s.pointTariffName || '—'}</b></div>
             <div>Стоимость без скидок: <b>${fmt(cost)}</b></div>
-            <div>Скидки: <b>${discLabel}</b></div>
+            <div>Скидки: <b style="color:#065f46">${discLabel}</b></div>
           </div>
         </div>
         <div style="text-align:right;flex-shrink:0;padding-top:2px">
@@ -2491,6 +2635,8 @@ function renderVacTable() {
             <div>Стоимость кандидата: <b>${fmt(ppc)}</b></div>
           </div>
           <div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:2px">Порядок оплаты</div>
+            <div style="font-size:11.5px;color:var(--text2);margin-bottom:6px">${payLabel}</div>
             <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:4px">График платежей</div>
             <div style="color:var(--text2)">${scheduleHtml}</div>
           </div>
@@ -2513,10 +2659,10 @@ function renderVacTable() {
 }
 
 function renderVacAggregate() {
-  const wrap = document.getElementById('vac-aggregate');
+  const smetaSection = document.getElementById('vac-smeta-section');
   const ids = Array.from(selectedVacancyIds).filter(id => vacanciesData[id]);
-  if (!ids.length) { if (wrap) wrap.style.display = 'none'; return; }
-  if (wrap) wrap.style.display = '';
+  if (!ids.length) { if (smetaSection) smetaSection.style.display = 'none'; return; }
+  if (smetaSection) smetaSection.style.display = '';
 
   const stdDisc = vacCountToDiscount(ids.length);
   const vacN = ids.length;
@@ -2812,9 +2958,14 @@ function resetCalculator() {
   currentId = null;
   safeReplaceState(location.pathname);
   updateHeaderLink();
-  document.querySelectorAll('.btn-copy-link').forEach(b => { b.style.display = 'none'; });
+  const copyBtnH = document.getElementById('btn-copy-link'); if (copyBtnH) copyBtnH.style.display = 'none';
   calcTotal();
   massCalc();
+  // Сбрасываем все filled/field-empty классы в экспертизе и переинициализируем
+  document.querySelectorAll('.field-wrap input, .field-wrap select, .field-wrap textarea').forEach(el => {
+    el.classList.remove('filled', 'field-empty');
+  });
+  attachBlurListeners(); // восстанавливает желтые поля
   } finally {
     suppressAutoSave = false;
   }
@@ -2822,18 +2973,10 @@ function resetCalculator() {
 }
 
 function updateHeaderLink() {
-  const el = document.getElementById('header-link');
-  if (!el) return;
-  if (currentId) {
-    const url = location.href.split('?')[0] + '?project=' + PROJECT_ID + '&id=' + currentId;
-    el.href = url;
-    el.textContent = url.replace(/^https?:\/\//, '');
-    el.classList.remove('disabled');
-  } else {
-    el.removeAttribute('href');
-    el.textContent = 'Ссылка появится после сохранения';
-    el.classList.add('disabled');
-  }
+  const show = currentId ? 'inline-flex' : 'none';
+  const copyBtn = document.getElementById('btn-copy-link');
+  if (copyBtn) copyBtn.style.display = show;
+  document.querySelectorAll('.copy-link-bottom').forEach(b => b.style.display = show);
 }
 
 // ==================== INIT ====================
@@ -2868,7 +3011,7 @@ async function loadData(id) {
       const targetTab = (state && state.tab && state.tab !== 'vacancies') ? state.tab : 'expertise';
       switchTab(targetTab);
       updateHeaderLink();
-      document.querySelectorAll('.btn-copy-link').forEach(b => { b.style.display = 'inline-flex'; });
+      const copyBtn = document.getElementById('btn-copy-link'); if (copyBtn) copyBtn.style.display = 'inline-flex';
       safeReplaceState('?id=' + currentId);
       setSaveIndicator('saved');
     } else {
@@ -2883,10 +3026,33 @@ async function loadData(id) {
 document.addEventListener('keydown', function(e) {
   if (e.key !== 'Enter') return;
   const el = e.target;
-  if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'SELECT')) return;
+  if (!el) return;
+  // textarea exp-extra: Enter = blur (без Ctrl/Shift)
+  if (el.tagName === 'TEXTAREA' && el.id === 'exp-extra' && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+    e.preventDefault();
+    el.blur();
+    return;
+  }
+  if (el.tagName !== 'INPUT' && el.tagName !== 'SELECT') return;
   if (el.tagName === 'INPUT' && ['checkbox','radio','button'].includes(el.type)) return;
-  if (el.closest('.custom-row-inner')) return; // поля свободного ввода в смете — без автоперехода
+  if (el.closest('.custom-row-inner')) {
+    e.preventDefault();
+    const row = el.closest('.custom-row-inner');
+    if (el.classList.contains('custom-name')) {
+      // Из названия → в сумму
+      row.querySelector('.custom-price')?.focus();
+    } else if (el.classList.contains('custom-price')) {
+      // Из суммы → выходим
+      el.blur();
+    }
+    return;
+  }
   e.preventDefault();
+  // Поле названия компании — просто blur (сохранение)
+  if (el.id === 'exp-co-name') {
+    el.blur();
+    return;
+  }
   // Поле суммы зарплаты — перескок к доп. информации
   if (el.closest('.salary-entry')) {
     document.getElementById('exp-extra')?.focus();
