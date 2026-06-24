@@ -17,17 +17,17 @@
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; min-height: 100vh; padding: 2rem 1rem 4rem; }
   .page { max-width: 760px; margin: 0 auto; }
   .header { margin-bottom: 1rem; }
-  .save-indicator { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 20px; border: 1px solid; transition: background .2s, color .2s; font-family: inherit; line-height: 1.4; white-space: nowrap; flex-shrink: 0; min-width: 0; }
-  .copy-link-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 20px; border: 1px solid #93c5fd; background: #eff6ff; color: #1e40af; cursor: pointer; font-family: inherit; transition: background .15s; line-height: 1.4; white-space: nowrap; flex-shrink: 0; min-width: 0; }
+  .save-indicator { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 20px; border: 1px solid; transition: background .2s, color .2s; font-family: inherit; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex-shrink: 1; }
+  .copy-link-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 20px; border: 1px solid #93c5fd; background: #eff6ff; color: #1e40af; cursor: pointer; font-family: inherit; transition: background .15s; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex-shrink: 1; }
   .copy-link-btn:hover { background: #dbeafe; }
   .save-indicator::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
   .save-indicator.si-pending { background: #fef6e7; color: #b7791f; border-color: #f6d860; }
   .save-indicator.si-saving  { background: #eef2ff; color: #4f56d3; border-color: #a5b4fc; }
   .save-indicator.si-saved   { background: #ecfdf3; color: #1c8a4e; border-color: #6ee7b7; }
   .save-indicator.si-error   { background: #fdf0ee; color: #c0392b; border-color: #fca5a5; }
-  .nav-btn { display: inline-flex; align-items: center; font-size: 12px; font-weight: 500; color: var(--text3); background: var(--surface2); border: 1px solid var(--border2); border-radius: 20px; padding: 4px 12px; cursor: pointer; transition: background .15s; font-family: inherit; line-height: 1.4; white-space: nowrap; flex-shrink: 0; min-width: 0; }
+  .nav-btn { display: inline-flex; align-items: center; font-size: 12px; font-weight: 500; color: var(--text3); background: var(--surface2); border: 1px solid var(--border2); border-radius: 20px; padding: 4px 12px; cursor: pointer; transition: background .15s; font-family: inherit; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex-shrink: 1; }
   .nav-btn:hover { background: var(--surface); color: var(--text2); }
-  .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: .75rem; gap: .5rem; }
+  .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: .75rem; gap: .5rem; overflow: visible; }
   .header-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: .5rem; display: inline-block; text-decoration: none; cursor: pointer; }
   .header-eyebrow:hover { text-decoration: underline; }
   .header-eyebrow.disabled { cursor: default; opacity: .55; pointer-events: none; text-transform: none; letter-spacing: normal; font-weight: 500; }
@@ -99,7 +99,7 @@
   .vac-empty-hint { text-align: center; color: var(--text3); font-size: 13px; padding: 1.5rem 0; }
   .tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
 
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 1rem; box-shadow: var(--shadow); }
+  .card { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 1rem; box-shadow: var(--shadow); }
   .card-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--text3); margin-bottom: 1rem; padding-bottom: .6rem; border-bottom: 1px solid var(--border); }
   .card-title-wrap { display: flex; align-items: center; gap: 6px; margin-bottom: 1rem; padding-bottom: .6rem; border-bottom: 1px solid var(--border); }
   .card-title-wrap .card-title { margin: 0; padding: 0; border: none; }
@@ -227,7 +227,7 @@
   .collapse-header:hover { background: var(--surface2); }
   .collapse-header-left { display: flex; align-items: center; gap: 12px; flex: 1; }
   .collapse-title { font-size: 14px; font-weight: 600; color: var(--text); }
-  .collapse-summary { font-size: 14px; font-weight: 700; color: #065f46; background: #f0faf4; border: 1px solid #a8d9bc; padding: 2px 10px; border-radius: 20px; }
+  .collapse-summary { font-size: 14px; font-weight: 700; color: #065f46; background: #f0faf4; border: 1px solid #a8d9bc; padding: 2px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
   .collapse-chevron { color: var(--text3); transition: transform .2s; flex-shrink: 0; }
   .collapse-chevron.open { transform: rotate(180deg); }
   .collapse-body { padding: 1rem 1rem 0; border-top: 1px solid var(--border); }
@@ -337,17 +337,17 @@
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   /* ОБЩИЙ СТИЛЬ ЗАГОЛОВКОВ РАЗДЕЛОВ */
-  .section-header { background: linear-gradient(135deg, #1c1b18 0%, #2d2b24 100%); border-bottom: none; color: #fff; padding: .6rem 1.25rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 52px; }
-  .smeta-top { background: linear-gradient(135deg, #1c1b18 0%, #2d2b24 100%); color: #fff; padding: .6rem 1.25rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 52px; }
+  .section-header { box-sizing: border-box; background: linear-gradient(135deg, #1c1b18 0%, #2d2b24 100%); border-bottom: none; color: #fff; padding: .6rem 1.25rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 52px; }
+  .smeta-top { box-sizing: border-box; background: linear-gradient(135deg, #1c1b18 0%, #2d2b24 100%); color: #fff; padding: .6rem 1.25rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 52px; }
   .section-header-left { display: flex; flex-direction: column; gap: 1px; }
   .section-header-title { font-size: 14px; font-weight: 600; letter-spacing: -.01em; line-height: 1.3; color: #fff; }
-  .section-header-sub { font-size: 11px; color: rgba(255,255,255,.55); margin-top: 1px; }
+  .section-header-sub { font-size: 11px; line-height: 1.3; color: rgba(255,255,255,.55); margin-top: 1px; }
   .section-header-icon { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: rgba(255,255,255,.85); }
 
   /* СМЕТА */
   .smeta { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-top: 1.25rem; box-shadow: var(--shadow); overflow: hidden; }
   .smeta-top-title { font-size: 14px; font-weight: 600; line-height: 1.3; letter-spacing: -.01em; color: #fff; }
-  .smeta-top-date { font-size: 11px; opacity: .5; margin-top: 1px; }
+  .smeta-top-date { font-size: 11px; line-height: 1.3; opacity: .5; margin-top: 1px; }
   .smeta-top-badge { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: rgba(255,255,255,.85); }
   .smeta-body { padding: 1.25rem 1.5rem; }
   .smeta-section { margin-bottom: 1.25rem; }
@@ -405,6 +405,24 @@
     .smeta-top { background: #1c1b18 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .st-card, .mass-card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
+
+  /* Мобильная версия: кнопки навигации — только стрелка; статус-бар и копирование — иконка по центру круга */
+  @media (max-width: 600px) {
+    .nav-btn-label, .copy-link-label, .si-text { display: none; }
+    .nav-btn {
+      width: 28px; height: 28px; padding: 0; border-radius: 50%;
+      justify-content: center; flex-shrink: 0; font-size: 13px;
+    }
+    .save-indicator, .copy-link-btn {
+      width: 28px; height: 28px; padding: 0; border-radius: 50%;
+      justify-content: center; gap: 0; flex-shrink: 0;
+    }
+    .save-indicator::before { width: 8px; height: 8px; }
+    .copy-link-btn svg { width: 12px; height: 12px; }
+    .header h1 { font-size: 20px; }
+    .header > div { gap: .5rem !important; }
+    .header > div > div:last-child { gap: .4rem !important; }
+  }
 </style>
 </head>
 <body>
@@ -412,9 +430,9 @@
   <div class="header">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
       <h1 style="margin:0">Калькулятор подбора</h1>
-      <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:nowrap;min-width:0;flex:1;justify-content:flex-end">
+      <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:nowrap;padding-bottom:2px;flex-shrink:0">
         <div class="save-indicator" id="save-indicator" style="display:none"></div>
-        <button id="btn-copy-link" onclick="copyLink()" class="copy-link-btn" style="display:none"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Скопировать ссылку</button>
+        <button id="btn-copy-link" onclick="copyLink()" class="copy-link-btn" style="display:none"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span class="copy-link-label">Скопировать ссылку</span></button>
       </div>
     </div>
   </div>
@@ -660,13 +678,13 @@
     </div><!-- end inner -->
       </div><!-- end collapse-body -->
     </div><!-- end exp-collapse -->
-    <div class="nav-row">
-      <div style="flex:0 0 auto;visibility:hidden"><button class="nav-btn">Далее к точечному подбору →</button></div>
+    <div class="nav-row" style="flex-wrap:nowrap">
+      <div style="flex:0 0 auto;visibility:hidden;min-width:0;overflow:hidden"><button class="nav-btn"><span class="nav-btn-label">Далее к точечному подбору </span>→</button></div>
       <div style="flex:1;display:flex;justify-content:center;align-items:center;gap:.5rem;min-width:0;overflow:hidden">
-        <div class="save-indicator si-saved copy-link-bottom" style="display:none">Все изменения сохранены</div>
-        <button onclick="copyLink()" class="copy-link-bottom copy-link-btn" style="display:none"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Скопировать ссылку</button>
+        <div class="save-indicator si-saved copy-link-bottom" style="display:none"><span class="si-text">Все изменения сохранены</span></div>
+        <button onclick="copyLink()" class="copy-link-bottom copy-link-btn" style="display:none"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span class="copy-link-label">Скопировать ссылку</span></button>
       </div>
-      <button class="nav-btn" onclick="switchTab('tochechny')">Далее к точечному подбору →</button>
+      <button class="nav-btn" onclick="switchTab('tochechny')" style="flex:0 1 auto;min-width:0"><span class="nav-btn-label">Далее к точечному подбору </span>→</button>
     </div>
   </div>
   <div id="section-tochechny" style="display:none">
@@ -676,11 +694,11 @@
       <div class="collapse-card" id="calc-collapse">
         <button class="section-header" style="width:100%;text-align:left;cursor:pointer;border:none" onclick="toggleCalcCollapse()" type="button">
           <div class="section-header-left">
-            <div class="section-header-title">Расчёт стоимости</div>
+            <div class="section-header-title">Параметры вакансии</div>
             <div class="section-header-sub">Как правило, заполняется аудитором</div>
           </div>
           <div style="display:flex;align-items:center;gap:6px">
-            <span class="collapse-summary" id="collapse-summary" style="display:none;font-size:13px;font-weight:700;color:#065f46;background:#f0faf4;border:1px solid #a8d9bc;padding:2px 10px;border-radius:20px"></span>
+            <span class="collapse-summary" id="collapse-summary" style="display:none;font-size:13px;font-weight:700;color:#065f46;background:#f0faf4;border:1px solid #a8d9bc;padding:2px 10px;border-radius:20px;white-space:nowrap;flex-shrink:0"></span>
             <div id="collapse-chevron" style="transition:transform .2s;color:rgba(255,255,255,.6);display:flex;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
             <div class="section-header-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg></div>
           </div>
@@ -736,16 +754,16 @@
 
       <!-- РАЗДЕЛ МЕНЕДЖЕРА -->
       <div class="collapse-card manager-section" id="mgr-collapse">
-        <div class="section-header" style="border-radius:var(--radius) var(--radius) 0 0">
+        <button class="section-header" style="width:100%;text-align:left;cursor:pointer;border:none" onclick="toggleMgrCollapse()" type="button">
           <div class="section-header-left">
-            <div class="section-header-title">Тарифы и скидки</div>
+            <div class="section-header-title">Объём и оплата</div>
             <div class="section-header-sub">Как правило, заполняется менеджером</div>
           </div>
           <div style="display:flex;align-items:center;gap:6px">
-            <span id="mgr-summary" style="display:none;font-size:13px;font-weight:700;padding:2px 10px;border-radius:20px"></span>
+            <div id="mgr-chevron" style="transition:transform .2s;color:rgba(255,255,255,.6);display:flex;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
             <div class="section-header-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
           </div>
-        </div>
+        </button>
         <div class="collapse-body" id="mgr-collapse-body">
 
         <div class="card-title" style="margin-bottom:.75rem">Объём работы</div>
@@ -877,12 +895,12 @@
     </div>
 
 
-    <div class="nav-row">
-      <button class="nav-btn" onclick="switchTab('expertise')">← Назад к экспертизе</button>
-      <div style="display:flex;align-items:center;gap:.5rem;min-width:0;overflow:hidden">
-        <div class="save-indicator si-saved copy-link-bottom" style="display:none">Все изменения сохранены</div>
-        <button onclick="copyLink()" class="copy-link-bottom copy-link-btn" style="display:none"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Скопировать ссылку</button>
-        <button class="nav-btn" onclick="switchTab('massovy')">Далее к массовому подбору →</button>
+    <div class="nav-row" style="flex-wrap:nowrap">
+      <button class="nav-btn" onclick="switchTab('expertise')" style="flex:0 1 auto;min-width:0">←<span class="nav-btn-label"> Назад к экспертизе</span></button>
+      <div style="display:flex;align-items:center;gap:.5rem;min-width:0;overflow:hidden;flex:0 1 auto">
+        <div class="save-indicator si-saved copy-link-bottom" style="display:none"><span class="si-text">Все изменения сохранены</span></div>
+        <button onclick="copyLink()" class="copy-link-bottom copy-link-btn" style="display:none"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span class="copy-link-label">Скопировать ссылку</span></button>
+        <button class="nav-btn" onclick="switchTab('massovy')" style="flex:0 1 auto;min-width:0"><span class="nav-btn-label">Далее к массовому подбору </span>→</button>
       </div>
     </div>
   </div>
@@ -892,15 +910,16 @@
     <div class="calc-section">
 
       <div class="collapse-card" id="mass-params-collapse">
-        <div class="section-header" style="border-radius:var(--radius) var(--radius) 0 0">
+        <button class="section-header" style="width:100%;text-align:left;cursor:pointer;border:none" onclick="toggleMassParamsCollapse()" type="button">
           <div class="section-header-left">
-            <div class="section-header-title">Параметры заказа</div>
+            <div class="section-header-title">Параметры вакансии</div>
             <div class="section-header-sub">Как правило, заполняется аудитором</div>
           </div>
           <div style="display:flex;align-items:center;gap:6px">
+            <div id="mass-params-chevron" style="transition:transform .2s;color:rgba(255,255,255,.6);display:flex;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
             <div class="section-header-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg></div>
           </div>
-        </div>
+        </button>
         <div class="collapse-body" id="mass-params-body">
           <div class="card" style="margin-bottom:.75rem;box-shadow:none;border-color:var(--border)">
             <div class="field-wrap" style="margin-bottom:0">
@@ -915,15 +934,16 @@
       </div>
 
       <div class="collapse-card manager-section" id="mass-mgr-collapse">
-        <div class="section-header" style="border-radius:var(--radius) var(--radius) 0 0">
+        <button class="section-header" style="width:100%;text-align:left;cursor:pointer;border:none" onclick="toggleMassMgrCollapse()" type="button">
           <div class="section-header-left">
             <div class="section-header-title">Объём и оплата</div>
             <div class="section-header-sub">Как правило, заполняется менеджером</div>
           </div>
           <div style="display:flex;align-items:center;gap:6px">
+            <div id="mass-mgr-chevron" style="transition:transform .2s;color:rgba(255,255,255,.6);display:flex;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></div>
             <div class="section-header-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
           </div>
-        </div>
+        </button>
         <div class="collapse-body" id="mass-mgr-collapse-body">
 
       <div class="card">
@@ -982,7 +1002,7 @@
     <div class="smeta" id="m-smeta-block">
       <div class="smeta-top">
         <div class="section-header-left">
-          <div class="smeta-top-title" id="m-smeta-title">Смета</div>
+          <div class="smeta-top-title" id="m-smeta-title">Смета по вакансии</div>
           <div class="section-header-sub">Массовый подбор</div>
         </div>
         <div class="smeta-top-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg></div>
@@ -990,13 +1010,13 @@
       <div class="smeta-body" id="m-smeta-body"></div>
     </div>
 
-    <div class="nav-row">
-      <button class="nav-btn" onclick="switchTab('tochechny')">← Назад к точечному подбору</button>
+    <div class="nav-row" style="flex-wrap:nowrap">
+      <button class="nav-btn" onclick="switchTab('tochechny')" style="flex:0 1 auto;min-width:0">←<span class="nav-btn-label"> Назад к точечному подбору</span></button>
       <div style="flex:1;display:flex;justify-content:center;align-items:center;gap:.5rem;min-width:0;overflow:hidden">
-        <div class="save-indicator si-saved copy-link-bottom" style="display:none">Все изменения сохранены</div>
-        <button onclick="copyLink()" class="copy-link-bottom copy-link-btn" style="display:none"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Скопировать ссылку</button>
+        <div class="save-indicator si-saved copy-link-bottom" style="display:none"><span class="si-text">Все изменения сохранены</span></div>
+        <button onclick="copyLink()" class="copy-link-bottom copy-link-btn" style="display:none"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink:0"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span class="copy-link-label">Скопировать ссылку</span></button>
       </div>
-      <div style="flex:0 0 auto;visibility:hidden"><button class="nav-btn">← Назад к точечному подбору</button></div>
+      <div style="flex:0 0 auto;visibility:hidden;min-width:0;overflow:hidden"><button class="nav-btn">←<span class="nav-btn-label"> Назад к точечному подбору</span></button></div>
     </div>
 
   </div>
@@ -1025,43 +1045,43 @@ const PROJECT_ID = getProjectId();
 // ==================== ДАННЫЕ ТОЧЕЧНОГО ====================
 const BASE = [
   {name:"Рабочая позиция", price:35000, tip:"Сотрудники, выполняющие простые физические или вспомогательные работы, как правило без необходимости общения с клиентами и наличия специальных навыков.\n\nПримеры: грузчики, разнорабочие, подсобные рабочие, уборщики, дворники, сортировщики, фасовщики."},
-  {name:"Линейная позиция", price:40000, tip:"Сотрудники, выполняющие регулярные операционные задачи. Как правило, не требуют узкой специализации, но предполагают взаимодействие с клиентами, коллегами или документацией.\n\nПримеры: продавцы-консультанты, администраторы, диспетчеры, охранники.\n\nВажно: если у позиции есть план продаж или KPI по привлечению клиентов — это продающая позиция. Если требуется профессиональный диплом или узкая экспертиза — профильная."},
+  {name:"Линейная позиция", price:40000, tip:"Сотрудники, выполняющие регулярные операционные задачи. Как правило, не требуют узкой специализации, но предполагают взаимодействие с клиентами, коллегами или документацией.\n\nПримеры: продавцы-консультанты, администраторы, диспетчеры, охранники."},
   {name:"Профильная позиция", price:40000, tip:"Сотрудники, выполняющие профессиональные, административные или профильные функции, требующие специальных знаний, навыков или подготовки.\n\nПримеры: бухгалтеры, HR-специалисты, маркетологи, юристы, инженеры, экономисты, проектировщики, специалисты в бьюти-сфере."},
   {name:"Продающая позиция", price:45000, tip:"Сотрудники, отвечающие за привлечение клиентов, развитие продаж и выполнение коммерческих показателей.\n\nПримеры: менеджеры по продажам, торговые представители, менеджеры по развитию бизнеса, аккаунт-менеджеры."},
   {name:"Автомобильная позиция", price:45000, tip:"Специалисты в сфере эксплуатации, обслуживания и ремонта транспортных средств.\n\nПримеры: водители, механики, автослесари, автоэлектрики, мастера-приёмщики, диагносты."},
-  {name:"Медицинская позиция", price:50000, tip:"Специалисты, осуществляющие медицинскую деятельность и имеющие соответствующее образование и допуски.\n\nПримеры: врачи, медицинские сёстры, фельдшеры, фармацевты, лаборанты, стоматологи. КРОМЕ администраторов на ресепшен и прочего обслуживающего персонала в больницы/клиники."},
+  {name:"Медицинская позиция", price:50000, tip:"Специалисты, осуществляющие медицинскую деятельность и имеющие соответствующее образование и допуски.\n\nПримеры: врачи, медицинские сёстры, фельдшеры, фармацевты, лаборанты, стоматологи, ветеринары. КРОМЕ администраторов на ресепшен и прочего обслуживающего персонала в больницы/клиники."},
   {name:"IT позиция", price:50000, tip:"Специалисты в области разработки, сопровождения и внедрения информационных технологий.\n\nПримеры: разработчики, тестировщики, системные администраторы, аналитики, DevOps-инженеры, специалисты по информационной безопасности."},
   {name:"Руководящая позиция", price:50000, tip:"Сотрудники, отвечающие за управление подразделением, направлением деятельности или организацией в целом.\n\nПримеры: руководители отделов, начальники подразделений, управляющие, коммерческие директора, операционные директора, генеральные директора."},
 ];
 const CRIT = [
   {name:"Узкопрофильный опыт работы", price:5000, tip:"Опыт работы в узкой сфере. Например, нужен маркетолог с опытом работы на пищевом производстве."},
-  {name:"Опыт работы на аналогичной должности от 6 месяцев", price:3000, tip:"Опыт работы в сфере вакансии от 6 месяцев."},
-  {name:"Опыт работы на аналогичной должности от 2 лет", price:5000, tip:"Опыт работы в сфере вакансии от 2 лет."},
-  {name:"Опыт работы на аналогичной должности от 3 лет", price:7000, tip:"Опыт работы в сфере вакансии от 3 лет."},
-  {name:"Опыт работы на аналогичной должности от 5 лет", price:10000, tip:"Опыт работы в сфере вакансии от 5 лет."},
+  {name:"Опыт работы на аналогичной должности от 6 месяцев", price:3000, tip:"Опыт работы не обязательно в сфере вакансии, а на аналогичной должности — от 6 месяцев."},
+  {name:"Опыт работы на аналогичной должности от 2 лет", price:5000, tip:"Опыт работы не обязательно в сфере вакансии, а на аналогичной должности — от 2 лет."},
+  {name:"Опыт работы на аналогичной должности от 3 лет", price:7000, tip:"Опыт работы не обязательно в сфере вакансии, а на аналогичной должности — от 3 лет."},
+  {name:"Опыт работы на аналогичной должности от 5 лет", price:10000, tip:"Опыт работы не обязательно в сфере вакансии, а на аналогичной должности — от 5 лет."},
   {name:"Высшее образование", price:5000, tip:"Проставляется, если вакансия требует наличия высшего образования в любой области."},
-  {name:"Узкопрофильное образование (высшее или среднее)", price:10000, tip:"Проставляется, если вакансия требует высшего или среднего образования в конкретной узкой области — например, химическая технология, нефтегазовое дело, ядерная физика, биотехнологии.\n\nЕсли требуется просто «техническое» или просто «юридическое образование» — это не является узкой сферой."},
+  {name:"Узкопрофильное образование (высшее или среднее)", price:10000, tip:"Проставляется, если вакансия требует высшего или среднего образования в конкретной узкой области — например, химическая технология, нефтегазовое дело, ядерная физика, биотехнологии.\n\nЕсли требуется, например, просто «техническое» или, например, просто «юридическое образование» — это не является узкой сферой."},
   {name:"Холодные продажи", price:5000, tip:"По большей части касается специалистов в сфере продаж, которым нужно самостоятельно искать клиентов."},
   {name:"Знание иностранного языка (1 шт.)", price:5000, tip:"Проставляется, если знание иностранного языка является требованием по данной вакансии. Можно включить до 3 языков — каждый учитывается отдельно.", counter:true, maxCount:3},
   {name:"Наличие водительских прав", price:5000, tip:"Проставляется, если наличие водительских прав является требованием по данной вакансии."},
   {name:"Собственный автомобиль", price:5000, tip:"Проставляется в том случае, если сотрудник должен иметь собственный автомобиль."},
-  {name:"Менее 500 кандидатов на вакансию (в открытом доступе)", price:5000, tip:"Проставляется если на рынке труда менее 500 кандидатов на данную вакансию.\n\nЕсли во время аудита окажется, что кандидатов более 500, стоимость скорректируется в меньшую сторону."},
-  {name:"Менее 300 кандидатов на вакансию (в открытом доступе)", price:10000, tip:"Проставляется если на рынке труда менее 300 кандидатов на данную вакансию.\n\nЕсли во время аудита окажется, что кандидатов более 300, стоимость скорректируется в меньшую сторону."},
-  {name:"В вакансии от 20 до 30 требований", price:7000, tip:"Проставляется, если в вакансии от 20 до 30 формальных требований к кандидату. Большое число требований сужает выборку и увеличивает объём работы."},
+  {name:"Менее 500 кандидатов на вакансию (в открытом доступе)", price:5000, tip:"Проставляется если на рынке труда в районе поиска кандидатов менее 500 подходящих кандидатов на данную вакансию."},
+  {name:"Менее 300 кандидатов на вакансию (в открытом доступе)", price:10000, tip:"Проставляется если на рынке труда в районе поиска кандидатов менее 300 подходящих кандидатов на данную вакансию."},
+  {name:"В вакансии от 20 до 30 требований", price:7000, tip:"Проставляется, если в вакансии от 20 до 30 требований к кандидату. Большое число требований сужает выборку и увеличивает объём работы."},
 ];
 const EXTRA = [
-  {name:"Внесение корректировок в «портрет кандидата» во время подбора (1 раз)", price:0, free:true, checked:true, tip:"В том случае, если заказчику требуется проводить стажировку/тест кандидатов, подбор не будет остановлен даже после выхода одного из кандидатов на работу."},
-  {name:"Тест кандидата на рабочем месте до 7 календарных дней", price:0, free:true, tip:"Выход кандидата на первый рабочий день не будет означать завершение подбора. Подбор завершится, если пройдёт более 7 дней с момента выхода."},
-  {name:"Тест кандидата на рабочем месте от 7 до 14 календарных дней", price:10000, tip:"Мы замедлим либо остановим подбор (по возможности). Дополнительная оплата закладывается заранее, так как приостановка процесса требует дополнительных средств."},
+  {name:"Внесение корректировок в «портрет кандидата» во время подбора (1 раз)", price:0, free:true, checked:true, tip:"Мы внесём корректировки в портрет кандидата по просьбе заказчика — за исключением случаев, когда эти корректировки существенно изменяют вакансию (в таком случае потребуется доплата), либо когда корректировки улучшают условия вакансии (в этом случае доплата не требуется)."},
+  {name:"Тест кандидата на рабочем месте до 7 календарных дней", price:0, free:true, tip:"Вакансия будет считаться закрытой, если кандидат проработает более 7 календарных дней. До истечения этого срока подбор не считается завершённым."},
+  {name:"Тест кандидата на рабочем месте от 7 до 14 календарных дней", price:10000, tip:"Вакансия будет считаться закрытой, если кандидат проработает более 14 календарных дней. До истечения этого срока подбор не считается завершённым. Дополнительная оплата закладывается заранее, так как приостановка процесса в этот период требует дополнительных ресурсов."},
   {name:"Ускоренный поиск и подбор кандидатов", price:15000, tip:"Для срочных, «горящих» вакансий. Вакансия получает высокий приоритет, подключается дополнительный рекрутер."},
-  {name:"Проведение профильных тестовых заданий (все кандидаты)", price:15000, tip:"Проверка практических навыков кандидатов через выполнение тестовых заданий, имитирующих рабочие задачи."},
+  {name:"Проведение профильных тестовых заданий (все кандидаты)", price:15000, tip:"Проверка практических навыков кандидатов через выполнение тестовых заданий."},
   {name:"Проведение внутренних собеседований в видео-формате", price:10000, tip:"По стандарту интервью проводится в аудио-формате. С данной опцией — в видео-формате."},
-  {name:"Проверка кандидатов СБ (до 5 кандидатов на выбор заказчика)", price:5000, tip:"Проверяем кандидатов на уголовное/кредитное прошлое — подготавливаем отчёт по запросу."},
-  {name:"Проверка рекомендаций с предыдущих мест работы (до 5 кандидатов)", price:5000, tip:"Находим контакты руководителей с предыдущих мест работы, задаём вопросы и передаём информацию клиенту."},
-  {name:"Увеличение % формального соответствия для усложн. критериев до 100%", price:0, free:true, tip:"ТОЛЬКО ПО ПРОСЬБЕ ЗАКАЗЧИКА! Корректировка может быть внесена в договор."},
-  {name:"Увеличение % формального соответствия до 70%", price:7000, tip:"Чем выше порог, тем больше кандидатов необходимо рассмотреть на этапе резюме — это увеличивает объём работы и затраты на ресурсы."},
-  {name:"Увеличение срока рассмотрения кандидатов до 3 дней", price:0, free:true, tip:"Предоставляется бесплатно."},
-  {name:"Увеличение срока рассмотрения кандидатов до 4–5 дней", price:7000, tip:"Оплачивается дополнительно, так как удлиняет цикл подбора."},
+  {name:"Проверка кандидатов СБ (до 5 кандидатов на выбор заказчика)", price:5000, tip:"Проверяем 5 кандидатов на выбор заказчика на уголовное/кредитное прошлое — подготавливаем отчёт по запросу."},
+  {name:"Проверка рекомендаций с предыдущих мест работы (до 5 кандидатов)", price:5000, tip:"Проверяем 5 кандидатов на выбор заказчика — находим контакты руководителей с предыдущих мест работы, задаём вопросы и передаём информацию клиенту."},
+  {name:"Увеличение % соответствия для усложн. критериев до 100%", price:0, free:true, tip:"⚠ Требует согласования с руководством!\n\nВносится только по просьбе заказчика. В договоре будет указано, что кандидат должен соответствовать обязательным усложняющим критериям (входящим в стоимость подбора) на 100%."},
+  {name:"Увеличение % соответствия для всех критериев до 70%", price:0, free:true, tip:"⚠ Требует согласования с руководством!\n\nПредоставляется бесплатно. Чем выше порог формального соответствия, тем больше кандидатов необходимо рассмотреть на этапе резюме — это увеличивает объём работы и затраты на ресурсы."},
+  {name:"Увеличение срока рассмотрения кандидатов до 3 дней", price:0, free:true, tip:"Предоставляется бесплатно. Это срок, в течение которого мы сообщаем кандидатам, что Руководитель даст им обратную связь. Чем больше срок — тем выше вероятность, что кандидат не дождётся ответа и примет другое предложение."},
+  {name:"Увеличение срока рассмотрения кандидатов до 4–5 дней", price:7000, tip:"Оплачивается дополнительно, так как удлиняет цикл подбора. Это срок, в течение которого мы сообщаем кандидатам, что Руководитель даст им обратную связь. Чем больше срок — тем выше вероятность, что кандидат не дождётся ответа и примет другое предложение."},
 ];
 const DISC_STAFF = [
   {label:"1 сотрудник", disc:0},
@@ -1093,6 +1113,55 @@ let currentId = null;
 let vacanciesData = {};
 let selectedVacancyIds = new Set();
 
+function copyLink() {
+  const url = PROJECT_ID && currentId
+    ? location.href.split('?')[0] + '?project=' + PROJECT_ID + '&id=' + currentId
+    : location.href;
+
+  const showCopiedAnimation = () => {
+    document.querySelectorAll('#btn-copy-link, .copy-link-bottom').forEach(btn => {
+      if (!btn.classList.contains('copy-link-btn')) return; // не трогаем save-indicator
+      const orig = btn.innerHTML;
+      btn.innerHTML = '✓<span class="copy-link-label"> Скопировано</span>';
+      btn.style.background = '#ecfdf3';
+      btn.style.borderColor = '#6ee7b7';
+      btn.style.color = '#1c8a4e';
+      setTimeout(() => {
+        btn.innerHTML = orig;
+        btn.style.background = '';
+        btn.style.borderColor = '';
+        btn.style.color = '';
+      }, 2000);
+    });
+  };
+
+  // Запасной способ копирования — работает без HTTPS (file://, content://ит.п.),
+  // где современный Clipboard API недоступен или блокируется браузером.
+  const fallbackCopy = () => {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = url;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      ta.style.top = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      if (ok) { showCopiedAnimation(); }
+      else { showToast('Не удалось скопировать ссылку'); }
+    } catch (e) {
+      showToast('Не удалось скопировать ссылку');
+    }
+  };
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(showCopiedAnimation).catch(fallbackCopy);
+  } else {
+    fallbackCopy();
+  }
+}
 function safeReplaceState(url) {
   try {
     history.replaceState(null, '', url);
@@ -1413,9 +1482,25 @@ function setExpState(s) {
 let activeTip = null;
 function toggleSectionTip(id) {
   const p = document.getElementById(id);
+  if (!p) return;
   if (activeTip && activeTip !== p) activeTip.classList.remove('visible');
   p.classList.toggle('visible');
   activeTip = p.classList.contains('visible') ? p : null;
+  if (p.classList.contains('visible')) {
+    const btn = document.querySelector(`[onclick*="${id}"]`);
+    if (btn) {
+      // Позиционируем абсолютно через координаты относительно document
+      const rect = btn.getBoundingClientRect();
+      const scrollY = window.scrollY || window.pageYOffset;
+      p.style.position = 'absolute';
+      p.style.top = (rect.bottom + scrollY + 6) + 'px';
+      p.style.right = (window.innerWidth - rect.right) + 'px';
+      p.style.left = 'auto';
+      p.style.zIndex = '9999';
+      // Move to body so it doesn't inherit overflow:hidden
+      document.body.appendChild(p);
+    }
+  }
 }
 function showTip(id, btn) {
   const p = document.getElementById(id);
@@ -1563,6 +1648,7 @@ function getState() {
     extra: EXTRA.map((_,i) => document.getElementById(`e-${i}`)?.checked ? 1 : 0),
     mass:  { level: document.getElementById('m-level')?.value, staff: document.getElementById('m-staff')?.value, cands: document.getElementById('m-cands')?.value, ratio: document.getElementById('m-ratio')?.value },
     tab:   currentTab,
+    calcCollapsed: calcCollapsed,
   };
 }
 
@@ -1578,6 +1664,12 @@ function setState(state) {
     if (state.mass.staff)  document.getElementById('m-staff').value  = state.mass.staff;
     if (state.mass.cands)  document.getElementById('m-cands').value  = state.mass.cands;
     if (state.mass.ratio && document.getElementById('m-ratio')) document.getElementById('m-ratio').value = state.mass.ratio;
+  }
+  // Restore collapse state (only collapse if explicitly saved as collapsed)
+  if (state.calcCollapsed === true && !calcCollapsed) {
+    toggleCalcCollapse();
+  } else if (state.calcCollapsed === false && calcCollapsed) {
+    toggleCalcCollapse();
   }
 }
 
@@ -1652,6 +1744,8 @@ setTimeout(() => {
   if (mc) mc.style.transform = 'rotate(180deg)';
   const mmc = document.getElementById('mass-mgr-chevron');
   if (mmc) mmc.style.transform = 'rotate(180deg)';
+  const mgrc = document.getElementById('mgr-chevron');
+  if (mgrc) mgrc.style.transform = 'rotate(180deg)';
   const vcc = document.getElementById('vac-company-chevron');
   if (vcc) vcc.style.transform = 'rotate(180deg)';
   const ecc = document.getElementById('exp-collapse-chevron');
@@ -1736,6 +1830,8 @@ function toggleCalcCollapse() {
   if (chev) chev.style.transform = calcCollapsed ? 'rotate(0deg)' : 'rotate(180deg)';
   const bottomCircle = document.getElementById('collapse-chevron-bottom');
   if (bottomCircle) bottomCircle.style.transform = calcCollapsed ? 'rotate(0deg)' : 'rotate(180deg)';
+  const bottomBtn = bottomCircle ? bottomCircle.closest('.collapse-bottom-btn') : null;
+  if (bottomBtn) bottomBtn.style.display = calcCollapsed ? 'none' : '';
   const summary = document.getElementById('collapse-summary');
   if (calcCollapsed) {
     const val = document.getElementById('total-final')?.textContent || '0 ₽';
@@ -1981,7 +2077,7 @@ function massCalc() {
     if (payCard) payCard.style.display = '';
     const vname = document.getElementById('exp-vname')?.value?.trim();
     const mTitle = document.getElementById('m-smeta-title');
-    if (mTitle) mTitle.textContent = 'Смета';
+    if (mTitle) mTitle.textContent = 'Смета по вакансии';
     return;
   }
   if (cands === 0) {
@@ -2007,7 +2103,7 @@ function massCalc() {
 
   const vname = document.getElementById('exp-vname')?.value?.trim();
   const mTitle = document.getElementById('m-smeta-title');
-  if (mTitle) mTitle.textContent = 'Смета';
+  if (mTitle) mTitle.textContent = 'Смета по вакансии';
   scheduleAutoSave();
 }
 
@@ -2334,13 +2430,13 @@ function renderMassSmeta(level, staff, cands, payMode, discount) {
     const remainder   = cands % batchSize;
     const batchAmt    = ppc * batchSize;
     const totalPayments = fullBatches + (remainder > 0 ? 1 : 0);
-    html += `<div class="smeta-item"><span class="smeta-item-name">Платёж 1 · Платёж для начала оказания услуг</span><span class="smeta-item-price" style="font-weight:600">${fmt(batchAmt)}</span></div>`;
+    html += `<div class="smeta-item"><span class="smeta-item-name">Платёж 1 · Платёж для начала оказания услуг (за первые ${candsGen(batchSize)})</span><span class="smeta-item-price" style="font-weight:600">${fmt(batchAmt)}</span></div>`;
     if (fullBatches > 1) {
       const repeatCount = fullBatches - 1;
       if (repeatCount === 1) {
-        html += `<div class="smeta-item"><span class="smeta-item-name">Платёж 2 · Платеж после предоставления ${candsGen(batchSize)}</span><span class="smeta-item-price" style="font-weight:600">${fmt(batchAmt)}</span></div>`;
+        html += `<div class="smeta-item"><span class="smeta-item-name">Платёж 2 · Платёж после предоставления ${candsGen(batchSize)}</span><span class="smeta-item-price" style="font-weight:600">${fmt(batchAmt)}</span></div>`;
       } else {
-        html += `<div class="smeta-item"><span class="smeta-item-name">Платежи 2–${fullBatches} · Платеж после предоставления каждых ${candsGen(batchSize)}</span><span class="smeta-item-price" style="font-weight:600">${fmt(batchAmt)} × ${repeatCount}</span></div>`;
+        html += `<div class="smeta-item"><span class="smeta-item-name">Платежи 2–${fullBatches} · Платежи после предоставления каждых ${candsGen(batchSize)}</span><span class="smeta-item-price" style="font-weight:600">${fmt(batchAmt)} × ${repeatCount}</span></div>`;
       }
     }
     if (remainder > 0) {
@@ -2405,7 +2501,6 @@ async function runAutoSave() {
 
 function setSaveIndicator(state) {
   const el = document.getElementById('save-indicator');
-  if (!el) return;
   const map = {
     pending: { t: 'Изменения не сохранены', c: 'si-pending' },
     saving:  { t: 'Сохранение…',            c: 'si-saving' },
@@ -2414,9 +2509,19 @@ function setSaveIndicator(state) {
     idle:    { t: '',                        c: '' },
   };
   const m = map[state] || map.idle;
-  el.innerHTML = m.t ? `<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0">${m.t}</span>` : '';
-  el.className = 'save-indicator' + (m.c ? ' ' + m.c : '');
-  el.style.display = m.t ? 'inline-flex' : 'none';
+  const inner = m.t ? `<span class="si-text">${m.t}</span>` : '';
+  if (el) {
+    el.innerHTML = inner;
+    el.className = 'save-indicator' + (m.c ? ' ' + m.c : '');
+    el.style.display = m.t ? 'inline-flex' : 'none';
+  }
+  // Синхронизируем нижние копии статус-бара (под формами), которые иначе никогда не обновлялись
+  document.querySelectorAll('.copy-link-bottom.save-indicator').forEach(bottomEl => {
+    bottomEl.innerHTML = inner;
+    bottomEl.className = 'save-indicator copy-link-bottom' + (m.c ? ' ' + m.c : '');
+    // display управляется отдельно через updateHeaderLink() (показ/скрытие по наличию currentId),
+    // здесь его не трогаем, чтобы не сломать логику видимости
+  });
 }
 
 // Возвращает true при успешном сохранении, false при ошибке
@@ -2618,7 +2723,7 @@ function renderVacTable() {
           scheduleHtml += `<div style="font-size:11.5px;margin-top:1px">${label} · Платеж после каждых ${candsGen(batchSize)} — <b>${fmt(batchAmt)}</b>${repeatCount > 1 ? ` × ${repeatCount}` : ''}</div>`;
         }
         if (remainder > 0) {
-          scheduleHtml += `<div style="font-size:11.5px;margin-top:1px">Платёж ${fullBatches + 1} · Платеж после ${remainWord(remainder)} ${candsGen(remainder)} — <b>${fmt(ppc * remainder)}</b></div>`;
+          scheduleHtml += `<div style="font-size:11.5px;margin-top:1px">Платёж ${fullBatches + 1} · Платеж перед предоставлением ${remainWord(remainder)} ${candsGen(remainder)} — <b>${fmt(ppc * remainder)}</b></div>`;
         }
       } else {
         scheduleHtml = `<div style="font-size:11.5px;margin-top:1px">100% предоплата · единый платёж — <b>${fmt(cost)}</b></div>`;
