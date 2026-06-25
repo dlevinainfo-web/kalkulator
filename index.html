@@ -98,6 +98,14 @@
   .vac-add:hover .vac-add-label { color: var(--accent); }
   .vac-empty-hint { text-align: center; color: var(--text3); font-size: 13px; padding: 1.5rem 0; }
   .tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+  #tab-vacancies-cat { position: absolute; top: 50%; left: 100%; transform: translateY(-50%); display: none; pointer-events: none; overflow: visible; }
+  #tab-vacancies-cat.running { display: block; animation: tabCatRun 1.9s linear infinite; }
+  @keyframes tabCatRun { 0% { left: 105%; } 100% { left: -65%; } }
+  .cat-leg { transform-box: fill-box; transform-origin: top center; }
+  .cat-leg-fl, .cat-leg-br { animation: catLegA .42s ease-in-out infinite; }
+  .cat-leg-fr, .cat-leg-bl { animation: catLegB .42s ease-in-out infinite; }
+  @keyframes catLegA { 0%, 100% { transform: rotate(26deg); } 50% { transform: rotate(-26deg); } }
+  @keyframes catLegB { 0%, 100% { transform: rotate(-26deg); } 50% { transform: rotate(26deg); } }
 
   .card { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 1rem; box-shadow: var(--shadow); }
   .card-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--text3); margin-bottom: 1rem; padding-bottom: .6rem; border-bottom: 1px solid var(--border); }
@@ -280,7 +288,7 @@
   .discount-custom-row { display: grid; grid-template-columns: 80px 1fr; gap: 8px; align-items: center; }
   .discount-custom-row input { height: 36px; font-size: 14px; font-weight: 500; font-family: inherit; border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 0 10px; outline: none; background: var(--surface); color: var(--text); }
   .discount-custom-hint { font-size: 11px; color: var(--text3); margin-top: 5px; }
-  .discount-custom-warn { font-size: 11.5px; margin: 8px 0 14px; padding: 6px 10px; border-radius: var(--radius-sm); display: none; }
+  .discount-custom-warn { font-size: 11.5px; margin: 8px 0 0; padding: 6px 10px; border-radius: var(--radius-sm); display: none; }
   .smeta-plain-note { font-size: 11.5px; color: var(--text3); margin: 4px 0 16px; }
   .discount-custom-warn.warn-low    { display: block; background: #eff6ff; border: 1px solid #93c5fd; color: #1e40af; }
   .discount-custom-warn.warn-high   { display: block; background: #fdf0ee; border: 1px solid #f5c6c0; color: #c0392b; }
@@ -349,6 +357,11 @@
   .smeta-top-title { font-size: 14px; font-weight: 600; line-height: 1.3; letter-spacing: -.01em; color: #fff; }
   .smeta-top-date { font-size: 11px; line-height: 1.3; opacity: .5; margin-top: 1px; }
   .smeta-top-badge { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: rgba(255,255,255,.85); }
+  .smeta-warn-toggle { display: flex; align-items: center; gap: 5px; height: 32px; padding: 0 11px; border-radius: 20px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15); flex-shrink: 0; color: rgba(255,255,255,.85); cursor: pointer; font-size: 11.5px; font-weight: 500; white-space: nowrap; font-family: inherit; transition: background .15s, color .15s, border-color .15s; }
+  .smeta-warn-toggle:hover { background: rgba(255,255,255,.18); }
+  .smeta-warn-toggle.active { background: rgba(192,57,43,.18); border-color: rgba(192,57,43,.4); color: #ff8a7a; }
+  .smeta-warn-toggle svg { flex-shrink: 0; }
+  .smeta-warn-toggle-label { overflow: hidden; text-overflow: ellipsis; }
   .smeta-body { padding: 1.25rem 1.5rem; }
   .smeta-section { margin-bottom: 1.25rem; }
   .smeta-section .smeta-item:last-child { border-bottom: 1px solid var(--border); }
@@ -439,7 +452,19 @@
 
   <!-- Tabs -->
   <div class="tabs" id="main-tabs">
-    <button class="tab tab-vacancies active" id="tab-vacancies" onclick="switchTab('vacancies')">Вакансии</button>
+    <button class="tab tab-vacancies active" id="tab-vacancies" onclick="switchTab('vacancies')" style="position:relative;overflow:hidden">Вакансии<svg id="tab-vacancies-cat" viewBox="0 0 64 34" width="58" height="30">
+      <path d="M48 16 Q60 6 56 20 Q54 22 48 19 Z" fill="#f5a623"/>
+      <ellipse cx="34" cy="16" rx="17" ry="9" fill="#f5a623"/>
+      <circle cx="15" cy="11" r="8" fill="#f5a623"/>
+      <path d="M9 5 L7 -2 L13 4 Z" fill="#f5a623"/>
+      <path d="M19 4 L23 -3 L21 5 Z" fill="#f5a623"/>
+      <circle cx="12.5" cy="10" r="1.1" fill="#3a2a10"/>
+      <path d="M17 13 L20 12 M17 14.5 L20 14.5 M17 16 L20 16" stroke="#3a2a10" stroke-width=".6" stroke-linecap="round"/>
+      <g class="cat-leg cat-leg-fl"><rect x="19" y="21" width="3.4" height="11" rx="1.6" fill="#e08e1f"/></g>
+      <g class="cat-leg cat-leg-bl"><rect x="42" y="21" width="3.4" height="11" rx="1.6" fill="#e08e1f"/></g>
+      <g class="cat-leg cat-leg-fr"><rect x="25" y="21" width="3.4" height="11" rx="1.6" fill="#d97f12"/></g>
+      <g class="cat-leg cat-leg-br"><rect x="36" y="21" width="3.4" height="11" rx="1.6" fill="#d97f12"/></g>
+    </svg></button>
     <button class="tab" id="tab-expertise" onclick="switchTab('expertise')" style="display:none">Экспертиза вакансии</button>
     <button class="tab" id="tab-tochechny" onclick="switchTab('tochechny')" style="display:none">Точечный подбор</button>
     <button class="tab" id="tab-massovy" onclick="switchTab('massovy')" style="display:none">Массовый подбор</button>
@@ -533,9 +558,9 @@
       <!-- Блок скидок (только точечный) -->
       <div id="vac-disc-block" class="card" style="margin-bottom:1rem">
         <div class="card-title">Скидка за кол-во вакансий в 1 договоре</div>
-        <div class="discount-custom-wrap" style="margin:.75rem 0;background:var(--surface);border-color:var(--border2);position:relative">
+        <div class="discount-custom-wrap" id="vac-disc-auto-wrap" style="margin:.75rem 0;background:var(--surface);border-color:var(--border2);position:relative">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
-            <label>Скидка за кол-во вакансий в 1 договоре которая может быть применена</label>
+            <label>Скидка которая может быть применена</label>
             <button class="tip-btn" type="button" onclick="event.stopPropagation();showTip('tip-vac-disc-applied',this)" style="flex-shrink:0">?</button>
           </div>
           <div class="tip-popup" id="tip-vac-disc-applied" style="right:0;left:auto">Скидка за количество вакансий в одном договоре:
@@ -549,15 +574,15 @@
           <div id="vac-disc-auto-display" style="height:36px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);display:flex;align-items:center;padding:0 12px;font-size:13px;color:var(--text2);margin-top:5px">Выберите вакансии выше</div>
         </div>
         <div class="discount-custom-wrap" id="vac-disc-manual-wrap" style="background:var(--surface);border-color:var(--border2)">
-          <label id="vac-disc-label">Итоговая скидка за кол-во вакансий</label>
+          <label id="vac-disc-label">Ручное изменение скидки</label>
           <div class="discount-custom-row">
             <div class="vac-disc-input-wrap" style="position:relative;display:inline-flex;align-items:center">
               <input type="number" id="vac-disc-custom" min="0" max="50" placeholder="0" oninput="renderVacAggregateTotals()">
             </div>
             <span id="vac-disc-hint" style="font-size:13px;color:var(--text2)">% — можно снизить вручную</span>
           </div>
+          <div id="vac-aggregate-discount-note"></div>
         </div>
-        <div id="vac-aggregate-discount-note"></div>
       </div>
 
       <!-- Таблица вакансий -->
@@ -720,7 +745,9 @@
               <div class="card-title">Усложняющие критерии поиска</div>
               <button class="tip-btn" onclick="toggleSectionTip('tip-crit')" type="button">?</button>
             </div>
-            <div class="tip-popup" id="tip-crit">Некоторые усложняющие критерии можно указать в портрете кандидата как «желательные» — в этом случае доплата не требуется.</div>
+            <div class="tip-popup" id="tip-crit">Усложняющие критерии — это то, что делает вакансию более сложной в процессе подбора, так как требует дополнительной проверки кандидатов (например, проверка опыта работы) либо усложняет процесс поиска (например, небольшое количество подходящих кандидатов на вакансию на рынке труда).
+
+По согласованию с руководством, некоторые усложняющие критерии можно указать в портрете кандидата как «желательные», если они относятся к требованиям вакансии — в этом случае доплата не требуется.</div>
             <div id="crit-list"></div>
             <div id="crit-custom-list"></div>
             <button class="btn-add-custom" type="button" onclick="addCustomRow('crit')">+ Добавить другой усложняющий критерий</button>
@@ -731,7 +758,7 @@
               <div class="card-title">Дополнительные услуги</div>
               <button class="tip-btn" onclick="toggleSectionTip('tip-extra')" type="button">?</button>
             </div>
-            <div class="tip-popup" id="tip-extra">Дополнительные услуги — это процессы, увеличивающие нашу работу в процессе подбора: то, что усложняет воронку найма.</div>
+            <div class="tip-popup" id="tip-extra">Дополнительные услуги — это дополнительные процессы или изменения нашего стандартного процесса оказания услуг, которые усложняют поиск и (или) подбор.</div>
             <div id="extra-list"></div>
             <div id="extra-custom-list"></div>
             <button class="btn-add-custom" type="button" onclick="addCustomRow('extra')">+ Добавить другую доп. услугу</button>
@@ -786,7 +813,7 @@
                 <button class="tip-btn" type="button" onclick="event.stopPropagation(); toggleSectionTip('tip-tc-max')">?</button>
               </div>
               <div class="tc-name"><span style="color:var(--text2);font-weight:400;font-size:12px">Максимальный</span> · 100%</div>
-              <div class="tc-detail">Гарантия 365 дней<span class="sep"> · </span>Скидка −5%<span class="sep"> · </span>Бесплатно, если не найдём за 30 дней</div>
+              <div class="tc-detail">Гарантия 365 дней<span class="sep"> · </span>Скидка −5%<span class="sep"> · </span>Бесплатно, если не найдём за 30 дней<span class="sep"> · </span>самая высокая скорость</div>
               <div class="tip-popup" id="tip-tc-max">Условия:
 • Оплата вносится одним платежом перед началом оказания услуг
 
@@ -889,7 +916,18 @@
           <div class="smeta-top-title" id="smeta-title">Смета по вакансии</div>
           <div class="section-header-sub">Точечный подбор</div>
         </div>
-        <div class="smeta-top-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg></div>
+        <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0">
+          <button class="smeta-warn-toggle" id="pt-warn-toggle" onclick="togglePtHideWarnings()" type="button" title="Скрыть предупреждения" style="display:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+              <line id="pt-warn-toggle-slash" x1="2.5" y1="21.5" x2="21.5" y2="2.5" style="display:none"/>
+            </svg>
+            <span class="smeta-warn-toggle-label" id="pt-warn-toggle-label">Скрыть предупреждения</span>
+          </button>
+          <div class="smeta-top-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg></div>
+        </div>
       </div>
       <div class="smeta-body" id="smeta-body"></div>
     </div>
@@ -922,9 +960,18 @@
         </button>
         <div class="collapse-body" id="mass-params-body">
           <div class="card" style="margin-bottom:.75rem;box-shadow:none;border-color:var(--border)">
+            <div class="card-title-wrap">
+              <div class="card-title">Уровень требований к кандидату</div>
+              <button class="tip-btn" onclick="toggleSectionTip('tip-m-level')" type="button">?</button>
+            </div>
+            <div class="tip-popup" id="tip-m-level">В массовом подборе предусмотрено небольшое общее количество требований к кандидатам.
+
+Есть два тарифа: в первом заказчик может указать от 1 до 4 требований к кандидату, во втором — от 5 до 8.
+
+Но это в любом случае могут быть не любые требования — массовый подбор подходит не для всех вакансий, поэтому мы всегда предварительно согласовываем требования.</div>
             <div class="field-wrap" style="margin-bottom:0">
-              <label for="m-level">Уровень требований к кандидату</label>
-              <select id="m-level" onchange="massCalc()">
+              <select id="m-level" onchange="updateLevelStyle();massCalc()" style="border-color:#f0e4a0;background:#fffdf0">
+                <option value="" selected>— Не выбрано —</option>
                 <option value="1-4">1–4 требования к кандидату</option>
                 <option value="5-8">5–8 требований к кандидату</option>
               </select>
@@ -952,22 +999,19 @@
         <div class="discount-custom-wrap" style="background:var(--surface);border-color:var(--border2);margin-bottom:.75rem">
           <label>Количество сотрудников</label>
           <div class="discount-custom-row">
-            <input type="number" id="m-staff" min="1" placeholder="0" oninput="document.getElementById('m-cands').dataset.manual='';massCalc()" style="height:36px;font-size:14px;font-weight:500;font-family:inherit">
+            <input type="number" id="m-staff" min="1" placeholder="0" oninput="document.getElementById('m-cands').dataset.manual='';updateStaffStyle();massCalc()" style="height:36px;font-size:14px;font-weight:500;font-family:inherit;border-color:#f0e4a0;background:#fffdf0">
             <span style="font-size:13px;color:var(--text2)">чел. — введите сколько сотрудников требуется найти</span>
           </div>
         </div>
 
-        <div style="margin-bottom:.75rem">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-            <label style="font-size:12px;color:var(--text2)">Кандидатов на 1 сотрудника</label>
+        <div class="discount-custom-wrap" style="background:var(--surface);border-color:var(--border2);margin-bottom:.75rem">
+          <label>Рекомендуемое кол-во кандидатов</label>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin:10px 0 6px">
+            <span style="font-size:12px;color:var(--text2)">Кандидатов на 1 сотрудника</span>
             <span id="m-ratio-val" style="font-size:13px;font-weight:600;color:var(--text)">4</span>
           </div>
           <input type="range" id="m-ratio" min="1" max="10" value="4" oninput="document.getElementById('m-cands').dataset.manual='';massCalc()" style="width:100%;accent-color:#2d7a4f">
-          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:2px"><span>1</span><span>10</span></div>
-        </div>
-
-        <div style="margin-bottom:.75rem">
-          <label style="display:block;font-size:12px;color:var(--text2);margin-bottom:5px">Рекомендуемое кол-во кандидатов</label>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:2px;margin-bottom:12px"><span>1</span><span>10</span></div>
           <div id="m-rec-display" style="height:40px;border:1.5px solid #a8d9bc;border-radius:var(--radius-sm);background:#f0faf4;display:flex;align-items:center;padding:0 12px;font-size:15px;font-weight:600;color:#065f46">—</div>
           <div class="field-hint" style="color:#065f46">Рассчитывается автоматически исходя из коэффициента выше, но не менее 10 кандидатов</div>
         </div>
@@ -978,7 +1022,7 @@
             <input type="number" id="m-cands" min="1" placeholder="0" oninput="this.dataset.manual='1';updateCandsStyle();massCalc()" style="border-color:#f0e4a0;background:#fffdf0">
             <span style="font-size:13px;color:var(--text2)">канд. — можно ввести вручную</span>
           </div>
-          <div id="m-cands-warn" style="font-size:11.5px;margin-top:6px;color:#92400e">Можно указать любое кол-во, вне зависимости от рекомендуемого, но не менее 10 кандидатов</div>
+          <div id="m-cands-warn" style="font-size:11.5px;margin-top:6px;color:#92400e">Можно указать любое кол-во вручную, вне зависимости от рекомендуемого, но не менее 10 кандидатов</div>
         </div>
       </div>
 
@@ -1005,7 +1049,18 @@
           <div class="smeta-top-title" id="m-smeta-title">Смета по вакансии</div>
           <div class="section-header-sub">Массовый подбор</div>
         </div>
-        <div class="smeta-top-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg></div>
+        <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0">
+          <button class="smeta-warn-toggle" id="m-warn-toggle" onclick="toggleMassHideWarnings()" type="button" title="Скрыть предупреждения" style="display:none">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+              <line id="m-warn-toggle-slash" x1="2.5" y1="21.5" x2="21.5" y2="2.5" style="display:none"/>
+            </svg>
+            <span class="smeta-warn-toggle-label" id="m-warn-toggle-label">Скрыть предупреждения</span>
+          </button>
+          <div class="smeta-top-badge"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg></div>
+        </div>
       </div>
       <div class="smeta-body" id="m-smeta-body"></div>
     </div>
@@ -1055,6 +1110,7 @@ const BASE = [
 ];
 const CRIT = [
   {name:"Узкопрофильный опыт работы", price:5000, tip:"Опыт работы в узкой сфере. Например, нужен маркетолог с опытом работы на пищевом производстве."},
+  {name:"Узкопрофильный навык (1 шт.)", price:7000, tip:"Требуется конкретный узкопрофильный навык или владение специфическим инструментом/программой, которыми обладают далеко не все кандидаты в этой сфере. Например, менеджер, который должен работать именно в Bitrix24, или маркетолог, который должен работать именно в Яндекс.Директ. Можно включить до 3 навыков — каждый учитывается отдельно.", counter:true, maxCount:3},
   {name:"Опыт работы на аналогичной должности от 6 месяцев", price:3000, tip:"Опыт работы не обязательно в сфере вакансии, а на аналогичной должности — от 6 месяцев."},
   {name:"Опыт работы на аналогичной должности от 2 лет", price:5000, tip:"Опыт работы не обязательно в сфере вакансии, а на аналогичной должности — от 2 лет."},
   {name:"Опыт работы на аналогичной должности от 3 лет", price:7000, tip:"Опыт работы не обязательно в сфере вакансии, а на аналогичной должности — от 3 лет."},
@@ -1071,17 +1127,17 @@ const CRIT = [
 ];
 const EXTRA = [
   {name:"Внесение корректировок в «портрет кандидата» во время подбора (1 раз)", price:0, free:true, checked:true, tip:"Мы внесём корректировки в портрет кандидата по просьбе заказчика — за исключением случаев, когда эти корректировки существенно изменяют вакансию (в таком случае потребуется доплата), либо когда корректировки улучшают условия вакансии (в этом случае доплата не требуется)."},
-  {name:"Тест кандидата на рабочем месте до 7 календарных дней", price:0, free:true, tip:"Вакансия будет считаться закрытой, если кандидат проработает более 7 календарных дней. До истечения этого срока подбор не считается завершённым."},
+  {name:"Тест кандидата на рабочем месте до 7 календарных дней", price:0, free:true, tip:"Применяется только по просьбе или явной потребности заказчика. Вакансия будет считаться закрытой, если кандидат проработает более 7 календарных дней. До истечения этого срока подбор не считается завершённым."},
   {name:"Тест кандидата на рабочем месте от 7 до 14 календарных дней", price:10000, tip:"Вакансия будет считаться закрытой, если кандидат проработает более 14 календарных дней. До истечения этого срока подбор не считается завершённым. Дополнительная оплата закладывается заранее, так как приостановка процесса в этот период требует дополнительных ресурсов."},
   {name:"Ускоренный поиск и подбор кандидатов", price:15000, tip:"Для срочных, «горящих» вакансий. Вакансия получает высокий приоритет, подключается дополнительный рекрутер."},
   {name:"Проведение профильных тестовых заданий (все кандидаты)", price:15000, tip:"Проверка практических навыков кандидатов через выполнение тестовых заданий."},
   {name:"Проведение внутренних собеседований в видео-формате", price:10000, tip:"По стандарту интервью проводится в аудио-формате. С данной опцией — в видео-формате."},
-  {name:"Проверка кандидатов СБ (до 5 кандидатов на выбор заказчика)", price:5000, tip:"Проверяем 5 кандидатов на выбор заказчика на уголовное/кредитное прошлое — подготавливаем отчёт по запросу."},
+  {name:"Проверка кандидатов СБ (до 5 кандидатов)", price:5000, tip:"Проверяем 5 кандидатов на выбор заказчика на уголовное/кредитное прошлое — подготавливаем отчёт по запросу."},
   {name:"Проверка рекомендаций с предыдущих мест работы (до 5 кандидатов)", price:5000, tip:"Проверяем 5 кандидатов на выбор заказчика — находим контакты руководителей с предыдущих мест работы, задаём вопросы и передаём информацию клиенту."},
-  {name:"Увеличение % соответствия для усложн. критериев до 100%", price:0, free:true, tip:"⚠ Требует согласования с руководством!\n\nВносится только по просьбе заказчика. В договоре будет указано, что кандидат должен соответствовать обязательным усложняющим критериям (входящим в стоимость подбора) на 100%."},
-  {name:"Увеличение % соответствия для всех критериев до 70%", price:0, free:true, tip:"⚠ Требует согласования с руководством!\n\nПредоставляется бесплатно. Чем выше порог формального соответствия, тем больше кандидатов необходимо рассмотреть на этапе резюме — это увеличивает объём работы и затраты на ресурсы."},
-  {name:"Увеличение срока рассмотрения кандидатов до 3 дней", price:0, free:true, tip:"Предоставляется бесплатно. Это срок, в течение которого мы сообщаем кандидатам, что Руководитель даст им обратную связь. Чем больше срок — тем выше вероятность, что кандидат не дождётся ответа и примет другое предложение."},
-  {name:"Увеличение срока рассмотрения кандидатов до 4–5 дней", price:7000, tip:"Оплачивается дополнительно, так как удлиняет цикл подбора. Это срок, в течение которого мы сообщаем кандидатам, что Руководитель даст им обратную связь. Чем больше срок — тем выше вероятность, что кандидат не дождётся ответа и примет другое предложение."},
+  {name:"Увеличение % соответствия для усложн. критериев до 100%", price:0, free:true, tip:"⚠ Требует согласования с руководством!\n\nПрименяется только по просьбе или явной потребности заказчика. В договоре будет указано, что кандидат должен соответствовать обязательным усложняющим критериям (входящим в стоимость подбора) на 100%."},
+  {name:"Увеличение % соответствия для всех критериев до 70%", price:0, free:true, tip:"⚠ Требует согласования с руководством!\n\nПрименяется только по просьбе или явной потребности заказчика. Предоставляется бесплатно. Чем выше порог формального соответствия, тем больше кандидатов необходимо рассмотреть на этапе резюме — это увеличивает объём работы и затраты на ресурсы."},
+  {name:"Увеличение срока рассмотрения кандидатов до 3 дней", price:0, free:true, tip:"Применяется только по просьбе или явной потребности заказчика. Предоставляется бесплатно. Стандартный срок рассмотрения — 2 дня. Это срок, в течение которого мы сообщаем кандидатам, что Руководитель даст им обратную связь. Чем больше срок — тем выше вероятность, что кандидат не дождётся ответа и примет другое предложение."},
+  {name:"Увеличение срока рассмотрения кандидатов до 4 или 5 дней", price:7000, tip:"Оплачивается дополнительно, так как удлиняет цикл подбора. Стандартный срок рассмотрения — 2 дня. Это срок, в течение которого мы сообщаем кандидатам, что Руководитель даст им обратную связь. Чем больше срок — тем выше вероятность, что кандидат не дождётся ответа и примет другое предложение."},
 ];
 const DISC_STAFF = [
   {label:"1 сотрудник", disc:0},
@@ -1178,11 +1234,19 @@ function fmt(n) { return n.toLocaleString('ru-RU') + ' ₽'; }
 const NUM_WORDS_GEN_M = {1:'одного',2:'двух',3:'трёх',4:'четырёх',5:'пяти',6:'шести',7:'семи',8:'восьми',9:'девяти',10:'десяти',11:'одиннадцати',12:'двенадцати',13:'тринадцати',14:'четырнадцати',15:'пятнадцати',16:'шестнадцати',17:'семнадцати',18:'восемнадцати',19:'девятнадцати',20:'двадцати'};
 // «N (словом) кандидата/кандидатов» в родительном падеже (для «оставшихся N», «предоставления N» и т.п.)
 function candsGen(n) {
-  const word = NUM_WORDS_GEN_M[n] ? ` (${NUM_WORDS_GEN_M[n]})` : '';
-  const noun = (n % 10 === 1 && n % 100 !== 11) ? 'кандидата'
-    : ([2,3,4].includes(n % 10) && ![12,13,14].includes(n % 100)) ? 'кандидата'
-    : 'кандидатов';
-  return `${n}${word} ${noun}`;
+  // Родительный падеж: после «предоставления», «последних», «первые N»
+  // 1 → кандидата, остальные → кандидатов
+  const noun = (n % 10 === 1 && n % 100 !== 11) ? 'кандидата' : 'кандидатов';
+  return `${n} ${noun}`;
+}
+function candsGenPl(n) {
+  // После «последних/последнего» — склоняем
+  const noun = (n % 10 === 1 && n % 100 !== 11) ? 'кандидата' : 'кандидатов';
+  return `${n} ${noun}`;
+}
+function candsGenMany(n) {
+  // После «каждых» — всегда кандидатов
+  return `${n} кандидатов`;
 }
 // «оставшегося/оставшихся» согласование
 function remainWord(n) {
@@ -1200,16 +1264,44 @@ function openVacancy(id) {
   loadData(id); // loadData сам вызовет switchTab с сохранённой вкладкой
 }
 
+function showTabCat() {
+  const cat = document.getElementById('tab-vacancies-cat');
+  if (cat) cat.classList.add('running');
+}
+function hideTabCat() {
+  const cat = document.getElementById('tab-vacancies-cat');
+  if (cat) cat.classList.remove('running');
+}
+
 function closeVacancy() {
   vacancyMode = false;
-  // Re-apply field-empty to selects that show 'not selected'
   const coType = document.getElementById('exp-co-type');
   if (coType && !coType.value) { coType.classList.add('field-empty'); coType.classList.remove('filled'); }
-  // Скрываем вкладки
   ['tab-expertise','tab-tochechny','tab-massovy'].forEach(t => {
     document.getElementById(t).style.display = 'none';
   });
-  switchTab('vacancies');
+
+  const doClose = () => { hideTabCat(); switchTab('vacancies'); };
+
+  if (autoSaveTimer !== null) {
+    // Есть отложенное сохранение — запускаем немедленно и ждём
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = null;
+    setSaveIndicator('saving');
+    showTabCat();
+    runAutoSave().finally(() => {
+      const waitDone = () => { if (isSaving) { setTimeout(waitDone, 50); return; } doClose(); };
+      waitDone();
+    });
+  } else if (isSaving) {
+    // Уже идёт сохранение — ждём завершения
+    setSaveIndicator('saving');
+    showTabCat();
+    const waitDone = () => { if (isSaving) { setTimeout(waitDone, 50); return; } doClose(); };
+    waitDone();
+  } else {
+    doClose();
+  }
 }
 
 function switchTab(tab) {
@@ -1601,7 +1693,7 @@ function getSummary() {
   const candsInputEl = document.getElementById('m-cands');
   const massVisible = candsInputEl && parseInt(candsInputEl.value) > 0;
   let massCands = null, massCostMin = null, massCostMax = null;
-  let massTariffName = null, massPayLabel = null, massPayMode = null;
+  let massTariffName = null, massPayLabel = null, massPayMode = null, massSmetaItems = [];
   if (massVisible) {
     massCands = parseInt(candsInputEl.value) || null;
     const level = document.getElementById('m-level')?.value || '1-4';
@@ -1610,9 +1702,26 @@ function getSummary() {
     massCostMax = massCostMin;
     const MASS_NAMES = { search: 'Только поиск и подбор', full: 'Полный цикл найма' };
     massTariffName = MASS_NAMES[massModeSelected] || null;
-    const PAY_LABELS = { per10: 'Предоплата за каждые 10 кандидатов', per20: 'Предоплата за каждые 20 кандидатов', full_prepay: '100% предоплата', under10: `Предоплата за ${massCands} кандидатов` };
-    massPayLabel = PAY_LABELS[massTariffSelected] || null;
+    // Dynamic label matching renderMassSmeta logic
+    const bs = massTariffSelected === 'per20' || massTariffSelected === 'half20' ? 20 : 10;
+    if (massTariffSelected === 'full_prepay') massPayLabel = '100% предоплата';
+    else if (massTariffSelected === 'under10') massPayLabel = `Предоплата за ${candsGen(massCands)}`;
+    else {
+      const isHalfS = massTariffSelected === 'half10' || massTariffSelected === 'half20';
+      if (isHalfS) {
+        const f=Math.floor(massCands/2),s=massCands-f,allEv=(massCands%2===0)&&(s%bs===0);
+        massPayLabel = allEv&&Math.floor(s/bs)>0?`50% предоплата, далее за каждые ${bs} кандидатов`:'50% предоплата, далее поэтапная оплата';
+      } else {
+        const rem = massCands % bs;
+        const rn=rem%10===1&&rem%100!==11?'кандидата':[2,3,4].includes(rem%10)&&![12,13,14].includes(rem%100)?'кандидата':'кандидатов';massPayLabel = rem > 0 ? (massCands <= bs + rem ? `Предоплата за ${bs} кандидатов, далее за ${rem} ${rn}` : `Предоплата за каждые ${bs} кандидатов, далее за ${rem} ${rn}`) : `Предоплата за каждые ${bs} кандидатов`;
+      }
+    }
     massPayMode = massTariffSelected;
+    // Реальные строки массовой сметы (график платежей и т.п.) — переносим как есть, а не пересчитываем заново
+    massSmetaItems = Array.from(document.querySelectorAll('#m-smeta-body .smeta-item')).map(el => ({
+      name: el.querySelector('.smeta-item-name')?.textContent || '',
+      price: el.querySelector('.smeta-item-price')?.textContent || ''
+    }));
   }
 
   return {
@@ -1631,6 +1740,7 @@ function getSummary() {
     massStaff: massCands ? (parseInt(document.getElementById('m-staff')?.value) || null) : null,
     massLevel: massCands ? (document.getElementById('m-level')?.value || '1-4') : null,
     massModeKey: massCands ? (massModeSelected || 'search') : null,
+    massSmetaItems,
   };
 }
 
@@ -1664,6 +1774,9 @@ function setState(state) {
     if (state.mass.staff)  document.getElementById('m-staff').value  = state.mass.staff;
     if (state.mass.cands)  document.getElementById('m-cands').value  = state.mass.cands;
     if (state.mass.ratio && document.getElementById('m-ratio')) document.getElementById('m-ratio').value = state.mass.ratio;
+    updateStaffStyle();
+    updateLevelStyle();
+    updateCandsStyle();
   }
   // Restore collapse state (only collapse if explicitly saved as collapsed)
   if (state.calcCollapsed === true && !calcCollapsed) {
@@ -1780,6 +1893,32 @@ function toggleMgrCollapse() {
 }
 
 let calcCollapsed = false;
+let ptHideWarnings = false;
+let massHideWarnings = false;
+function togglePtHideWarnings() {
+  ptHideWarnings = !ptHideWarnings;
+  const btn = document.getElementById('pt-warn-toggle');
+  const slash = document.getElementById('pt-warn-toggle-slash');
+  const label = document.getElementById('pt-warn-toggle-label');
+  if (btn) btn.classList.toggle('active', ptHideWarnings);
+  if (slash) slash.style.display = ptHideWarnings ? '' : 'none';
+  const titleText = ptHideWarnings ? 'Показать предупреждения' : 'Скрыть предупреждения';
+  if (btn) btn.title = titleText;
+  if (label) label.textContent = titleText;
+  calcTotal();
+}
+function toggleMassHideWarnings() {
+  massHideWarnings = !massHideWarnings;
+  const btn = document.getElementById('m-warn-toggle');
+  const slash = document.getElementById('m-warn-toggle-slash');
+  const label = document.getElementById('m-warn-toggle-label');
+  if (btn) btn.classList.toggle('active', massHideWarnings);
+  if (slash) slash.style.display = massHideWarnings ? '' : 'none';
+  const titleText = massHideWarnings ? 'Показать предупреждения' : 'Скрыть предупреждения';
+  if (btn) btn.title = titleText;
+  if (label) label.textContent = titleText;
+  massCalc();
+}
 let vacCompanyCollapsed = false;
 let expCollapsed = false;
 function toggleVacCompanyCollapse() {
@@ -1997,12 +2136,38 @@ function beautifyMin(total) {
 }
 
 // ==================== МАССОВЫЙ ====================
+function updateStaffStyle() {
+  const input = document.getElementById('m-staff');
+  if (!input) return;
+  if (input.value === '') {
+    input.style.borderColor = '#f0e4a0';
+    input.style.background  = '#fffdf0';
+  } else {
+    input.style.borderColor = '';
+    input.style.background  = '';
+  }
+}
+
+function updateLevelStyle() {
+  const sel = document.getElementById('m-level');
+  if (!sel) return;
+  if (sel.value === '') {
+    sel.style.borderColor = '#f0e4a0';
+    sel.style.background  = '#fffdf0';
+  } else {
+    sel.style.borderColor = '';
+    sel.style.background  = '';
+  }
+}
+
 function updateCandsStyle() {
   const input = document.getElementById('m-cands');
   const warn  = document.getElementById('m-cands-warn');
   if (!input) return;
-  const val = parseInt(input.value) || 0;
-  if (val < 10 && input.value !== '') {
+  const raw = input.value;
+  const val = parseInt(raw) || 0;
+  if (raw !== '' && val < 10) {
+    // Заполнено, но меньше минимума — предупреждение
     input.style.borderColor = '#f5c6c0';
     input.style.background  = '#fdf0ee';
     if (warn) {
@@ -2014,7 +2179,8 @@ function updateCandsStyle() {
       warn.style.fontWeight   = '500';
       warn.textContent = '⚠ Указано кол-во менее минимального (10 кандидатов) — необходимо согласование с руководством';
     }
-  } else {
+  } else if (raw === '') {
+    // Поле пустое — приглашение заполнить
     input.style.borderColor = '#f0e4a0';
     input.style.background  = '#fffdf0';
     if (warn) {
@@ -2024,7 +2190,20 @@ function updateCandsStyle() {
       warn.style.padding      = '';
       warn.style.color        = '#c0392b';
       warn.style.fontWeight   = '';
-      warn.textContent = 'Можно указать любое кол-во, вне зависимости от рекомендуемого, но не менее 10 кандидатов';
+      warn.textContent = 'Можно указать любое кол-во вручную, вне зависимости от рекомендуемого, но не менее 10 кандидатов';
+    }
+  } else {
+    // Заполнено (вручную или автоматически) и не меньше минимума — без заливки
+    input.style.borderColor = '';
+    input.style.background  = '';
+    if (warn) {
+      warn.style.background   = '';
+      warn.style.border       = '';
+      warn.style.borderRadius = '';
+      warn.style.padding      = '';
+      warn.style.color        = '#c0392b';
+      warn.style.fontWeight   = '';
+      warn.textContent = 'Можно указать любое кол-во вручную, вне зависимости от рекомендуемого, но не менее 10 кандидатов';
     }
   }
 }
@@ -2049,7 +2228,8 @@ function massPayBreakdown(total_cands, batch) {
 function massCalc() {
   const staff  = parseInt(document.getElementById('m-staff').value) || 0;
   const ratio  = parseInt(document.getElementById('m-ratio')?.value) || 4;
-  const level  = document.getElementById('m-level').value;
+  const levelRaw = document.getElementById('m-level').value;
+  const level  = levelRaw || '1-4'; // безопасный фоллбэк для расчётов, пока пользователь не выбрал уровень
 
   // Ползунок
   const ratioVal = document.getElementById('m-ratio-val');
@@ -2164,6 +2344,11 @@ function renderSmeta(bases, crits, extras, subtotal) {
   const manuallyZero = customInput && customInput.value !== '' && usedDisc === 0 && std.total > 0;
   const discStatus = usedDisc > std.total ? 'custom' : (usedDisc < std.total ? 'lowered' : 'std');
 
+  // Кнопка "Скрыть предупреждения" видна только если предупреждение реально есть
+  const hasPtWarning = (usedDisc > 0 && (discStatus === 'custom' || discStatus === 'lowered')) || manuallyZero;
+  const ptWarnBtn = document.getElementById('pt-warn-toggle');
+  if (ptWarnBtn) ptWarnBtn.style.display = hasPtWarning ? '' : 'none';
+
   // Стоимость до скидки — только если скидка есть или предусмотрена
   const subtotalBeforeDiscount = Math.round(subtotal * staffCount);
   if (std.total > 0) {
@@ -2193,18 +2378,18 @@ function renderSmeta(bases, crits, extras, subtotal) {
         }
       }
     }
-    if (discStatus === 'custom')  html += `<div class="discount-custom-warn warn-high">⚠ Нестандартная скидка — необходимо согласование с руководством</div>`;
-    else if (discStatus === 'lowered') html += `<div class="discount-custom-warn warn-low">⚠ Скидка снижена вручную — скорректируйте слайд со скидками в КП</div>`;
+    if (discStatus === 'custom')  { if (!ptHideWarnings) html += `<div class="discount-custom-warn warn-high">⚠ Нестандартная скидка — необходимо согласование с руководством</div>`; }
+    else if (discStatus === 'lowered') { if (!ptHideWarnings) html += `<div class="discount-custom-warn warn-low">⚠ Скидка снижена вручную — скорректируйте слайд со скидками в КП</div>`; }
   } else if (manuallyZero) {
     // Скидка предусмотрена, но вручную выставлена в 0
-    html += `<div class="discount-custom-warn warn-low" style="margin-top:.5rem">⚠ Скидка снижена вручную до 0% — скорректируйте слайд со скидками в КП</div>`;
+    if (!ptHideWarnings) html += `<div class="discount-custom-warn warn-low" style="margin-top:.5rem">⚠ Скидка снижена вручную до 0% — скорректируйте слайд со скидками в КП</div>`;
   }
 
   // Обновить warn в разделе менеджера
   const warnEl = document.getElementById('mgr-disc-warn');
   if (warnEl) {
-    if (discStatus === 'custom')  { warnEl.className = 'discount-custom-warn warn-high'; warnEl.textContent = '⚠ Нестандартная скидка — необходимо согласование с руководством'; }
-    else if (discStatus === 'lowered') { warnEl.className = 'discount-custom-warn warn-low'; warnEl.textContent = '⚠ Скидка снижена вручную — скорректируйте слайд со скидками в КП'; }
+    if (discStatus === 'custom' && !ptHideWarnings)  { warnEl.className = 'discount-custom-warn warn-high'; warnEl.textContent = '⚠ Нестандартная скидка — необходимо согласование с руководством'; }
+    else if (discStatus === 'lowered' && !ptHideWarnings) { warnEl.className = 'discount-custom-warn warn-low'; warnEl.textContent = '⚠ Скидка снижена вручную — скорректируйте слайд со скидками в КП'; }
     else { warnEl.className = usedDisc > 0 ? 'discount-custom-warn warn-std' : 'discount-custom-warn'; warnEl.textContent = usedDisc > 0 ? 'Скидка: ' + discLabel : ''; }
   }
 
@@ -2317,20 +2502,39 @@ function renderMassTariffSelect(level, cands, discount, forcedMode) {
   const tariffSel = document.getElementById('mass-tariff-select');
   if (!tariffSel) return;
   const isUnder10 = cands > 0 && cands < 10;
-  const payModes = isUnder10 ? [
-    { id: 'under10', label: `Предоплата за ${cands} кандидатов`, batch: 0, avail: true },
-  ] : [
-    { id: 'per10', label: cands === 10 ? 'Предоплата за 10 кандидатов' : 'Предоплата за каждые 10 кандидатов', batch: 10, avail: cands >= 10 },
-    { id: 'per20', label: 'Предоплата за каждые 20 кандидатов', batch: 20, avail: cands >= 40 },
-    { id: 'full_prepay', label: '100% предоплата', batch: 0, avail: cands > 10 },
-  ];
-  if (isUnder10) massTariffSelected = 'under10';
-  else if (massTariffSelected === 'per20' && cands < 40) massTariffSelected = 'per10';
-  else if (massTariffSelected === 'under10') massTariffSelected = 'per10';
   const currentMode = forcedMode || massModeSelected || 'search';
   const ppc   = MASS_PRICES[level][currentMode];
   const total = ppc * cands;
   const mc    = {...MASS_TARIFF_COLORS[currentMode]};
+
+  const halfPaymentAmt = ppc * Math.floor(cands / 2);
+  const payModes = isUnder10 ? [
+    { id: 'under10', label: `Предоплата за ${candsGen(cands)}`, batch: 0, avail: true },
+  ] : [
+    { id: 'per10', label: (() => {
+      function cn(n){return n%10===1&&n%100!==11?'кандидата':[2,3,4].includes(n%10)&&![12,13,14].includes(n%100)?'кандидата':'кандидатов';}
+      const r=cands%10;
+      if(cands===10) return 'Предоплата за 10 кандидатов';
+      if(r===0) return 'Предоплата за каждые 10 кандидатов';
+      if(cands<=10+r) return `Предоплата за 10 кандидатов, далее за ${r} ${cn(r)}`;
+      return `Предоплата за каждые 10 кандидатов, далее за ${r} ${cn(r)}`;
+    })(), batch: 10, avail: cands >= 10 },
+    { id: 'per20', label: (() => {
+      function cn(n){return n%10===1&&n%100!==11?'кандидата':[2,3,4].includes(n%10)&&![12,13,14].includes(n%100)?'кандидата':'кандидатов';}
+      const r=cands%20;
+      if(r===0) return 'Предоплата за каждые 20 кандидатов';
+      if(cands<=20+r) return `Предоплата за 20 кандидатов, далее за ${r} ${cn(r)}`;
+      return `Предоплата за каждые 20 кандидатов, далее за ${r} ${cn(r)}`;
+    })(), batch: 20, avail: cands >= 40 },
+    { id: 'half10', label: (() => { const f=Math.floor(cands/2),s=cands-f,allEv=(cands%2===0)&&(s%10===0),cnt=Math.floor(s/10); return allEv&&cnt>0?(cnt===1?'50% предоплата, далее за 10 кандидатов':'50% предоплата, далее за каждые 10 кандидатов'):'50% предоплата, далее поэтапная оплата'; })(), batch: 10, half: true, avail: cands >= 22 || halfPaymentAmt >= 39000 },
+    { id: 'half20', label: (() => { const f=Math.floor(cands/2),s=cands-f,allEv=(cands%2===0)&&(s%20===0),cnt=Math.floor(s/20); return allEv&&cnt>0?(cnt===1?'50% предоплата, далее за 20 кандидатов':'50% предоплата, далее за каждые 20 кандидатов'):'50% предоплата, далее поэтапная оплата'; })(), batch: 20, half: true, avail: cands >= 40 },
+    { id: 'full_prepay', label: '100% предоплата', batch: 0, avail: cands > 10 },
+  ];
+  if (isUnder10) massTariffSelected = 'under10';
+  else if (massTariffSelected === 'per20' && cands < 40) massTariffSelected = 'per10';
+  else if (massTariffSelected === 'half20' && cands < 40) massTariffSelected = 'half10';
+  else if ((massTariffSelected === 'half10' || massTariffSelected === 'half20') && !(cands >= 22 || halfPaymentAmt >= 39000)) massTariffSelected = 'per10';
+  else if (massTariffSelected === 'under10') massTariffSelected = 'per10';
 
   tariffSel.innerHTML = payModes.filter(pm => pm.avail).map(pm => {
     const sel = massTariffSelected === pm.id;
@@ -2342,7 +2546,16 @@ function renderMassTariffSelect(level, cands, discount, forcedMode) {
       return n + ' платежей';
     }
     let sublabel;
-    if (pm.batch > 0) {
+    if (pm.half) {
+      const firstHalf = Math.floor(cands / 2);
+      const secondHalf = cands - firstHalf;
+      const halfBatches = Math.floor(secondHalf / pm.batch);
+      const halfRem = secondHalf % pm.batch;
+      const parts = [`${fmt(ppc * firstHalf)} (50%)`];
+      if (halfBatches > 0) parts.push(`${halfBatches > 1 ? halfBatches + ' × ' : ''}${fmt(ppc * pm.batch)} за ${pm.batch} канд.`);
+      if (halfRem > 0) parts.push(`${fmt(ppc * halfRem)} за ${halfRem} канд.`);
+      sublabel = parts.join(' + ');
+    } else if (pm.batch > 0) {
       if (fullBatches_lbl <= 1) {
         if (rem_lbl > 0 && fullBatches_lbl === 1) {
           const plurC = (n) => n % 10 === 1 && n % 100 !== 11 ? n + ' кандидата' : [2,3,4].includes(n%10) && ![12,13,14].includes(n%100) ? n + ' кандидата' : n + ' кандидатов';
@@ -2379,6 +2592,10 @@ function renderMassSmeta(level, staff, cands, payMode, discount) {
   const exp = getExpState();
   const vname = exp.vname || 'Смета по вакансии';
   // m-smeta-title фиксирован в HTML
+  // Кнопка "Скрыть предупреждения" видна только если предупреждение реально есть
+  const hasMassWarning = cands > 0 && cands < 10;
+  const mWarnBtn = document.getElementById('m-warn-toggle');
+  if (mWarnBtn) mWarnBtn.style.display = hasMassWarning ? '' : 'none';
   const discPct   = Math.round(discount * 100);
   const levelName = level === '1-4' ? '1–4 требования' : '5–8 требований';
   const mode      = massModeSelected || 'search';
@@ -2389,9 +2606,32 @@ function renderMassSmeta(level, staff, cands, payMode, discount) {
 
   // Способ оплаты
   const pluralCandsFn = (n) => [2,3,4].includes(n%10) && ![12,13,14].includes(n%100) ? n+' кандидата' : n+(n%10===1&&n%100!==11?' кандидата':' кандидатов');
-  const payLabels = { per10: cands === 10 ? 'Предоплата за 10 кандидатов' : 'Предоплата за каждые 10 кандидатов', per20: 'Предоплата за каждые 20 кандидатов', full_prepay: '100% предоплата', under10: `Предоплата за ${pluralCandsFn(cands)}` };
-  const payLabel  = payLabels[payMode] || '—';
-  const batchSize = payMode === 'per20' ? 20 : payMode === 'per10' ? 10 : 0;
+  // Dynamic payLabel based on actual breakdown
+  function candNoun(n){return n%10===1&&n%100!==11?'кандидата':[2,3,4].includes(n%10)&&![12,13,14].includes(n%100)?'кандидата':'кандидатов';}
+  function makeDynLabel(mode, cands, bsz) {
+    if (mode === 'full_prepay') return '100% предоплата';
+    if (mode === 'under10') return `Предоплата за ${pluralCandsFn(cands)}`;
+    const isHalfM = mode === 'half10' || mode === 'half20';
+    if (isHalfM) {
+      const first = Math.floor(cands/2);
+      const second = cands - first;
+      const allEven = (cands % 2 === 0) && (second % bsz === 0) && Math.floor(second/bsz) > 0;
+      if (allEven) {
+        const regularBatchCount = Math.floor((cands - Math.floor(cands/2)) / bsz);
+        if (regularBatchCount === 1) return `50% предоплата, далее за ${bsz} кандидатов`;
+        return `50% предоплата, далее за каждые ${bsz} кандидатов`;
+      }
+      return '50% предоплата, далее поэтапная оплата';
+    }
+    const rem = cands % bsz;
+    if (rem === 0) return cands === bsz ? `Предоплата за ${bsz} кандидатов` : `Предоплата за каждые ${bsz} кандидатов`;
+    // Match payModes label format exactly
+    if (cands <= bsz + rem) return `Предоплата за ${bsz} кандидатов, далее за ${rem} ${candNoun(rem)}`;
+    return `Предоплата за каждые ${bsz} кандидатов, далее за ${rem} ${candNoun(rem)}`;
+  }
+  const isHalf    = payMode === 'half10' || payMode === 'half20';
+  const batchSize = payMode === 'per20' || payMode === 'half20' ? 20 : payMode === 'per10' || payMode === 'half10' ? 10 : 0;
+  const payLabel = makeDynLabel(payMode, cands, batchSize);
   const breakdown = batchSize > 0 ? massPayBreakdown(cands, batchSize) : '—';
   const prepayAmt = batchSize > 0 ? fmt(ppc * Math.min(batchSize, cands)) : fmt(totalDisc);
 
@@ -2404,8 +2644,8 @@ function renderMassSmeta(level, staff, cands, payMode, discount) {
   if (massVname) html += `<div class="smeta-item"><span class="smeta-item-name">Название вакансии</span><span class="smeta-item-price">${massVname}</span></div>`;
   html += `<div class="smeta-item"><span class="smeta-item-name">Уровень требований</span><span class="smeta-item-price">${levelName}</span></div>`;
   if (staff > 0) html += `<div class="smeta-item"><span class="smeta-item-name">Сотрудников</span><span class="smeta-item-price">${staff}</span></div>`;
-  const candsColor = cands < 10 ? 'color:#c0392b;font-weight:600' : '';
-  const candsWarn  = cands < 10 ? ' ⚠' : '';
+  const candsColor = (cands < 10 && !massHideWarnings) ? 'color:#c0392b;font-weight:600' : '';
+  const candsWarn  = (cands < 10 && !massHideWarnings) ? ' ⚠' : '';
   html += `<div class="smeta-item"><span class="smeta-item-name" style="${candsColor}">Кандидатов в подбор${candsWarn}</span><span class="smeta-item-price" style="${candsColor}">${cands}</span></div>`;
   html += `<div class="smeta-item"><span class="smeta-item-name">Тариф</span><span class="smeta-item-price">${MASS_TARIFF_NAMES[mode]}</span></div>`;
   html += `<div class="smeta-item"><span class="smeta-item-name">Стоимость 1 кандидата</span><span class="smeta-item-price">${fmt(ppc)}</span></div>`;
@@ -2425,28 +2665,51 @@ function renderMassSmeta(level, staff, cands, payMode, discount) {
   html += `<div class="smeta-sec-title">Порядок оплаты</div>`;
   html += `<div class="smeta-item" style="margin-bottom:.5rem"><span class="smeta-item-name">Формат</span><span class="smeta-item-price">${payLabel}</span></div>`;
   html += `<div class="smeta-sec-title">Порядок платежей</div>`;
-  if (batchSize > 0 && cands >= 10) {
+  if (isHalf && cands >= 2) {
+    const firstHalf = Math.floor(cands / 2);
+    const secondHalf = cands - firstHalf;
+    const fullBatches = Math.floor(secondHalf / batchSize);
+    const remainder = secondHalf % batchSize;
+    const batchAmt = ppc * batchSize;
+    const totalPayments = 1 + fullBatches + (remainder > 0 ? 1 : 0);
+    const isExact50 = (cands % 2 === 0);
+    const pct50Label = isExact50 ? '50%' : '~50%';
+    html += `<div class="smeta-item"><span class="smeta-item-name">Платёж 1 · Платёж для начала оказания услуг <span style="color:var(--text2);user-select:none;-webkit-user-select:none">(${pct50Label} от стоимости подбора, за ${candsGen(firstHalf)})</span></span><span class="smeta-item-price" style="font-weight:600">${fmt(ppc * firstHalf)}</span></div>`;
+    if (fullBatches > 0) {
+      if (fullBatches === 1) {
+        html += `<div class="smeta-item"><span class="smeta-item-name">Платёж 2 · Платёж после предоставления ${candsGen(batchSize)}</span><span class="smeta-item-price" style="font-weight:600">${fmt(batchAmt)}</span></div>`;
+      } else {
+        html += `<div class="smeta-item"><span class="smeta-item-name">Платежи 2–${1 + fullBatches} · Платежи после предоставления каждых ${candsGenMany(batchSize)}</span><span class="smeta-item-price" style="font-weight:600">${fmt(batchAmt)} × ${fullBatches}</span></div>`;
+      }
+    }
+    if (remainder > 0) {
+      html += `<div class="smeta-item"><span class="smeta-item-name">Платёж ${totalPayments} · Платеж перед предоставлением ${remainWord(remainder)} ${candsGenPl(remainder)}</span><span class="smeta-item-price" style="font-weight:600">${fmt(ppc * remainder)}</span></div>`;
+    }
+  } else if (batchSize > 0 && cands >= 10) {
     const fullBatches = Math.floor(cands / batchSize);
     const remainder   = cands % batchSize;
     const batchAmt    = ppc * batchSize;
     const totalPayments = fullBatches + (remainder > 0 ? 1 : 0);
-    html += `<div class="smeta-item"><span class="smeta-item-name">Платёж 1 · Платёж для начала оказания услуг (за первые ${candsGen(batchSize)})</span><span class="smeta-item-price" style="font-weight:600">${fmt(batchAmt)}</span></div>`;
+    html += `<div class="smeta-item"><span class="smeta-item-name">Платёж 1 · Платёж для начала оказания услуг <span style="color:var(--text2);user-select:none;-webkit-user-select:none">(за первые ${candsGen(batchSize)})</span></span><span class="smeta-item-price" style="font-weight:600">${fmt(batchAmt)}</span></div>`;
     if (fullBatches > 1) {
       const repeatCount = fullBatches - 1;
       if (repeatCount === 1) {
         html += `<div class="smeta-item"><span class="smeta-item-name">Платёж 2 · Платёж после предоставления ${candsGen(batchSize)}</span><span class="smeta-item-price" style="font-weight:600">${fmt(batchAmt)}</span></div>`;
       } else {
-        html += `<div class="smeta-item"><span class="smeta-item-name">Платежи 2–${fullBatches} · Платежи после предоставления каждых ${candsGen(batchSize)}</span><span class="smeta-item-price" style="font-weight:600">${fmt(batchAmt)} × ${repeatCount}</span></div>`;
+        html += `<div class="smeta-item"><span class="smeta-item-name">Платежи 2–${fullBatches} · Платежи после предоставления каждых ${candsGenMany(batchSize)}</span><span class="smeta-item-price" style="font-weight:600">${fmt(batchAmt)} × ${repeatCount}</span></div>`;
       }
     }
     if (remainder > 0) {
-      html += `<div class="smeta-item"><span class="smeta-item-name">Платёж ${totalPayments} · Платеж перед предоставлением ${remainWord(remainder)} ${candsGen(remainder)}</span><span class="smeta-item-price" style="font-weight:600">${fmt(ppc * remainder)}</span></div>`;
+      html += `<div class="smeta-item"><span class="smeta-item-name">Платёж ${totalPayments} · Платеж перед предоставлением ${remainWord(remainder)} ${candsGenPl(remainder)}</span><span class="smeta-item-price" style="font-weight:600">${fmt(ppc * remainder)}</span></div>`;
     }
   } else if (cands < 10 && cands > 0) {
-    html += `<div class="smeta-item"><span class="smeta-item-name" style="color:#c0392b">Платёж 1 · Платёж для начала оказания услуг · за ${candsGen(cands)}</span><span class="smeta-item-price" style="color:#c0392b;font-weight:600">${fmt(ppc * cands)}</span></div>`;
-    html += `<div class="smeta-item"><span class="smeta-item-name" style="color:#c0392b;font-size:11.5px">⚠ Нестандартный объём — требуется согласование с руководством</span></div>`;
+    const ptColor = massHideWarnings ? '' : 'color:#c0392b';
+    html += `<div class="smeta-item"><span class="smeta-item-name" style="${ptColor}">Платёж 1 · Платёж для начала оказания услуг <span style="color:var(--text2);user-select:none;-webkit-user-select:none">(за ${candsGen(cands)})</span></span><span class="smeta-item-price" style="${ptColor}${massHideWarnings ? '' : ';'}font-weight:600">${fmt(ppc * cands)}</span></div>`;
+    if (!massHideWarnings) {
+      html += `<div class="smeta-item"><span class="smeta-item-name" style="color:#c0392b;font-size:11.5px">⚠ Нестандартный объём — требуется согласование с руководством</span></div>`;
+    }
   } else {
-    html += `<div class="smeta-item"><span class="smeta-item-name">Платёж 1 · Платёж для начала оказания услуг</span><span class="smeta-item-price" style="font-weight:600">${fmt(discount > 0 ? totalDisc : total)}</span></div>`;
+    html += `<div class="smeta-item"><span class="smeta-item-name">Платёж 1 · Платёж для начала оказания услуг <span style="color:var(--text2);user-select:none;-webkit-user-select:none">(100% предоплата)</span></span><span class="smeta-item-price" style="font-weight:600">${fmt(discount > 0 ? totalDisc : total)}</span></div>`;
   }
 
   document.getElementById('m-smeta-body').innerHTML = html;
@@ -2556,6 +2819,22 @@ async function saveData(silent) {
     }
     if (result && result.success) {
       updateHeaderLink();
+      // Обновляем локальный кэш карточки сразу, без перезагрузки с сервера
+      // (создаём запись, если её ещё нет — например, для только что созданной вакансии)
+      if (currentId) {
+        const freshSummary = getSummary();
+        const freshExp = getExpState();
+        const hasPoint = freshSummary.staffCount != null && freshSummary.pointCost != null;
+        const hasMass  = freshSummary.massCands != null && (freshSummary.massCostMin != null || freshSummary.massCostMax != null);
+        let freshCost = 0;
+        if (hasPoint) freshCost = freshSummary.pointCost;
+        else if (hasMass) freshCost = freshSummary.massCostMin || freshSummary.massCostMax || 0;
+        if (!vacanciesData[currentId]) vacanciesData[currentId] = {};
+        vacanciesData[currentId].name = freshExp.vname || 'Без названия';
+        vacanciesData[currentId].summary = freshSummary;
+        vacanciesData[currentId].cost = freshCost;
+        vacanciesData[currentId].modified = new Date().toISOString();
+      }
       return true;
     }
     return false;
@@ -2625,7 +2904,7 @@ function renderVacTable() {
     : vacCountToDiscount(ids.length);
 
   if (vacMode === 'point') {
-    if (tableTitle) tableTitle.textContent = 'Итоговая смета по договору';
+    if (tableTitle) tableTitle.textContent = 'Точечный подбор — смета по договору';
     let html = '';
     let totalSum = 0;
     ids.forEach(id => {
@@ -2668,7 +2947,6 @@ function renderVacTable() {
         firstPayVal = fmt(Math.round(finalCost * 0.5)); // 50%
       }
       const isFullPrepay = s.pointTariff === 'max';
-      const tariffColor = s.pointTariff === 'mid' ? '#1e40af' : s.pointTariff === 'min' ? '#5b21b6' : '#065f46';
       const rightCol = `<div style="font-size:10.5px;color:#1e40af;font-weight:600;margin-bottom:2px">1-й платёж</div>
           <div style="font-size:14px;font-weight:700;color:#1e40af">${firstPayVal}</div>
           <div style="font-size:10.5px;color:var(--text3);margin-top:10px;margin-bottom:2px">Итоговая стоимость</div>
@@ -2678,9 +2956,9 @@ function renderVacTable() {
           <div style="font-size:13px;font-weight:700;margin-bottom:6px">${escapeHtml(x.name)}</div>
           <div style="font-size:12px;color:var(--text2);line-height:1.8">
             <div>Сотрудников: <b>${s.staffCount}</b></div>
-            <div>Тариф: <b style="color:${tariffColor}">${s.pointTariffName || '—'}</b></div>
+            <div>Тариф: <b>${s.pointTariffName || '—'}</b></div>
             <div>Стоимость без скидок: <b>${fmt(cost)}</b></div>
-            <div>Скидки: <b style="color:#065f46">${discLabel}</b></div>
+            <div>Скидки: <b>${discLabel}</b></div>
           </div>
         </div>
         <div style="text-align:right;flex-shrink:0;padding-top:2px">
@@ -2702,32 +2980,22 @@ function renderVacTable() {
       const cost = s.massCostMin || 0;
       totalSum += cost;
 
-      const batchSize = s.massPayMode === 'per20' ? 20 : s.massPayMode === 'per10' ? 10 : 0;
+      const batchSize = (s.massPayMode === 'per20' || s.massPayMode === 'half20') ? 20 : (s.massPayMode === 'per10' || s.massPayMode === 'half10') ? 10 : 0;
       const level = s.massLevel || '1-4';
       const modeKey = s.massModeKey || 'search';
       const ppc = (MASS_PRICES[level] || {})[modeKey] || 0;
-      const firstPayment = batchSize > 0 ? ppc * Math.min(batchSize, s.massCands) : cost;
+      const isHalfMode = s.massPayMode === 'half10' || s.massPayMode === 'half20';
+      const firstPayment = isHalfMode ? ppc * Math.floor(s.massCands / 2) : (batchSize > 0 ? ppc * Math.min(batchSize, s.massCands) : cost);
       const levelName = level === '1-4' ? '1–4 требования' : '5–8 требований';
       const payLabel = s.massPayLabel || '—';
 
-      // Полный график платежей
-      let scheduleHtml = '';
-      if (batchSize > 0) {
-        const fullBatches = Math.floor(s.massCands / batchSize);
-        const remainder = s.massCands % batchSize;
-        const batchAmt = ppc * batchSize;
-        scheduleHtml += `<div style="font-size:11.5px;margin-top:1px">Платёж 1 · Платёж для начала оказания услуг — <b>${fmt(batchAmt)}</b></div>`;
-        if (fullBatches > 1) {
-          const repeatCount = fullBatches - 1;
-          const label = repeatCount === 1 ? `Платёж 2` : `Платежи 2–${fullBatches}`;
-          scheduleHtml += `<div style="font-size:11.5px;margin-top:1px">${label} · Платеж после каждых ${candsGen(batchSize)} — <b>${fmt(batchAmt)}</b>${repeatCount > 1 ? ` × ${repeatCount}` : ''}</div>`;
-        }
-        if (remainder > 0) {
-          scheduleHtml += `<div style="font-size:11.5px;margin-top:1px">Платёж ${fullBatches + 1} · Платеж перед предоставлением ${remainWord(remainder)} ${candsGen(remainder)} — <b>${fmt(ppc * remainder)}</b></div>`;
-        }
-      } else {
-        scheduleHtml = `<div style="font-size:11.5px;margin-top:1px">100% предоплата · единый платёж — <b>${fmt(cost)}</b></div>`;
-      }
+      // График платежей — переносим реальные строки из сметы по вакансии, а не пересчитываем заново
+      const payItems = (s.massSmetaItems || []).filter(i => i.name.includes('Платёж') || i.name.includes('платёж'));
+      let scheduleHtml = payItems.length
+        ? payItems.map(i => `<div style="font-size:11.5px;margin-top:1px">${i.name} — <b>${i.price}</b></div>`).join('')
+        : (batchSize === 0
+            ? `<div style="font-size:11.5px;margin-top:1px">100% предоплата · единый платёж — <b>${fmt(cost)}</b></div>`
+            : `<div style="font-size:11.5px;margin-top:1px;color:var(--text3)">—</div>`);
 
       html += `<div style="border-bottom:1px solid var(--border);padding:.85rem 0;display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
         <div style="flex:1;min-width:0">
@@ -2818,7 +3086,8 @@ function renderVacAggregate() {
       noteEl = document.createElement('div');
       noteEl.id = 'vac-disc-note';
       noteEl.style.cssText = 'font-size:11.5px;margin-top:6px;padding:6px 10px;border-radius:6px;font-weight:500';
-      discInp.closest('.discount-custom-wrap').appendChild(noteEl);
+      const autoWrap = document.getElementById('vac-disc-auto-wrap');
+      if (autoWrap) autoWrap.appendChild(noteEl);
     }
     const isWarn = noteText.startsWith('⚠');
     noteEl.style.background = isWarn ? '#fdf0ee' : '#f0faf4';
@@ -2831,13 +3100,12 @@ function renderVacAggregate() {
   } else {
     discInp.style.borderColor = '';
     discInp.style.background = '';
-    const noteEl = document.getElementById('vac-disc-note');
-    if (noteEl) noteEl.style.display = 'none';
-    // Если выбрана только 1 вакансия — скидка за количество неприменима, блокируем поле
+    const noteEl2 = document.getElementById('vac-disc-note');
+    if (noteEl2) noteEl2.style.display = 'none';
     setVacDiscLock(ids.length < 2);
   }
 
-  setVacMode(vacMode); // применяет кнопки и вызывает renderVacTable
+  setVacMode(vacMode);
   renderVacAggregateTotals();
 }
 
@@ -2886,6 +3154,7 @@ async function loadVacanciesList() {
     if (!result.success) throw new Error(result.error || 'unknown');
     const items = result.items || [];
     grid.querySelectorAll('.vac-card:not(.vac-add)').forEach(el => el.remove());
+    const prevVacanciesData = vacanciesData; // сохраняем кэш ДО сброса, чтобы fallback ниже реально работал
     vacanciesData = {};
     items.forEach(item => {
       const card = document.createElement('div');
@@ -2895,6 +3164,16 @@ async function loadVacanciesList() {
       card.onclick = (ev) => { if (!ev.target.closest('.vac-card-check') && !ev.target.closest('.vac-card-del')) openVacancy(item.id); };
       let summary = null;
       try { summary = item.summary ? JSON.parse(item.summary) : null; } catch(e) {}
+      // Если в локальном кэше есть более свежие данные (после сохранения) — используем их
+      // (сервер может отдавать чуть устаревшую запись сразу после сохранения)
+      const cached = prevVacanciesData[item.id];
+      const serverModified = item.modified ? new Date(item.modified).getTime() : 0;
+      const cachedModified = cached && cached.modified ? new Date(cached.modified).getTime() : 0;
+      if (cached && cached.summary && Object.keys(cached.summary).length > 0 && cachedModified >= serverModified) {
+        summary = cached.summary;
+        item.vacancy = cached.name || item.vacancy;
+        if (cached.modified) item.modified = cached.modified;
+      }
       let infoHtml = '';
       let repCost = 0;
       const hasPoint = summary && summary.staffCount != null && summary.pointCost != null;
@@ -3030,7 +3309,7 @@ function resetCalculator() {
       const plus  = document.getElementById(`c-${i}-plus`);  if (plus)  plus.disabled  = false;
     }
   });
-  EXTRA.forEach((_,i) => { const el = document.getElementById(`e-${i}`); if (el) el.checked = false; });
+  EXTRA.forEach((item,i) => { const el = document.getElementById(`e-${i}`); if (el) el.checked = !!item.checked; });
 
   // Свои позиции (свободный ввод)
   ['base','crit','extra'].forEach(cat => {
@@ -3051,8 +3330,11 @@ function resetCalculator() {
   const mCands = document.getElementById('m-cands'); if (mCands) { mCands.value = ''; mCands.dataset.manual = ''; }
   const mRatio = document.getElementById('m-ratio'); if (mRatio) mRatio.value = '4';
   const mRatioVal = document.getElementById('m-ratio-val'); if (mRatioVal) mRatioVal.textContent = '4';
-  const mLevel = document.getElementById('m-level'); if (mLevel) mLevel.value = '1-4';
+  const mLevel = document.getElementById('m-level'); if (mLevel) mLevel.value = '';
   const mRecDisp = document.getElementById('m-rec-display'); if (mRecDisp) mRecDisp.textContent = '—';
+  updateStaffStyle();
+  updateLevelStyle();
+  updateCandsStyle();
   massModeSelected = 'search';
   massTariffSelected = 'per10';
   const mResult = document.getElementById('mass-result'); if (mResult) mResult.style.display = 'none';
@@ -3161,6 +3443,17 @@ document.addEventListener('keydown', function(e) {
   // Поле суммы зарплаты — перескок к доп. информации
   if (el.closest('.salary-entry')) {
     document.getElementById('exp-extra')?.focus();
+    return;
+  }
+  // Массовый подбор: кол-во сотрудников -> итоговое кол-во кандидатов (минуя слайдер соотношения)
+  if (el.id === 'm-staff') {
+    const next = document.getElementById('m-cands');
+    if (next) { next.focus(); next.select(); }
+    return;
+  }
+  // Массовый подбор: итоговое кол-во кандидатов — последнее поле цепочки
+  if (el.id === 'm-cands') {
+    el.blur();
     return;
   }
   const focusable = Array.from(document.querySelectorAll(
