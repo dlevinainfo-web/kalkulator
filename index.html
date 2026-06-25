@@ -34,10 +34,16 @@
   .header h1 { font-size: 26px; font-weight: 600; color: var(--text); letter-spacing: -.01em; }
 
   /* Tabs */
-  .tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: var(--radius-sm); padding: 4px; margin-bottom: 1.25rem; }
-  .tab { flex: 1; padding: 8px 12px; font-size: 14px; font-weight: 500; font-family: inherit; background: transparent; border: none; border-radius: 6px; cursor: pointer; color: var(--text2); transition: background .15s, color .15s; text-align: center; }
+  .tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: var(--radius-sm); padding: 4px; margin-bottom: 1.25rem; overflow: hidden; position: relative; }
+  .tab { flex: 1; padding: 8px 12px; font-size: 14px; font-weight: 500; font-family: inherit; background: transparent; border: none; border-radius: 6px; cursor: pointer; color: var(--text2); transition: background .15s, color .15s; text-align: center; min-width: 0; }
   .tab.tab-vacancies { color: var(--accent); }
   .tab.tab-vacancies.active { background: var(--accent); color: #fff; box-shadow: var(--shadow); }
+  #tab-vacancies-icon { display: none; flex-shrink: 0; width: 36px; padding: 8px 0; background: var(--accent); border: none; border-radius: 6px; cursor: pointer; color: #fff; align-items: center; justify-content: center; }
+  @media (max-width: 480px) {
+    .tabs { flex-wrap: nowrap; }
+    #tab-vacancies { display: none !important; }
+    #tab-vacancies-icon { display: flex !important; }
+  }
   .vac-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1rem; margin-bottom: .5rem; }
   .vac-card { position: relative; min-height: 172px; border-radius: 14px; padding: 0; display: flex; flex-direction: column; cursor: pointer; background: var(--surface); border: 1px solid var(--border); transition: box-shadow .18s, border-color .18s, transform .12s; overflow: hidden; }
   .vac-card::before { display: none; }
@@ -98,9 +104,9 @@
   .vac-add:hover .vac-add-label { color: var(--accent); }
   .vac-empty-hint { text-align: center; color: var(--text3); font-size: 13px; padding: 1.5rem 0; }
   .tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
-  #tab-vacancies-cat { position: absolute; top: 50%; left: 100%; transform: translateY(-50%); display: none; pointer-events: none; overflow: visible; }
+  #tab-vacancies-cat { position: absolute; top: 50%; left: -20%; transform: translateY(-50%) scaleX(-1); display: none; pointer-events: none; overflow: visible; z-index: 5; }
   #tab-vacancies-cat.running { display: block; animation: tabCatRun 1.9s linear infinite; }
-  @keyframes tabCatRun { 0% { left: 105%; } 100% { left: -65%; } }
+  @keyframes tabCatRun { 0% { left: -20%; } 100% { left: 110%; } }
   .cat-leg { transform-box: fill-box; transform-origin: top center; }
   .cat-leg-fl, .cat-leg-br { animation: catLegA .42s ease-in-out infinite; }
   .cat-leg-fr, .cat-leg-bl { animation: catLegB .42s ease-in-out infinite; }
@@ -452,7 +458,7 @@
 
   <!-- Tabs -->
   <div class="tabs" id="main-tabs">
-    <button class="tab tab-vacancies active" id="tab-vacancies" onclick="switchTab('vacancies')" style="position:relative;overflow:hidden">Вакансии<svg id="tab-vacancies-cat" viewBox="0 0 64 34" width="58" height="30">
+    <svg id="tab-vacancies-cat" viewBox="0 0 64 34" width="58" height="30">
       <path d="M48 16 Q60 6 56 20 Q54 22 48 19 Z" fill="#f5a623"/>
       <ellipse cx="34" cy="16" rx="17" ry="9" fill="#f5a623"/>
       <circle cx="15" cy="11" r="8" fill="#f5a623"/>
@@ -464,7 +470,11 @@
       <g class="cat-leg cat-leg-bl"><rect x="42" y="21" width="3.4" height="11" rx="1.6" fill="#e08e1f"/></g>
       <g class="cat-leg cat-leg-fr"><rect x="25" y="21" width="3.4" height="11" rx="1.6" fill="#d97f12"/></g>
       <g class="cat-leg cat-leg-br"><rect x="36" y="21" width="3.4" height="11" rx="1.6" fill="#d97f12"/></g>
-    </svg></button>
+    </svg>
+    <button id="tab-vacancies-icon" onclick="switchTab('vacancies')" title="Вакансии">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    </button>
+    <button class="tab tab-vacancies active" id="tab-vacancies" onclick="switchTab('vacancies')">Вакансии</button>
     <button class="tab" id="tab-expertise" onclick="switchTab('expertise')" style="display:none">Экспертиза вакансии</button>
     <button class="tab" id="tab-tochechny" onclick="switchTab('tochechny')" style="display:none">Точечный подбор</button>
     <button class="tab" id="tab-massovy" onclick="switchTab('massovy')" style="display:none">Массовый подбор</button>
@@ -969,8 +979,9 @@
 Есть два тарифа: в первом заказчик может указать от 1 до 4 требований к кандидату, во втором — от 5 до 8.
 
 Но это в любом случае могут быть не любые требования — массовый подбор подходит не для всех вакансий, поэтому мы всегда предварительно согласовываем требования.</div>
-            <div class="field-wrap" style="margin-bottom:0">
-              <select id="m-level" onchange="updateLevelStyle();massCalc()" style="border-color:#f0e4a0;background:#fffdf0">
+            <div class="discount-custom-wrap" style="background:var(--surface);border-color:var(--border2);margin-bottom:0">
+              <label>Кол-во требований</label>
+              <select id="m-level" onchange="updateLevelStyle();massCalc()" style="width:100%;height:36px;font-size:14px;font-weight:500;font-family:inherit;border:1px solid #f0e4a0;border-radius:var(--radius-sm);padding:0 10px;outline:none;background:#fffdf0;color:var(--text)">
                 <option value="" selected>— Не выбрано —</option>
                 <option value="1-4">1–4 требования к кандидату</option>
                 <option value="5-8">5–8 требований к кандидату</option>
@@ -1317,6 +1328,13 @@ function switchTab(tab) {
     const btn = document.getElementById('tab-' + t);
     if (btn) btn.classList.toggle('active', t === tab);
   });
+  // Иконка вакансий на мобильном
+  const vacIcon = document.getElementById('tab-vacancies-icon');
+  if (vacIcon) {
+    vacIcon.style.background = tab === 'vacancies' ? 'var(--accent)' : 'var(--surface)';
+    vacIcon.style.color = tab === 'vacancies' ? '#fff' : 'var(--accent)';
+    vacIcon.style.border = tab === 'vacancies' ? 'none' : '1.5px solid var(--accent)';
+  }
   if (tab === 'vacancies') loadVacanciesList();
   // Прокрутка вверх при переходе
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2457,7 +2475,19 @@ function renderPaymentSplit(finalPrice, staffCount) {
 
   const guarColor = mgrTariff === 'max' ? 'pp-green' : mgrTariff === 'mid' ? 'pp-blue' : 'pp-purple';
   const guarTextColor = mgrTariff === 'max' ? '#065f46' : mgrTariff === 'mid' ? '#1e40af' : '#5b21b6';
-  parts += `<div class="pay-part ${guarColor}"><div class="pp-label">Гарантия</div><div class="pp-amount" style="font-size:16px;color:${guarTextColor}">${guaranteeDays} дней</div></div>`;
+  parts += `<div class="pay-part ${guarColor}">
+      <div class="pp-label">Гарантия</div>
+      <div class="pp-amount" style="font-size:16px;color:${guarTextColor}">${guaranteeDays} дней замена</div>
+      <div class="pp-sub">Если сотрудник проработает меньше этого времени, запустим подбор заново.</div>
+    </div>`;
+
+  if (mgrTariff === 'max') {
+    parts += `<div class="pay-part ${guarColor}">
+        <div class="pp-label">Гарантия</div>
+        <div class="pp-amount" style="font-size:16px;color:${guarTextColor}">30 дней поиск</div>
+        <div class="pp-sub">Если не найдем кандидатов за 30 дней — услуга бесплатно.</div>
+      </div>`;
+  }
 
   const colsClass = mgrTariff === 'max' ? '' : ' cols-4';
   return `<div class="smeta-pay-label">Разделение платежей</div><div class="pay-parts${colsClass}">${parts}</div>`;
@@ -2471,13 +2501,39 @@ function renderMassModeSelect(level, cands) {
     { id: 'search', label: MASS_TARIFF_NAMES['search'] },
     { id: 'full',   label: MASS_TARIFF_NAMES['full']   },
   ];
+  const MASS_TARIFF_TIPS = {
+    search: `Подходит для компаний, которым нужны кандидаты, с которыми они будут связываться самостоятельно.
+
+Поиск кандидатов:
+• Разработка индивидуальной документации (вакансии, опросные листы и т.д.).
+• Продвижение вакансии среди 120+ наших каналов.
+• Работа с откликами и холодный поиск.
+• Скрининг кандидатов по резюме.
+
+Подбор кандидатов:
+• Внутренние собеседования под запись.
+• Проверка соответствия требованиям вакансии.
+• Получение согласия на условия работы.
+
+Предоставление кандидатов:
+• Предоставляем прошедших подбор кандидатов (ФИО, контакты, запись собеседования, резюме) для дальнейшей связи с заказчиком.`,
+    full: `Подходит для компаний, которые предпочитают полностью делегировать поиск, подбор и координацию найма.
+
+То же самое, что в тарифе «Только поиск и подбор» + дополнительно администрирование найма:
+• Назначаем и координируем очные этапы с кандидатами (собеседования, тестовые дни и т.п.).
+• Гарантируем что кандидаты придут на первый назначенный очный этап (бесплатная замена не пришедших кандидатов).
+• Помогаем с организацией трудоустройства кандидатов в компанию (координируем приход кандидатов на оформление).
+• Предоставляем 30 дней гарантии на замену трудоустроенных кандидатов в случае увольнения — вне зависимости от причины.`,
+  };
   const c_search = MASS_TARIFF_COLORS['search'];
   const c_full   = MASS_TARIFF_COLORS['full'];
   sel.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">` + modes.map(m => {
     const isSel = massModeSelected === m.id;
     const c = MASS_TARIFF_COLORS[m.id];
     const ppc = MASS_PRICES[level][m.id];
-    return `<div onclick="massModeSelected='${m.id}';massCalc()" style="padding:1rem;border:2px solid ${isSel?c.border:'var(--border)'};border-radius:var(--radius-sm);background:${isSel?c.bg:'var(--surface)'};cursor:pointer;transition:border-color .15s,background .15s">
+    return `<div onclick="massModeSelected='${m.id}';massCalc()" style="position:relative;padding:1rem;border:2px solid ${isSel?c.border:'var(--border)'};border-radius:var(--radius-sm);background:${isSel?c.bg:'var(--surface)'};cursor:pointer;transition:border-color .15s,background .15s">
+      <button class="tip-btn" type="button" onclick="event.stopPropagation();toggleSectionTip('tip-mass-tariff-${m.id}')" style="position:absolute;top:8px;right:8px">?</button>
+      <div class="tip-popup" id="tip-mass-tariff-${m.id}" style="right:8px;left:auto;top:32px">${MASS_TARIFF_TIPS[m.id]}</div>
       <div style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:${c.badge_bg};color:${c.badge_text};display:inline-block;margin-bottom:8px">${m.label}</div>
       <div style="font-size:18px;font-weight:700;color:${isSel?c.text:'var(--text)'}">${fmt(ppc)}</div>
       <div style="font-size:12px;color:var(--text2);margin-top:2px">за кандидата</div>
@@ -2919,11 +2975,6 @@ function renderVacTable() {
       const discAmt = Math.round(cost * appliedDisc / 100);
       const final = cost - discAmt;
       totalSum += final;
-      // Платежи из smetaItems
-      const payItems = (s.smetaItems || []).filter(i => i.name.includes('Платёж') || i.name.includes('платёж'));
-      const payHtml = payItems.length
-        ? payItems.map(i => `<div style="font-size:11px;color:var(--text2)">${i.name}: ${i.price}</div>`).join('')
-        : `<div style="font-size:11px;color:var(--text2)">${s.pointTariffName || '—'}</div>`;
       const discParts = [];
       if (volDisc > 0) {
         discParts.push(staffDisc >= vacDisc && staffDisc > 0
@@ -2934,6 +2985,22 @@ function renderVacTable() {
         discParts.push(`−${tariffBonus}% (за тариф «Максимальный»)`);
       }
       const discLabel = discParts.length ? discParts.join(' + ') : 'без скидки';
+      // Порядок оплаты (расписываем платежи, как в массовом)
+      let payScheduleHtml = '';
+      if (s.pointTariff === 'mid' || s.pointTariff === 'min') {
+        const ratio = s.pointTariff === 'mid' ? 0.7 : 0.5;
+        const pctLabel1 = s.pointTariff === 'mid' ? '70%' : '50%';
+        const pctLabel2 = s.pointTariff === 'mid' ? '30%' : '50%';
+        const part1 = Math.round(final * ratio);
+        const part2 = final - part1;
+        const secondLabel = s.staffCount > 1 ? 'Платёж после подбора каждого сотрудника' : 'Платёж после подбора';
+        payScheduleHtml = `
+          <div style="font-size:11px;color:var(--text2);margin-top:4px">Платёж 1 · Платёж для начала оказания услуг (${pctLabel1}) — <b>${fmt(part1)}</b></div>
+          <div style="font-size:11px;color:var(--text2)">Платёж 2 · ${secondLabel} (${pctLabel2}) — <b>${fmt(part2)}</b></div>`;
+      } else if (s.pointTariff === 'max') {
+        payScheduleHtml = `
+          <div style="font-size:11px;color:var(--text2);margin-top:4px">Платёж 1 · Платёж для начала оказания услуг (100%) — <b>${fmt(final)}</b></div>`;
+      }
       // Первый платёж из tariff
       const pt1 = s.pointCost || 0;
       const discAmt1 = Math.round(pt1 * appliedDisc / 100);
@@ -2960,6 +3027,7 @@ function renderVacTable() {
             <div>Стоимость без скидок: <b>${fmt(cost)}</b></div>
             <div>Скидки: <b>${discLabel}</b></div>
           </div>
+          ${payScheduleHtml}
         </div>
         <div style="text-align:right;flex-shrink:0;padding-top:2px">
           ${rightCol}
@@ -2978,24 +3046,51 @@ function renderVacTable() {
       const s = x.summary || {};
       if (!s.massCands) return;
       const cost = s.massCostMin || 0;
-      totalSum += cost;
+      const massDisc = (s.massPayMode === 'full_prepay' && s.massCands > 10) ? 0.05 : 0;
+      const discountedCost = Math.round(cost * (1 - massDisc));
+      totalSum += discountedCost;
 
       const batchSize = (s.massPayMode === 'per20' || s.massPayMode === 'half20') ? 20 : (s.massPayMode === 'per10' || s.massPayMode === 'half10') ? 10 : 0;
       const level = s.massLevel || '1-4';
       const modeKey = s.massModeKey || 'search';
       const ppc = (MASS_PRICES[level] || {})[modeKey] || 0;
       const isHalfMode = s.massPayMode === 'half10' || s.massPayMode === 'half20';
-      const firstPayment = isHalfMode ? ppc * Math.floor(s.massCands / 2) : (batchSize > 0 ? ppc * Math.min(batchSize, s.massCands) : cost);
+      const firstPayment = isHalfMode ? ppc * Math.floor(s.massCands / 2) : (batchSize > 0 ? ppc * Math.min(batchSize, s.massCands) : discountedCost);
       const levelName = level === '1-4' ? '1–4 требования' : '5–8 требований';
       const payLabel = s.massPayLabel || '—';
 
-      // График платежей — переносим реальные строки из сметы по вакансии, а не пересчитываем заново
-      const payItems = (s.massSmetaItems || []).filter(i => i.name.includes('Платёж') || i.name.includes('платёж'));
-      let scheduleHtml = payItems.length
-        ? payItems.map(i => `<div style="font-size:11.5px;margin-top:1px">${i.name} — <b>${i.price}</b></div>`).join('')
-        : (batchSize === 0
-            ? `<div style="font-size:11.5px;margin-top:1px">100% предоплата · единый платёж — <b>${fmt(cost)}</b></div>`
-            : `<div style="font-size:11.5px;margin-top:1px;color:var(--text3)">—</div>`);
+      // График платежей — пересчитываем из данных summary (не из DOM)
+      let scheduleHtml = '';
+      if (batchSize === 0 && s.massPayMode === 'full_prepay') {
+        scheduleHtml = `<div style="font-size:11.5px;margin-top:1px">Платёж 1 · Платёж для начала оказания услуг — <b>${fmt(discountedCost)}</b></div>`;
+      } else if (batchSize === 0 && s.massPayMode === 'under10') {
+        scheduleHtml = `<div style="font-size:11.5px;margin-top:1px">Платёж 1 · Платёж для начала оказания услуг — <b>${fmt(discountedCost)}</b></div>`;
+      } else if (isHalfMode) {
+        const firstHalf = Math.floor(s.massCands / 2);
+        const secondHalf = s.massCands - firstHalf;
+        const p1 = Math.round(ppc * firstHalf * (1 - massDisc));
+        const fullBatches = Math.floor(secondHalf / batchSize);
+        const rem = secondHalf % batchSize;
+        let pNum = 2;
+        scheduleHtml = `<div style="font-size:11.5px;margin-top:1px">Платёж 1 · Платёж для начала оказания услуг — <b>${fmt(p1)}</b></div>`;
+        if (fullBatches > 1) {
+          scheduleHtml += `<div style="font-size:11.5px;margin-top:1px">Платежи ${pNum}–${pNum + fullBatches - 1} · Платёж после предоставления каждых ${batchSize} кандидатов — <b>${fmt(Math.round(ppc * batchSize))} × ${fullBatches}</b></div>`;
+          pNum += fullBatches;
+        } else if (fullBatches === 1) {
+          scheduleHtml += `<div style="font-size:11.5px;margin-top:1px">Платёж ${pNum} · Платёж после предоставления ${batchSize} кандидатов — <b>${fmt(Math.round(ppc * batchSize))}</b></div>`;
+          pNum++;
+        }
+        if (rem > 0) scheduleHtml += `<div style="font-size:11.5px;margin-top:1px">Платёж ${pNum} · Платёж перед предоставлением ${remainWord(rem)} ${candsGenPl(rem)} — <b>${fmt(Math.round(ppc * rem))}</b></div>`;
+      } else {
+        const fullBatches = Math.floor(s.massCands / batchSize);
+        const rem = s.massCands % batchSize;
+        const p1 = Math.round(ppc * Math.min(batchSize, s.massCands));
+        scheduleHtml = `<div style="font-size:11.5px;margin-top:1px">Платёж 1 · Платёж для начала оказания услуг — <b>${fmt(p1)}</b></div>`;
+        if (fullBatches > 1) {
+          scheduleHtml += `<div style="font-size:11.5px;margin-top:1px">Платежи 2–${fullBatches} · Платёж после предоставления каждых ${batchSize} кандидатов — <b>${fmt(p1)} × ${fullBatches - 1}</b></div>`;
+        }
+        if (rem > 0) scheduleHtml += `<div style="font-size:11.5px;margin-top:1px">Платёж ${fullBatches + 1} · Платёж перед предоставлением ${remainWord(rem)} ${candsGenPl(rem)} — <b>${fmt(Math.round(ppc * rem))}</b></div>`;
+      }
 
       html += `<div style="border-bottom:1px solid var(--border);padding:.85rem 0;display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
         <div style="flex:1;min-width:0">
@@ -3017,11 +3112,11 @@ function renderVacTable() {
         <div style="text-align:right;flex-shrink:0;padding-top:2px">
           ${batchSize === 0
             ? `<div style="font-size:10.5px;color:var(--text3);margin-bottom:2px">Полная сумма</div>
-          <div style="font-size:14px;font-weight:700;color:#065f46">${fmt(cost)}</div>`
+          <div style="font-size:14px;font-weight:700;color:#065f46">${fmt(discountedCost)}</div>`
             : `<div style="font-size:10.5px;color:var(--text3);margin-bottom:2px">1-й платёж</div>
           <div style="font-size:14px;font-weight:700;color:#065f46">${fmt(firstPayment)}</div>
           <div style="font-size:10.5px;color:var(--text3);margin-top:10px;margin-bottom:2px">Полная сумма</div>
-          <div style="font-size:14px;font-weight:700;color:#065f46">${fmt(cost)}</div>`}
+          <div style="font-size:14px;font-weight:700;color:#065f46">${fmt(discountedCost)}</div>`}
         </div>
       </div>`;
     });
