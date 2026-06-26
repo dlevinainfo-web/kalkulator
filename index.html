@@ -1314,16 +1314,16 @@ async function openVacancy(id) {
   // Если вакансия ещё закрывается (сохраняется) — ждём завершения
   if (_closeVacancyPromise) await _closeVacancyPromise;
   // Если есть несохранённые изменения в текущей вакансии — сохраняем до сброса
-  if (currentId && (autoSaveTimer !== null || pendingSave || isSaving)) {
+  if (currentId && (dirty || autoSaveTimer !== null || pendingSave || isSaving)) {
     if (autoSaveTimer !== null) { clearTimeout(autoSaveTimer); autoSaveTimer = null; }
     if (isSaving) {
       // ждём завершения летящего запроса
       await new Promise(r => { const check = () => { if (!isSaving) r(); else setTimeout(check, 50); }; check(); });
     }
-    if (pendingSave || !isSaving) {
+    if (dirty || pendingSave) {
       pendingSave = false;
       isSaving = true;
-      try { await saveData(true); } finally { isSaving = false; }
+      try { const ok = await saveData(true); if (ok) dirty = false; } finally { isSaving = false; }
     }
   }
   // Ждём завершения сохранения компании перед переходом
@@ -1413,6 +1413,7 @@ async function _closeVacancyInner() {
       }
     }
   } finally {
+    dirty = false;
     // Показываем «Сохранено», котика прячем — switchTab запустит его снова для загрузки списка
     hideTabCat();
     setSaveIndicator('saved');
@@ -3129,12 +3130,14 @@ let autoSaveTimer = null;
 let isSaving = false;        // идёт ли сейчас запрос на сервер
 let pendingSave = false;     // пришло ли новое изменение, пока шёл предыдущий запрос
 let suppressAutoSave = false; // временно отключает автосейв (при программном изменении полей)
+let dirty = false;           // есть ли несохранённые изменения (надёжнее, чем состояние таймера)
 
 function scheduleAutoSave() {
   if (suppressAutoSave) return;
   const projectInUrl = new URLSearchParams(location.search).get('project');
   const onVacanciesTab = (currentTab === 'vacancies');
   if (!vacancyMode && !currentId && !projectInUrl && !onVacanciesTab) return;
+  dirty = true;
   console.log('[scheduleAutoSave] timer set, currentId=', currentId, 'vacancyMode=', vacancyMode);
   setSaveIndicator('pending');
   clearTimeout(autoSaveTimer);
@@ -3266,6 +3269,7 @@ async function restoreCompanyFromList(items) {
 }
 
 async function runAutoSave() {
+  autoSaveTimer = null; // таймер сработал — обнуляем handle, чтобы guard'ы видели реальное состояние
   console.log('[runAutoSave] start, isSaving=', isSaving, 'vacancyMode=', vacancyMode, 'currentId=', currentId);
   if (isSaving) { pendingSave = true; return; }
   if (!vacancyMode && !currentId) return;
@@ -3278,11 +3282,16 @@ async function runAutoSave() {
   } finally {
     isSaving = false;
   }
-  setSaveIndicator(ok ? 'saved' : 'error');
   if (pendingSave) {
+    // во время сохранения пришло новое изменение — индикатор НЕ показываем «сохранено»,
+    // данные ещё не записаны, запускаем повторный сейв
     pendingSave = false;
     scheduleAutoSave();
-  } else if (!ok) {
+  } else if (ok) {
+    dirty = false;            // записано именно последнее состояние
+    setSaveIndicator('saved');
+  } else {
+    setSaveIndicator('error');
     autoSaveTimer = setTimeout(runAutoSave, 10000);
   }
 }
@@ -4017,6 +4026,7 @@ function resetCalculator() {
   } finally {
     suppressAutoSave = false;
   }
+  dirty = false;
   // Сбрасываем индикатор только если не на вкладке вакансий (там он управляется отдельно)
   if (currentTab !== 'vacancies') setSaveIndicator('idle');
 }
@@ -4169,8 +4179,8 @@ function handleGlobalChange(e) {
 // Если таймер автосейва ещё тикает в момент F5/закрытия вкладки — данные иначе потеряются.
 // sendBeacon не следует редиректам Google Apps Script, поэтому используем синхронный XHR.
 window.addEventListener('beforeunload', function() {
-  console.log('[beforeunload] autoSaveTimer=', autoSaveTimer, 'pendingSave=', pendingSave, 'isSaving=', isSaving, 'currentId=', currentId);
-  if (autoSaveTimer === null && !pendingSave) return;
+  console.log('[beforeunload] autoSaveTimer=', autoSaveTimer, 'pendingSave=', pendingSave, 'isSaving=', isSaving, 'dirty=', dirty, 'currentId=', currentId);
+  if (!dirty && autoSaveTimer === null && !pendingSave && !isSaving) return;
   if (autoSaveTimer !== null) { clearTimeout(autoSaveTimer); autoSaveTimer = null; }
   if (!currentId) return;
   const exp = getExpState();
