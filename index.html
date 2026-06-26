@@ -1408,6 +1408,10 @@ function updateCompany() {
   validateIP();
   expEdit();
   scheduleAutoSave();
+  // Если мы на вкладке Вакансий (не в режиме вакансии) — сохраняем данные компании отдельно
+  if (!suppressAutoSave && !vacancyMode && currentTab === 'vacancies') {
+    scheduleCompanySave();
+  }
 }
 
 function updateCompetition() {
@@ -2894,15 +2898,107 @@ function scheduleAutoSave() {
   if (suppressAutoSave) return;
   // Сохраняем если: открыта вакансия ИЛИ есть project в URL (поля компании на вкладке Вакансий)
   const projectInUrl = new URLSearchParams(location.search).get('project');
-  if (!vacancyMode && !currentId && !projectInUrl) return;
+  const onVacanciesTab = (currentTab === 'vacancies');
+  if (!vacancyMode && !currentId && !projectInUrl && !onVacanciesTab) return;
   setSaveIndicator('pending');
   clearTimeout(autoSaveTimer);
   autoSaveTimer = setTimeout(runAutoSave, 1200);
 }
 
+// ==================== ДАННЫЕ КОМПАНИИ (уровень проекта) ====================
+// Идентификатор специальной «виртуальной» записи с данными компании
+const COMPANY_VACANCY_NAME = '__company__';
+let companyRecordId = null; // id записи компании в Google Sheets
+let companySaveTimer = null;
+let isCompanySaving = false;
+
+function scheduleCompanySave() {
+  if (suppressAutoSave) return;
+  // Записываем ?project= в URL при первом изменении
+  ensureProjectInUrl();
+  const copyBtn = document.getElementById('btn-copy-link');
+  if (copyBtn) copyBtn.style.display = 'inline-flex';
+  setSaveIndicator('pending');
+  clearTimeout(companySaveTimer);
+  companySaveTimer = setTimeout(runCompanySave, 1200);
+}
+
+async function runCompanySave() {
+  if (isCompanySaving) return;
+  isCompanySaving = true;
+  setSaveIndicator('saving');
+  try {
+    const exp = getExpState();
+    const coData = JSON.stringify({ coType: exp.coType, coName: exp.coName });
+    let result;
+    if (companyRecordId) {
+      result = await api({ action: 'save', id: companyRecordId, vacancy: COMPANY_VACANCY_NAME, author: '', data: coData, summary: '{}' });
+    } else {
+      if (window._creatingCompany) return;
+      window._creatingCompany = true;
+      try {
+        result = await api({ action: 'create', vacancy: COMPANY_VACANCY_NAME, author: '', data: coData, summary: '{}', project_id: PROJECT_ID });
+      } finally {
+        window._creatingCompany = false;
+      }
+      if (result && result.success) {
+        companyRecordId = result.id;
+      }
+    }
+    setSaveIndicator(result && result.success ? 'saved' : 'error');
+  } catch(e) {
+    setSaveIndicator('error');
+  } finally {
+    isCompanySaving = false;
+  }
+}
+
+// Восстанавливает данные компании из списка вакансий (вызывается после loadVacanciesList)
+async function restoreCompanyFromList(items) {
+  const companyItem = items.find(item => item.vacancy === COMPANY_VACANCY_NAME);
+  if (!companyItem) return;
+  companyRecordId = companyItem.id;
+  // data может отсутствовать в ответе list — загружаем отдельно
+  let coData = null;
+  try {
+    if (companyItem.data) {
+      coData = JSON.parse(companyItem.data);
+    } else {
+      // list не вернул data — подгружаем через get
+      const full = await api({ action: 'get', id: companyItem.id });
+      if (full && full.success && full.data) coData = JSON.parse(full.data);
+    }
+  } catch(e) {}
+  if (!coData) return;
+  suppressAutoSave = true;
+  try {
+    if (coData.coType) {
+      const coTypeEl = document.getElementById('exp-co-type');
+      if (coTypeEl) {
+        coTypeEl.value = coData.coType;
+        coTypeEl.classList.toggle('field-empty', !coData.coType);
+        coTypeEl.classList.toggle('filled', !!coData.coType);
+      }
+    }
+    if (coData.coName !== undefined) {
+      const coNameEl = document.getElementById('exp-co-name');
+      if (coNameEl) coNameEl.value = coData.coName;
+    }
+    updateCompany();
+    // Показываем кнопку «Скопировать ссылку» если данные компании загружены
+    const copyBtn = document.getElementById('btn-copy-link');
+    if (copyBtn) copyBtn.style.display = 'inline-flex';
+    updateHeaderLink();
+  } finally {
+    suppressAutoSave = false;
+  }
+}
+
 async function runAutoSave() {
   // если уже идёт сохранение — поставим в очередь и выйдем
   if (isSaving) { pendingSave = true; return; }
+  // На вкладке вакансий без открытой вакансии — данные компании сохраняются отдельно
+  if (!vacancyMode && !currentId) return;
   isSaving = true;
   setSaveIndicator('saving');
   let ok = false;
@@ -3362,7 +3458,11 @@ async function loadVacanciesList() {
   try {
     const result = await api({ action: 'list', project_id: PROJECT_ID });
     if (!result.success) throw new Error(result.error || 'unknown');
-    const items = result.items || [];
+    const allItems = result.items || [];
+    // Восстанавливаем данные компании из специальной записи
+    await restoreCompanyFromList(allItems);
+    // Показываем только реальные вакансии (не служебные записи)
+    const items = allItems.filter(item => item.vacancy !== COMPANY_VACANCY_NAME);
     grid.querySelectorAll('.vac-card:not(.vac-add)').forEach(el => el.remove());
     const prevVacanciesData = vacanciesData; // сохраняем кэш ДО сброса, чтобы fallback ниже реально работал
     vacanciesData = {};
