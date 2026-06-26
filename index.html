@@ -445,6 +445,13 @@
 </style>
 </head>
 <body>
+<!-- Оверлей загрузки — показывается при переходе по прямой ссылке -->
+<div id="loading-overlay" style="display:none;position:fixed;inset:0;background:#f7f6f3;z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:1rem">
+  <div style="width:40px;height:40px;border:3px solid #e4e2dd;border-top-color:#4a3fc7;border-radius:50%;animation:spin .7s linear infinite"></div>
+  <div id="loading-overlay-text" style="font-size:14px;color:#6b6860;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif">Загрузка…</div>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
 <div class="page">
   <div class="header">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
@@ -2884,8 +2891,10 @@ let pendingSave = false;     // пришло ли новое изменение,
 let suppressAutoSave = false; // временно отключает автосейв (при программном изменении полей)
 
 function scheduleAutoSave() {
-  if (suppressAutoSave) return;            // не сохраняем во время загрузки/сброса
-  if (!vacancyMode && !currentId) return;  // нет активной вакансии — нечего сохранять
+  if (suppressAutoSave) return;
+  // Сохраняем если: открыта вакансия ИЛИ есть project в URL (поля компании на вкладке Вакансий)
+  const projectInUrl = new URLSearchParams(location.search).get('project');
+  if (!vacancyMode && !currentId && !projectInUrl) return;
   setSaveIndicator('pending');
   clearTimeout(autoSaveTimer);
   autoSaveTimer = setTimeout(runAutoSave, 1200);
@@ -3586,7 +3595,19 @@ function updateHeaderLink() {
 }
 
 // ==================== INIT ====================
+function showLoadingOverlay(text) {
+  const el = document.getElementById('loading-overlay');
+  if (el) { el.style.display = 'flex'; }
+  const t = document.getElementById('loading-overlay-text');
+  if (t) t.textContent = text || 'Загрузка…';
+}
+function hideLoadingOverlay() {
+  const el = document.getElementById('loading-overlay');
+  if (el) el.style.display = 'none';
+}
+
 async function loadData(id) {
+  showLoadingOverlay('Загрузка вакансии…');
   try {
     const result = await api({action:'get', id});
     if (result.success) {
@@ -3626,6 +3647,8 @@ async function loadData(id) {
     }
   } catch(e) {
     calcTotal();
+  } finally {
+    hideLoadingOverlay();
   }
 }
 
@@ -3705,10 +3728,15 @@ function handleGlobalChange(e) {
 }
 
 const urlParams = new URLSearchParams(location.search);
-const urlId = urlParams.get('id');
+const urlId      = urlParams.get('id');
+const urlProject = urlParams.get('project');
 if (urlId) {
-  // Прямая ссылка на вакансию (?id=) — загружаем её, потом переключаемся на ?project=
   loadData(urlId);
+} else if (urlProject) {
+  // Заход по ссылке проекта — показываем оверлей пока грузится список вакансий
+  showLoadingOverlay('Загрузка вакансий…');
+  calcTotal();
+  loadVacanciesList().finally(() => hideLoadingOverlay());
 } else {
   calcTotal();
   loadVacanciesList();
