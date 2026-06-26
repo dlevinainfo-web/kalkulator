@@ -544,7 +544,7 @@
               <option value="mup">МУП</option>
               <option value="other">Другое</option>
             </select>
-            <input type="text" id="exp-co-name" placeholder="Название" oninput="updateCompany()">
+            <input autocomplete="off" type="text" id="exp-co-name" placeholder="Название" oninput="updateCompany()">
           </div>
           <div class="field-hint" id="exp-co-hint">Выберите формат наименования компании клиента и введите название</div>
           <div class="ip-error" id="ip-error"></div>
@@ -619,7 +619,7 @@
           <label id="vac-disc-label">Ручное изменение скидки</label>
           <div class="discount-custom-row">
             <div class="vac-disc-input-wrap" style="position:relative;display:inline-flex;align-items:center">
-              <input type="number" id="vac-disc-custom" min="0" max="50" placeholder="0" oninput="renderVacAggregateTotals()">
+              <input autocomplete="off" type="number" id="vac-disc-custom" min="0" max="50" placeholder="0" oninput="renderVacAggregateTotals()">
             </div>
             <span id="vac-disc-hint" style="font-size:13px;color:var(--text2)">% — можно снизить вручную</span>
           </div>
@@ -659,7 +659,7 @@
       <div class="exp-section">
         <div class="card-title">Название вакансии</div>
         <div class="field-wrap" style="margin-bottom:0">
-          <input type="text" id="exp-vname" placeholder="Например: Менеджер по продажам" oninput="capitalizeFirst(this); expEdit()">
+          <input autocomplete="off" type="text" id="exp-vname" placeholder="Например: Менеджер по продажам" oninput="capitalizeFirst(this); expEdit()">
           <div class="field-hint">Официальное название или то, как называет вакансию клиент</div>
         </div>
       </div>
@@ -669,7 +669,7 @@
       <div class="exp-section">
         <div class="card-title">Зона поиска кандидатов</div>
         <div class="field-wrap" style="margin-bottom:0">
-          <input type="text" id="exp-region" placeholder="Например: Москва" oninput="capitalizeFirst(this); expEdit()">
+          <input autocomplete="off" type="text" id="exp-region" placeholder="Например: Москва" oninput="capitalizeFirst(this); expEdit()">
           <div class="field-hint">Город, регион или страна — укажите то, что применимо</div>
         </div>
       </div>
@@ -679,7 +679,7 @@
       <div class="exp-section">
         <div class="card-title">Кол-во потенциальных кандидатов</div>
         <div class="field-wrap" style="margin-bottom:0">
-          <input type="number" id="exp-candidates" placeholder="Количество резюме на рынке" oninput="expEdit()">
+          <input autocomplete="off" type="number" id="exp-candidates" placeholder="Количество резюме на рынке" oninput="expEdit()">
           <div class="field-hint">Оценочное кол-во подходящих резюме в открытом доступе</div>
         </div>
       </div>
@@ -719,7 +719,7 @@
             <option value="10">10 недель</option>
             <option value="other">Другое</option>
           </select>
-          <input type="text" id="exp-deadline-custom" placeholder="Укажите срок" oninput="expEdit()" style="display:none;margin-top:8px">
+          <input autocomplete="off" type="text" id="exp-deadline-custom" placeholder="Укажите срок" oninput="expEdit()" style="display:none;margin-top:8px">
         </div>
       </div>
 
@@ -839,7 +839,7 @@
         <div class="discount-custom-wrap" style="background:var(--surface);border-color:var(--border2)">
           <label>Количество сотрудников</label>
           <div class="discount-custom-row">
-            <input type="number" id="pt-staff" min="1" value="1" oninput="onStaffCountChange()" style="height:36px;font-size:14px;font-weight:500;font-family:inherit">
+            <input autocomplete="off" type="number" id="pt-staff" min="1" value="1" oninput="onStaffCountChange()" style="height:36px;font-size:14px;font-weight:500;font-family:inherit">
             <span style="font-size:13px;color:var(--text2)">чел. — введите сколько сотрудников требуется найти</span>
           </div>
           <div id="staff-warn" style="font-size:11.5px;margin-top:6px;display:none"></div>
@@ -849,7 +849,7 @@
           <div class="card-title" style="margin-bottom:.75rem;margin-top:1.25rem">Тариф оплаты</div>
           <div class="tariff-cards">
             <label class="tariff-card-sel sel-green selected" id="tc-max" onclick="selectManagerTariff('max')">
-              <input type="radio" name="mgr-tariff" value="max" checked>
+              <input autocomplete="off" type="radio" name="mgr-tariff" value="max" checked>
               <div class="tc-head">
                 <div class="tc-badge">Максимальный</div>
                 <button class="tip-btn" type="button" onclick="event.stopPropagation(); toggleSectionTip('tip-tc-max')">?</button>
@@ -866,7 +866,7 @@
 • Вся услуга — бесплатно, если не найдём подходящих кандидатов за 30 дней</div>
             </label>
             <label class="tariff-card-sel sel-blue" id="tc-mid" onclick="selectManagerTariff('mid')">
-              <input type="radio" name="mgr-tariff" value="mid">
+              <input autocomplete="off" type="radio" name="mgr-tariff" value="mid">
               <div class="tc-head">
                 <div class="tc-badge">Средний</div>
                 <button class="tip-btn" type="button" onclick="event.stopPropagation(); toggleSectionTip('tip-tc-mid')">?</button>
@@ -881,7 +881,7 @@
 • Стандартная скорость подбора</div>
             </label>
             <label class="tariff-card-sel sel-purple" id="tc-min" onclick="selectManagerTariff('min')">
-              <input type="radio" name="mgr-tariff" value="min">
+              <input autocomplete="off" type="radio" name="mgr-tariff" value="min">
               <div class="tc-head">
                 <div class="tc-badge">Минимальный</div>
                 <button class="tip-btn" type="button" onclick="event.stopPropagation(); toggleSectionTip('tip-tc-min')">?</button>
@@ -917,7 +917,7 @@
 Скидки из разных категорий не суммируются — выбирается наибольшая.</div>
               </div>
               <div id="mgr-disc-staff-display" style="height:36px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);display:flex;align-items:center;padding:0 12px;font-size:13px;color:var(--text2)">Заполняется автоматически</div>
-              <input type="hidden" id="mgr-disc-staff" value="0">
+              <input autocomplete="off" type="hidden" id="mgr-disc-staff" value="0">
             </div>
             <div class="discount-card" style="position:relative">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
@@ -933,14 +933,14 @@
 Скидки из разных категорий не суммируются — выбирается наибольшая.</div>
               </div>
               <div id="mgr-disc-staff-display2" style="height:36px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);display:flex;align-items:center;padding:0 12px;font-size:13px;color:var(--text2)">Заполняется из вкладки Вакансии</div>
-              <input type="hidden" id="mgr-disc-vac" value="0">
+              <input autocomplete="off" type="hidden" id="mgr-disc-vac" value="0">
             </div>
           </div>
           <div class="discount-stack-note">Скидки за количество между собой не суммируются — учитывается наибольшая по проценту.</div>
           <div class="discount-custom-wrap" style="background:var(--surface);border-color:var(--border2)">
             <label>Итоговый процент скидки</label>
             <div class="discount-custom-row">
-              <input type="number" id="mgr-disc-custom" min="0" max="50" placeholder="0" oninput="calcTotal()">
+              <input autocomplete="off" type="number" id="mgr-disc-custom" min="0" max="50" placeholder="0" oninput="calcTotal()">
               <span style="font-size:13px;color:var(--text2)">% — можно снизить вручную</span>
             </div>
             <div class="discount-custom-warn" id="mgr-disc-warn"></div>
@@ -1042,7 +1042,7 @@
         <div class="discount-custom-wrap" style="background:var(--surface);border-color:var(--border2);margin-bottom:.75rem">
           <label>Количество сотрудников</label>
           <div class="discount-custom-row">
-            <input type="number" id="m-staff" min="1" placeholder="0" oninput="document.getElementById('m-cands').dataset.manual='';updateStaffStyle();massCalc()" style="height:36px;font-size:14px;font-weight:500;font-family:inherit;border-color:#f0e4a0;background:#fffdf0">
+            <input autocomplete="off" type="number" id="m-staff" min="1" placeholder="0" oninput="document.getElementById('m-cands').dataset.manual='';updateStaffStyle();massCalc()" style="height:36px;font-size:14px;font-weight:500;font-family:inherit;border-color:#f0e4a0;background:#fffdf0">
             <span style="font-size:13px;color:var(--text2)">чел. — введите сколько сотрудников требуется найти</span>
           </div>
         </div>
@@ -1053,7 +1053,7 @@
             <span style="font-size:12px;color:var(--text2)">Кандидатов на 1 сотрудника</span>
             <span id="m-ratio-val" style="font-size:13px;font-weight:600;color:var(--text)">3</span>
           </div>
-          <input type="range" id="m-ratio" min="1" max="10" value="3" oninput="document.getElementById('m-cands').dataset.manual='';massCalc()" style="width:100%;accent-color:#2d7a4f">
+          <input autocomplete="off" type="range" id="m-ratio" min="1" max="10" value="3" oninput="document.getElementById('m-cands').dataset.manual='';massCalc()" style="width:100%;accent-color:#2d7a4f">
           <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:2px;margin-bottom:12px"><span>1</span><span>10</span></div>
           <div id="m-rec-display" style="height:40px;border:1.5px solid #a8d9bc;border-radius:var(--radius-sm);background:#f0faf4;display:flex;align-items:center;padding:0 12px;font-size:15px;font-weight:600;color:#065f46">—</div>
           <div class="field-hint" style="color:#065f46">Рассчитывается автоматически исходя из коэффициента выше, но не менее 10 кандидатов</div>
@@ -1062,7 +1062,7 @@
         <div class="discount-custom-wrap" style="border-color:var(--border2);background:var(--surface)">
           <label>Итоговое кол-во кандидатов</label>
           <div class="discount-custom-row">
-            <input type="number" id="m-cands" min="1" placeholder="0" oninput="this.dataset.manual='1';updateCandsStyle();massCalc()" style="border-color:#f0e4a0;background:#fffdf0">
+            <input autocomplete="off" type="number" id="m-cands" min="1" placeholder="0" oninput="this.dataset.manual='1';updateCandsStyle();massCalc()" style="border-color:#f0e4a0;background:#fffdf0">
             <span style="font-size:13px;color:var(--text2)">канд. — можно ввести вручную</span>
           </div>
           <div id="m-cands-warn" style="font-size:11.5px;margin-top:6px;color:#92400e">Можно указать любое кол-во вручную, вне зависимости от рекомендуемого, но не менее 10 кандидатов</div>
@@ -1564,7 +1564,7 @@ function addSalaryEntry(data) {
   div.innerHTML = `
     <button class="btn-remove-salary" onclick="removeSalaryEntry(${id})" title="Удалить">×</button>
     <div class="salary-inner-amount">
-      <input type="number" id="salary-amount-${id}" placeholder="Сумма" value="${data?.amount||''}" oninput="expEdit()">
+      <input autocomplete="off" type="number" id="salary-amount-${id}" placeholder="Сумма" value="${data?.amount||''}" oninput="expEdit()">
       <select id="salary-cur-${id}" onchange="expEdit()">
         <option value="RUB" ${(!data?.cur||data?.cur==='RUB')?'selected':''}>₽ RUB</option>
         <option value="USD" ${data?.cur==='USD'?'selected':''}>$ USD</option>
@@ -1784,12 +1784,12 @@ function buildList(arr, prefix, containerId, exclusive) {
     if (item.tiers) {
       // Tier-selector row (e.g. work experience) — +/- steps through levels
       const t0 = item.tiers[0];
-      div.innerHTML = `<input type="checkbox" class="row-check" id="${prefix}-${i}" onchange="${changeHandler}" ${item.checked ? 'checked' : ''}><label for="${prefix}-${i}" class="row-name">${item.name} <div class="row-counter" style="display:inline-flex;vertical-align:middle;margin-left:6px"><button type="button" onclick="changeTier('${prefix}',${i},-1)" id="${prefix}-${i}-minus" disabled>−</button><span id="${prefix}-${i}-label" data-tier="0" style="font-size:12px;color:var(--text3);min-width:56px;text-align:center">${t0.label}</span><button type="button" onclick="changeTier('${prefix}',${i},1)" id="${prefix}-${i}-plus">+</button></div></label><span class="row-price" id="${prefix}-${i}-price">${fmt(t0.price)}</span>${tipHtml}`;
+      div.innerHTML = `<input autocomplete="off" type="checkbox" class="row-check" id="${prefix}-${i}" onchange="${changeHandler}" ${item.checked ? 'checked' : ''}><label for="${prefix}-${i}" class="row-name">${item.name} <div class="row-counter" style="display:inline-flex;vertical-align:middle;margin-left:6px"><button type="button" onclick="changeTier('${prefix}',${i},-1)" id="${prefix}-${i}-minus" disabled>−</button><span id="${prefix}-${i}-label" data-tier="0" style="font-size:12px;color:var(--text3);min-width:56px;text-align:center">${t0.label}</span><button type="button" onclick="changeTier('${prefix}',${i},1)" id="${prefix}-${i}-plus">+</button></div></label><span class="row-price" id="${prefix}-${i}-price">${fmt(t0.price)}</span>${tipHtml}`;
     } else if (item.counter) {
       // Counter row (e.g. languages)
-      div.innerHTML = `<input type="checkbox" class="row-check" id="${prefix}-${i}" onchange="${changeHandler}" ${item.checked ? 'checked' : ''}><label for="${prefix}-${i}" class="row-name">${item.name.replace('(1 шт.)','').trim()} <div class="row-counter" style="display:inline-flex;vertical-align:middle;margin-left:6px"><button type="button" onclick="changeCounter('${prefix}',${i},-1)" id="${prefix}-${i}-minus" disabled>−</button><span id="${prefix}-${i}-label" style="font-size:12px;color:var(--text3);min-width:28px;text-align:center">1 шт.</span><button type="button" onclick="changeCounter('${prefix}',${i},1)" id="${prefix}-${i}-plus">+</button></div></label><span class="row-price" id="${prefix}-${i}-price">${fmt(item.price)}</span>${tipHtml}`;
+      div.innerHTML = `<input autocomplete="off" type="checkbox" class="row-check" id="${prefix}-${i}" onchange="${changeHandler}" ${item.checked ? 'checked' : ''}><label for="${prefix}-${i}" class="row-name">${item.name.replace('(1 шт.)','').trim()} <div class="row-counter" style="display:inline-flex;vertical-align:middle;margin-left:6px"><button type="button" onclick="changeCounter('${prefix}',${i},-1)" id="${prefix}-${i}-minus" disabled>−</button><span id="${prefix}-${i}-label" style="font-size:12px;color:var(--text3);min-width:28px;text-align:center">1 шт.</span><button type="button" onclick="changeCounter('${prefix}',${i},1)" id="${prefix}-${i}-plus">+</button></div></label><span class="row-price" id="${prefix}-${i}-price">${fmt(item.price)}</span>${tipHtml}`;
     } else {
-      div.innerHTML = `<input type="checkbox" class="row-check" id="${prefix}-${i}" onchange="${changeHandler}" ${item.checked ? 'checked' : ''}><label for="${prefix}-${i}" class="row-name">${item.name}</label><span class="row-price${item.free?' free':''}">${item.free ? 'Бесплатно' : fmt(item.price)}</span>${tipHtml}`;
+      div.innerHTML = `<input autocomplete="off" type="checkbox" class="row-check" id="${prefix}-${i}" onchange="${changeHandler}" ${item.checked ? 'checked' : ''}><label for="${prefix}-${i}" class="row-name">${item.name}</label><span class="row-price${item.free?' free':''}">${item.free ? 'Бесплатно' : fmt(item.price)}</span>${tipHtml}`;
     }
 
     wrap.appendChild(div);
@@ -2361,9 +2361,9 @@ function addCustomRow(category, data) {
   div.id = `${category}-custom-row-${id}`;
   div.innerHTML = `
     <div class="custom-row-inner">
-      <input type="checkbox" class="row-check" id="${checkId}" onchange="${changeHandler}" style="accent-color:#2d7a4f">
-      <input class="custom-name" type="text" id="${nameId}" placeholder="${customPlaceholders[category]}" oninput="autoCheckCustom('${checkId}','${nameId}','${priceId}'); calcTotal()">
-      <input class="custom-price" type="number" id="${priceId}" placeholder="Стоимость" oninput="autoCheckCustom('${checkId}','${nameId}','${priceId}'); calcTotal()">
+      <input autocomplete="off" type="checkbox" class="row-check" id="${checkId}" onchange="${changeHandler}" style="accent-color:#2d7a4f">
+      <input autocomplete="off" class="custom-name" type="text" id="${nameId}" placeholder="${customPlaceholders[category]}" oninput="autoCheckCustom('${checkId}','${nameId}','${priceId}'); calcTotal()">
+      <input autocomplete="off" class="custom-price" type="number" id="${priceId}" placeholder="Стоимость" oninput="autoCheckCustom('${checkId}','${nameId}','${priceId}'); calcTotal()">
       <button class="btn-remove-custom" type="button" onclick="removeCustomRow('${category}', ${id})" title="Удалить">×</button>
     </div>
   `;
@@ -2966,7 +2966,7 @@ function renderMassTariffSelect(level, cands, discount, forcedMode) {
       sublabel = cands > 10 ? `Единый платёж ${fmt(Math.round(total * 0.95))} со скидкой` : `Единый платёж ${fmt(total)}`;
     }
     return `<label style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1.5px solid ${sel?mc.border:'var(--border)'};border-radius:var(--radius-sm);background:${sel?mc.bg:'var(--surface)'};cursor:pointer;transition:border-color .15s,background .15s" onclick="massTariffSelected='${pm.id}';massCalc()">
-      <input type="radio" name="mass-pay-radio" value="${pm.id}" ${sel?'checked':''} style="accent-color:${mc.text};flex-shrink:0;margin-top:3px">
+      <input autocomplete="off" type="radio" name="mass-pay-radio" value="${pm.id}" ${sel?'checked':''} style="accent-color:${mc.text};flex-shrink:0;margin-top:3px">
       <div>
         <div style="display:flex;align-items:center;gap:8px">
           <div style="font-size:13px;font-weight:600;color:${sel?mc.text:'var(--text)'}">${pm.label}</div>
@@ -3908,7 +3908,7 @@ async function _loadVacanciesListInner() {
         <div class="vac-card-body">
           <div class="vac-card-head">
             <label class="vac-card-check" onclick="event.stopPropagation()" title="Выбрать для общей сметы">
-              <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleVacancyActive('${item.id}', this.checked)">
+              <input autocomplete="off" type="checkbox" ${checked ? 'checked' : ''} onchange="toggleVacancyActive('${item.id}', this.checked)">
             </label>
             <div class="vac-card-name">${escapeHtml(item.vacancy || 'Без названия')}</div>
           </div>
