@@ -3461,7 +3461,17 @@ async function loadVacanciesList() {
 }
 
 async function createNewVacancy() {
-  // Если уже открыта пустая вакансия — не создаём дубль, просто показываем её
+  // Если currentId уже есть (например, от сохранения полей компании на вкладке Вакансий)
+  // и вакансия ещё не открыта — просто переходим в неё, не создаём новую
+  if (currentId && !vacancyMode) {
+    vacancyMode = true;
+    ['tab-expertise','tab-tochechny','tab-massovy'].forEach(t => {
+      document.getElementById(t).style.display = '';
+    });
+    switchTab('expertise');
+    return;
+  }
+  // Если уже открыта пустая вакансия — просто показываем её
   if (currentId && vacancyMode) {
     const exp = getExpState();
     const isEmpty = !exp.vname && !exp.coName && !exp.region && !exp.candidates &&
