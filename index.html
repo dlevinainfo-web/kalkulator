@@ -1019,9 +1019,9 @@
           <label>Рекомендуемое кол-во кандидатов</label>
           <div style="display:flex;justify-content:space-between;align-items:center;margin:10px 0 6px">
             <span style="font-size:12px;color:var(--text2)">Кандидатов на 1 сотрудника</span>
-            <span id="m-ratio-val" style="font-size:13px;font-weight:600;color:var(--text)">4</span>
+            <span id="m-ratio-val" style="font-size:13px;font-weight:600;color:var(--text)">3</span>
           </div>
-          <input type="range" id="m-ratio" min="1" max="10" value="4" oninput="document.getElementById('m-cands').dataset.manual='';massCalc()" style="width:100%;accent-color:#2d7a4f">
+          <input type="range" id="m-ratio" min="1" max="10" value="3" oninput="document.getElementById('m-cands').dataset.manual='';massCalc()" style="width:100%;accent-color:#2d7a4f">
           <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:2px;margin-bottom:12px"><span>1</span><span>10</span></div>
           <div id="m-rec-display" style="height:40px;border:1.5px solid #a8d9bc;border-radius:var(--radius-sm);background:#f0faf4;display:flex;align-items:center;padding:0 12px;font-size:15px;font-weight:600;color:#065f46">—</div>
           <div class="field-hint" style="color:#065f46">Рассчитывается автоматически исходя из коэффициента выше, но не менее 10 кандидатов</div>
@@ -1695,6 +1695,12 @@ function getSummary() {
   const staffCount = parseInt(document.getElementById('pt-staff')?.value) || 1;
   const pointFinalEl = document.querySelector('#smeta-body .smeta-subtotal.final .smeta-subtotal-value');
   const pointCost = hasPointSelection && pointFinalEl ? parseNum(pointFinalEl.textContent) : null;
+  // Стоимость ДО скидки за кол-во сотрудников/тариф — если строка не отрисована (скидки нет), значит итог = базе
+  const pointBaseEl = document.querySelector('#smeta-body .smeta-subtotal:not(.final) .smeta-subtotal-value');
+  const pointBaseCost = hasPointSelection ? (pointBaseEl ? parseNum(pointBaseEl.textContent) : pointCost) : null;
+  // Фактически показанная сумма 1-й части (учитывает ручное округление через "Сделать красиво")
+  const sm1El = document.getElementById('sm-p1');
+  const pointP1Actual = hasPointSelection && sm1El ? parseNum(sm1El.textContent) : null;
 
   // Тариф и скидка точечного
   const mgrTariffVal = mgrTariff || 'max';
@@ -1716,6 +1722,7 @@ function getSummary() {
     massCands = parseInt(candsInputEl.value) || null;
     const level = document.getElementById('m-level')?.value || '1-4';
     const ppc = MASS_PRICES[level][massModeSelected || 'search'];
+    const massDiscForSummary = (massTariffSelected === 'full_prepay' && massCands > 10) ? 0.05 : 0;
     massCostMin = ppc * massCands;
     massCostMax = massCostMin;
     const MASS_NAMES = { search: 'Только поиск и подбор', full: 'Полный цикл найма' };
@@ -1731,7 +1738,7 @@ function getSummary() {
         massPayLabel = allEv&&Math.floor(s/bs)>0?`50% предоплата, далее за каждые ${bs} кандидатов`:'50% предоплата, далее поэтапная оплата';
       } else {
         const rem = massCands % bs;
-        const rn=rem%10===1&&rem%100!==11?'кандидата':[2,3,4].includes(rem%10)&&![12,13,14].includes(rem%100)?'кандидата':'кандидатов';massPayLabel = rem > 0 ? (massCands <= bs + rem ? `Предоплата за ${bs} кандидатов, далее за ${rem} ${rn}` : `Предоплата за каждые ${bs} кандидатов, далее за ${rem} ${rn}`) : `Предоплата за каждые ${bs} кандидатов`;
+        const rn=rem%10===1&&rem%100!==11?'кандидата':[2,3,4].includes(rem%10)&&![12,13,14].includes(rem%100)?'кандидата':'кандидатов';massPayLabel = rem > 0 ? (massCands <= bs + rem ? `Предоплата за ${bs} кандидатов, далее за последних ${rem} ${rn}` : `Предоплата за каждые ${bs} кандидатов, далее за последних ${rem} ${rn}`) : `Предоплата за каждые ${bs} кандидатов`;
       }
     }
     massPayMode = massTariffSelected;
@@ -1745,6 +1752,8 @@ function getSummary() {
   return {
     staffCount: hasPointSelection ? staffCount : null,
     pointCost,
+    pointBaseCost,
+    pointP1Actual,
     pointTariff: hasPointSelection ? mgrTariffVal : null,
     pointTariffName: hasPointSelection ? (tariffNames[mgrTariffVal] || '') : null,
     pointDiscount: hasPointSelection ? pointDiscount : null,
@@ -1759,6 +1768,9 @@ function getSummary() {
     massLevel: massCands ? (document.getElementById('m-level')?.value || '1-4') : null,
     massModeKey: massCands ? (massModeSelected || 'search') : null,
     massSmetaItems,
+    massPpc: (() => { if (!massCands) return null; const lv = document.getElementById('m-level')?.value || '1-4'; return (MASS_PRICES[lv] || {})[massModeSelected || 'search'] || null; })(),
+    massPpcDiscounted: (() => { if (!massCands) return null; const lv = document.getElementById('m-level')?.value || '1-4'; const p = (MASS_PRICES[lv] || {})[massModeSelected || 'search'] || 0; const d = (massTariffSelected === 'full_prepay' && massCands > 10) ? 0.05 : 0; return d > 0 ? Math.round(p * (1 - d)) : p; })(),
+    massDiscount: massCands ? ((massTariffSelected === 'full_prepay' && massCands > 10) ? 5 : 0) : null,
   };
 }
 
@@ -1777,6 +1789,7 @@ function getState() {
     mass:  { level: document.getElementById('m-level')?.value, staff: document.getElementById('m-staff')?.value, cands: document.getElementById('m-cands')?.value, ratio: document.getElementById('m-ratio')?.value },
     tab:   currentTab,
     calcCollapsed: calcCollapsed,
+    mgrMagicP1: mgrMagicP1,
   };
 }
 
@@ -1801,6 +1814,10 @@ function setState(state) {
     toggleCalcCollapse();
   } else if (state.calcCollapsed === false && calcCollapsed) {
     toggleCalcCollapse();
+  }
+  // Restore magic P1 LAST — must come after onStaffCountChange/onDiscountChange which reset it to null
+  if (state.mgrMagicP1 !== undefined && state.mgrMagicP1 !== null) {
+    mgrMagicP1 = state.mgrMagicP1;
   }
 }
 
@@ -2146,11 +2163,13 @@ function beautifyMid(total) {
   const p1raw = Math.round(total * 0.7);
   mgrMagicP1 = Math.floor(p1raw / 100) * 100; // только вниз до ближайших 100
   calcTotal();
+  scheduleAutoSave();
 }
 function beautifyMin(total) {
   const p1raw = Math.round(total * 0.5);
   mgrMagicP1 = Math.floor(p1raw / 100) * 100;
   calcTotal();
+  scheduleAutoSave();
 }
 
 // ==================== МАССОВЫЙ ====================
@@ -2245,7 +2264,7 @@ function massPayBreakdown(total_cands, batch) {
 
 function massCalc() {
   const staff  = parseInt(document.getElementById('m-staff').value) || 0;
-  const ratio  = parseInt(document.getElementById('m-ratio')?.value) || 4;
+  const ratio  = parseInt(document.getElementById('m-ratio')?.value) || 3;
   const levelRaw = document.getElementById('m-level').value;
   const level  = levelRaw || '1-4'; // безопасный фоллбэк для расчётов, пока пользователь не выбрал уровень
 
@@ -2572,15 +2591,15 @@ function renderMassTariffSelect(level, cands, discount, forcedMode) {
       const r=cands%10;
       if(cands===10) return 'Предоплата за 10 кандидатов';
       if(r===0) return 'Предоплата за каждые 10 кандидатов';
-      if(cands<=10+r) return `Предоплата за 10 кандидатов, далее за ${r} ${cn(r)}`;
-      return `Предоплата за каждые 10 кандидатов, далее за ${r} ${cn(r)}`;
+      if(cands<=10+r) return `Предоплата за 10 кандидатов, далее за последних ${r} ${cn(r)}`;
+      return `Предоплата за каждые 10 кандидатов, далее за последних ${r} ${cn(r)}`;
     })(), batch: 10, avail: cands >= 10 },
     { id: 'per20', label: (() => {
       function cn(n){return n%10===1&&n%100!==11?'кандидата':[2,3,4].includes(n%10)&&![12,13,14].includes(n%100)?'кандидата':'кандидатов';}
       const r=cands%20;
       if(r===0) return 'Предоплата за каждые 20 кандидатов';
-      if(cands<=20+r) return `Предоплата за 20 кандидатов, далее за ${r} ${cn(r)}`;
-      return `Предоплата за каждые 20 кандидатов, далее за ${r} ${cn(r)}`;
+      if(cands<=20+r) return `Предоплата за 20 кандидатов, далее за последних ${r} ${cn(r)}`;
+      return `Предоплата за каждые 20 кандидатов, далее за последних ${r} ${cn(r)}`;
     })(), batch: 20, avail: cands >= 40 },
     { id: 'half10', label: (() => { const f=Math.floor(cands/2),s=cands-f,allEv=(cands%2===0)&&(s%10===0),cnt=Math.floor(s/10); return allEv&&cnt>0?(cnt===1?'50% предоплата, далее за 10 кандидатов':'50% предоплата, далее за каждые 10 кандидатов'):'50% предоплата, далее поэтапная оплата'; })(), batch: 10, half: true, avail: cands >= 22 || halfPaymentAmt >= 39000 },
     { id: 'half20', label: (() => { const f=Math.floor(cands/2),s=cands-f,allEv=(cands%2===0)&&(s%20===0),cnt=Math.floor(s/20); return allEv&&cnt>0?(cnt===1?'50% предоплата, далее за 20 кандидатов':'50% предоплата, далее за каждые 20 кандидатов'):'50% предоплата, далее поэтапная оплата'; })(), batch: 20, half: true, avail: cands >= 40 },
@@ -2615,7 +2634,7 @@ function renderMassTariffSelect(level, cands, discount, forcedMode) {
       if (fullBatches_lbl <= 1) {
         if (rem_lbl > 0 && fullBatches_lbl === 1) {
           const plurC = (n) => n % 10 === 1 && n % 100 !== 11 ? n + ' кандидата' : [2,3,4].includes(n%10) && ![12,13,14].includes(n%100) ? n + ' кандидата' : n + ' кандидатов';
-          const labelText = `Предоплата за ${plurC(pm.batch)}, далее за ${plurC(rem_lbl)}`;
+          const labelText = `Предоплата за ${plurC(pm.batch)}, далее за последних ${plurC(rem_lbl)}`;
           sublabel = `${fmt(ppc * pm.batch)} за ${plurC(pm.batch)} + ${fmt(ppc * rem_lbl)} за ${plurC(rem_lbl)}`;
           pm = {...pm, label: labelText};
         } else {
@@ -2682,8 +2701,8 @@ function renderMassSmeta(level, staff, cands, payMode, discount) {
     const rem = cands % bsz;
     if (rem === 0) return cands === bsz ? `Предоплата за ${bsz} кандидатов` : `Предоплата за каждые ${bsz} кандидатов`;
     // Match payModes label format exactly
-    if (cands <= bsz + rem) return `Предоплата за ${bsz} кандидатов, далее за ${rem} ${candNoun(rem)}`;
-    return `Предоплата за каждые ${bsz} кандидатов, далее за ${rem} ${candNoun(rem)}`;
+    if (cands <= bsz + rem) return `Предоплата за ${bsz} кандидатов, далее за последних ${rem} ${candNoun(rem)}`;
+    return `Предоплата за каждые ${bsz} кандидатов, далее за последних ${rem} ${candNoun(rem)}`;
   }
   const isHalf    = payMode === 'half10' || payMode === 'half20';
   const batchSize = payMode === 'per20' || payMode === 'half20' ? 20 : payMode === 'per10' || payMode === 'half10' ? 10 : 0;
@@ -2693,6 +2712,9 @@ function renderMassSmeta(level, staff, cands, payMode, discount) {
 
   let html = '';
   const tc = MASS_TARIFF_COLORS[mode];
+
+  // Стоимость кандидата со скидкой (для отображения)
+  const ppcDiscounted = discount > 0 ? Math.round(ppc * (1 - discount)) : ppc;
 
   // Параметры
   html += `<div class="smeta-section"><div class="smeta-sec-title">Параметры заказа</div>`;
@@ -2705,17 +2727,18 @@ function renderMassSmeta(level, staff, cands, payMode, discount) {
   html += `<div class="smeta-item"><span class="smeta-item-name" style="${candsColor}">Кандидатов в подбор${candsWarn}</span><span class="smeta-item-price" style="${candsColor}">${cands}</span></div>`;
   html += `<div class="smeta-item"><span class="smeta-item-name">Тариф</span><span class="smeta-item-price">${MASS_TARIFF_NAMES[mode]}</span></div>`;
   html += `<div class="smeta-item"><span class="smeta-item-name">Стоимость 1 кандидата</span><span class="smeta-item-price">${fmt(ppc)}</span></div>`;
+  if (discount > 0) html += `<div class="smeta-item"><span class="smeta-item-name">Стоимость услуг без скидки</span><span class="smeta-item-price" style="font-weight:700">${fmt(total)}</span></div>`;
   html += `</div>`;
 
-  // Итого — как заголовок раздела (без hr перед ним)
-  html += `<div class="smeta-sec-title">Итого</div>`;
-  html += `<div class="smeta-item"><span class="smeta-item-name">Стоимость без скидки</span><span class="smeta-item-price" style="font-weight:700">${fmt(total)}</span></div>`;
+  // Скидки
   if (discount > 0) {
-    html += `<div class="smeta-item"><span class="smeta-item-name">Скидка за 100% предоплату −${discPct}%</span><span class="smeta-item-price" style="color:#065f46">−${fmt(Math.round(total*discount))}</span></div>`;
-    html += `<div class="smeta-item"><span class="smeta-item-name">Итого к оплате</span><span class="smeta-item-price" style="color:#065f46;font-weight:700">${fmt(totalDisc)}</span></div>`;
-  } else {
-    html += `<div class="smeta-item"><span class="smeta-item-name">Итого к оплате</span><span class="smeta-item-price" style="color:#065f46;font-weight:700">${fmt(total)}</span></div>`;
+    html += `<div class="smeta-sec-title">Скидки</div>`;
+    html += `<div class="smeta-item"><span class="smeta-item-name">Скидка за 100% предоплату −${discPct}%</span><span class="smeta-item-price" style="color:#065f46">−${fmt(Math.round(total * discount))}</span></div>`;
+    html += `<div class="smeta-item"><span class="smeta-item-name">Стоимость 1 кандидата со скидкой</span><span class="smeta-item-price" style="color:#065f46;font-weight:600">${fmt(ppcDiscounted)}</span></div>`;
   }
+
+  // Итого — зелёная плашка
+  html += `<div class="smeta-subtotal final"><span class="smeta-subtotal-label">Итого к оплате</span><span class="smeta-subtotal-value">${fmt(discount > 0 ? totalDisc : total)}</span></div>`;
 
   // Порядок оплаты — без hr перед ним
   html += `<div class="smeta-sec-title">Порядок оплаты</div>`;
@@ -2884,7 +2907,11 @@ async function saveData(silent) {
         const hasMass  = freshSummary.massCands != null && (freshSummary.massCostMin != null || freshSummary.massCostMax != null);
         let freshCost = 0;
         if (hasPoint) freshCost = freshSummary.pointCost;
-        else if (hasMass) freshCost = freshSummary.massCostMin || freshSummary.massCostMax || 0;
+        else if (hasMass) {
+          const massValRaw = freshSummary.massCostMin || freshSummary.massCostMax || 0;
+          const massDiscFresh = (freshSummary.massPayMode === 'full_prepay' && freshSummary.massCands > 10) ? 0.05 : 0;
+          freshCost = Math.round(massValRaw * (1 - massDiscFresh));
+        }
         if (!vacanciesData[currentId]) vacanciesData[currentId] = {};
         vacanciesData[currentId].name = freshExp.vname || 'Без названия';
         vacanciesData[currentId].summary = freshSummary;
@@ -2971,7 +2998,7 @@ function renderVacTable() {
       const volDisc = Math.max(staffDisc, vacDisc);
       const tariffBonus = s.pointTariff === 'max' ? 5 : 0;
       const appliedDisc = Math.min(volDisc + tariffBonus, 50);
-      const cost = s.pointCost || 0;
+      const cost = (s.pointBaseCost != null ? s.pointBaseCost : s.pointCost) || 0;
       const discAmt = Math.round(cost * appliedDisc / 100);
       const final = cost - discAmt;
       totalSum += final;
@@ -2991,27 +3018,31 @@ function renderVacTable() {
         const ratio = s.pointTariff === 'mid' ? 0.7 : 0.5;
         const pctLabel1 = s.pointTariff === 'mid' ? '70%' : '50%';
         const pctLabel2 = s.pointTariff === 'mid' ? '30%' : '50%';
-        const part1 = Math.round(final * ratio);
+        const part1 = (s.pointP1Actual != null) ? s.pointP1Actual : Math.round(final * ratio);
         const part2 = final - part1;
-        const secondLabel = s.staffCount > 1 ? 'Платёж после подбора каждого сотрудника' : 'Платёж после подбора';
+        const staffN = s.staffCount || 1;
         payScheduleHtml = `
-          <div style="font-size:11px;color:var(--text2);margin-top:4px">Платёж 1 · Платёж для начала оказания услуг (${pctLabel1}) — <b>${fmt(part1)}</b></div>
-          <div style="font-size:11px;color:var(--text2)">Платёж 2 · ${secondLabel} (${pctLabel2}) — <b>${fmt(part2)}</b></div>`;
+          <div style="font-size:11px;color:var(--text2);margin-top:4px">Платёж 1 · Платёж для начала оказания услуг <span style="color:var(--text2);user-select:none;-webkit-user-select:none">(${pctLabel1} для начала оказания услуг)</span> — <b>${fmt(part1)}</b></div>`;
+        if (staffN > 1) {
+          const perEmployee = Math.round(part2 / staffN);
+          payScheduleHtml += `
+          <div style="font-size:11px;color:var(--text2)">Платежи 2–${staffN + 1} · Платежи после подбора каждого сотрудника <span style="color:var(--text2);user-select:none;-webkit-user-select:none">(${pctLabel2} от стоимости каждого сотрудника)</span> — <b>${fmt(perEmployee)} × ${staffN}</b></div>`;
+        } else {
+          payScheduleHtml += `
+          <div style="font-size:11px;color:var(--text2)">Платёж 2 · Платёж после подбора <span style="color:var(--text2);user-select:none;-webkit-user-select:none">(${pctLabel2} после подбора)</span> — <b>${fmt(part2)}</b></div>`;
+        }
       } else if (s.pointTariff === 'max') {
         payScheduleHtml = `
-          <div style="font-size:11px;color:var(--text2);margin-top:4px">Платёж 1 · Платёж для начала оказания услуг (100%) — <b>${fmt(final)}</b></div>`;
+          <div style="font-size:11px;color:var(--text2);margin-top:4px">Платёж 1 · Платёж для начала оказания услуг <span style="color:var(--text2);user-select:none;-webkit-user-select:none">(100% для начала оказания услуг)</span> — <b>${fmt(final)}</b></div>`;
       }
-      // Первый платёж из tariff
-      const pt1 = s.pointCost || 0;
-      const discAmt1 = Math.round(pt1 * appliedDisc / 100);
-      const finalCost = pt1 - discAmt1;
+      // Первый платёж — используем уже корректно рассчитанный final (без повторного применения скидки)
       let firstPayVal = '—';
       if (s.pointTariff === 'max') {
-        firstPayVal = fmt(finalCost); // 100% предоплата
+        firstPayVal = fmt(final); // 100% предоплата
       } else if (s.pointTariff === 'mid') {
-        firstPayVal = fmt(Math.round(finalCost * 0.7)); // 70%
+        firstPayVal = fmt(s.pointP1Actual != null ? s.pointP1Actual : Math.round(final * 0.7)); // 70%
       } else if (s.pointTariff === 'min') {
-        firstPayVal = fmt(Math.round(finalCost * 0.5)); // 50%
+        firstPayVal = fmt(s.pointP1Actual != null ? s.pointP1Actual : Math.round(final * 0.5)); // 50%
       }
       const isFullPrepay = s.pointTariff === 'max';
       const rightCol = `<div style="font-size:10.5px;color:#1e40af;font-weight:600;margin-bottom:2px">1-й платёж</div>
@@ -3100,7 +3131,8 @@ function renderVacTable() {
             <div>Кандидатов: <b>${s.massCands}</b></div>
             <div>Уровень: <b>${levelName}</b></div>
             <div>Тариф: <b>${s.massTariffName || '—'}</b></div>
-            <div>Стоимость кандидата: <b>${fmt(ppc)}</b></div>
+            <div>Стоимость 1 кандидата: <b>${fmt(ppc)}</b></div>
+            ${massDisc > 0 ? `<div>Стоимость 1 кандидата со скидкой −${Math.round(massDisc*100)}%: <b style="color:#065f46">${fmt(s.massPpcDiscounted || Math.round(ppc * (1 - massDisc)))}</b></div>` : ''}
           </div>
           <div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">
             <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:2px">Порядок оплаты</div>
@@ -3289,16 +3321,20 @@ async function loadVacanciesList() {
         repCost = summary.pointCost;
       }
       if (hasMass) {
-        const massVal = summary.massCostMin || summary.massCostMax;
+        const massValRaw = summary.massCostMin || summary.massCostMax;
+        const massDiscCard = (summary.massPayMode === 'full_prepay' && summary.massCands > 10) ? 0.05 : 0;
+        const massVal = Math.round(massValRaw * (1 - massDiscCard));
         const massFmt = summary.massTariffName || '';
         const massClass = summary.massTariffName && summary.massTariffName.toLowerCase().includes('полный') ? 'is-mass-full' : 'is-mass-search';
+        // Цена за кандидата: берём сохранённую со скидкой, или считаем из итога
+        const ppcToShow = summary.massPpcDiscounted || (summary.massCands ? Math.round(massVal / summary.massCands) : null);
         infoHtml += `<div class="vac-card-info ${massClass}">
           <div class="vac-card-info-head">
             <span class="vac-card-info-type">Массовый</span>
             <span class="vac-card-info-meta">${summary.massCands} канд.</span>
           </div>
           ${massFmt ? `<span class="vac-card-info-sub">${escapeHtml(massFmt)}</span>` : ''}
-          ${summary.massCands && massVal ? `<span class="vac-card-info-sub" style="color:var(--text3)">${fmt(Math.round(massVal / summary.massCands))} / канд.</span>` : ''}
+          ${summary.massCands && ppcToShow ? `<span class="vac-card-info-sub" style="color:var(--text3)">${fmt(ppcToShow)} / канд.${massDiscCard > 0 ? ' (со скидкой)' : ''}</span>` : ''}
           <span class="vac-card-info-val">${fmt(massVal)}</span>
         </div>`;
         if (!repCost) repCost = massVal || 0;
@@ -3423,8 +3459,8 @@ function resetCalculator() {
   // Массовый — полный сброс
   const mStaff = document.getElementById('m-staff'); if (mStaff) mStaff.value = '';
   const mCands = document.getElementById('m-cands'); if (mCands) { mCands.value = ''; mCands.dataset.manual = ''; }
-  const mRatio = document.getElementById('m-ratio'); if (mRatio) mRatio.value = '4';
-  const mRatioVal = document.getElementById('m-ratio-val'); if (mRatioVal) mRatioVal.textContent = '4';
+  const mRatio = document.getElementById('m-ratio'); if (mRatio) mRatio.value = '3';
+  const mRatioVal = document.getElementById('m-ratio-val'); if (mRatioVal) mRatioVal.textContent = '3';
   const mLevel = document.getElementById('m-level'); if (mLevel) mLevel.value = '';
   const mRecDisp = document.getElementById('m-rec-display'); if (mRecDisp) mRecDisp.textContent = '—';
   updateStaffStyle();
