@@ -1282,6 +1282,8 @@ function remainWord(n) {
 let vacancyMode = false; // true = внутри вакансии
 
 function openVacancy(id) {
+  // Сбрасываем состояние перед загрузкой новой вакансии, чтобы не оставались данные предыдущей
+  resetCalculator();
   currentId = id;
   vacancyMode = true;
   ['tab-expertise','tab-tochechny','tab-massovy'].forEach(t => {
@@ -1590,15 +1592,20 @@ function getExpState() {
 
 function setExpState(s) {
   if (!s) return;
-  if (s.vname !== undefined)      document.getElementById('exp-vname').value       = s.vname;
-  if (s.coType)                   document.getElementById('exp-co-type').value     = s.coType;
-  if (s.coName !== undefined)     document.getElementById('exp-co-name').value     = s.coName;
-  if (s.region !== undefined)     document.getElementById('exp-region').value      = s.region;
-  if (s.candidates !== undefined) document.getElementById('exp-candidates').value  = s.candidates;
-  if (s.competition)              document.getElementById('exp-competition').value = s.competition;
-  if (s.deadline)                 document.getElementById('exp-deadline').value    = s.deadline;
-  if (s.deadlineCustom !== undefined) { document.getElementById('exp-deadline-custom').value = s.deadlineCustom; toggleDeadlineCustom(); }
-  if (s.extra !== undefined)      document.getElementById('exp-extra').value       = s.extra;
+  // Сначала сбрасываем все поля в пустое состояние, затем устанавливаем значения из state.
+  // Это гарантирует что при открытии новой вакансии не остаются данные предыдущей.
+  document.getElementById('exp-vname').value      = s.vname      !== undefined ? s.vname      : '';
+  document.getElementById('exp-co-type').value    = s.coType                  ? s.coType     : '';
+  document.getElementById('exp-co-name').value    = s.coName     !== undefined ? s.coName     : '';
+  document.getElementById('exp-region').value     = s.region     !== undefined ? s.region     : '';
+  document.getElementById('exp-candidates').value = s.candidates !== undefined ? s.candidates : '';
+  document.getElementById('exp-competition').value= s.competition             ? s.competition: '';
+  document.getElementById('exp-deadline').value   = s.deadline                ? s.deadline   : '';
+  const customDeadlineEl = document.getElementById('exp-deadline-custom');
+  if (customDeadlineEl) customDeadlineEl.value = s.deadlineCustom !== undefined ? s.deadlineCustom : '';
+  toggleDeadlineCustom();
+  const extraEl = document.getElementById('exp-extra');
+  if (extraEl) extraEl.value = s.extra !== undefined ? s.extra : '';
   // salaries
   document.getElementById('salary-entries').innerHTML = '';
   salaryCounter = 0;
@@ -1798,43 +1805,153 @@ function parseNum(str) {
   return isNaN(n) ? null : n;
 }
 
+function getCustomRowsState(category) {
+  const container = document.getElementById(category + '-custom-list');
+  if (!container) return [];
+  return Array.from(container.querySelectorAll('.custom-row-inner')).map(row => ({
+    name:    row.querySelector('.custom-name')?.value || '',
+    price:   row.querySelector('.custom-price')?.value || '',
+    checked: row.querySelector('.row-check')?.checked || false,
+  }));
+}
+
+function getCritCounters() {
+  return CRIT.map((item, i) => {
+    if (!item.counter) return 1;
+    const el = document.getElementById(`c-${i}-label`);
+    return el ? parseInt(el.textContent) || 1 : 1;
+  });
+}
+
 function getState() {
   return {
     exp:   getExpState(),
     ptStaff: document.getElementById('pt-staff')?.value || '1',
+    mgrTariff: mgrTariff,
+    discCustom: document.getElementById('mgr-disc-custom')?.value || '',
     base:  BASE.map((_,i)  => document.getElementById(`b-${i}`)?.checked ? 1 : 0),
     crit:  CRIT.map((_,i)  => document.getElementById(`c-${i}`)?.checked ? 1 : 0),
+    critCounters: getCritCounters(),
     extra: EXTRA.map((_,i) => document.getElementById(`e-${i}`)?.checked ? 1 : 0),
-    mass:  { level: document.getElementById('m-level')?.value, staff: document.getElementById('m-staff')?.value, cands: document.getElementById('m-cands')?.value, ratio: document.getElementById('m-ratio')?.value },
+    customBase:  getCustomRowsState('base'),
+    customCrit:  getCustomRowsState('crit'),
+    customExtra: getCustomRowsState('extra'),
+    mass:  {
+      level: document.getElementById('m-level')?.value,
+      staff: document.getElementById('m-staff')?.value,
+      cands: document.getElementById('m-cands')?.value,
+      ratio: document.getElementById('m-ratio')?.value,
+      modeSelected: massModeSelected,
+      tariffSelected: massTariffSelected,
+    },
     tab:   currentTab,
     calcCollapsed: calcCollapsed,
     mgrMagicP1: mgrMagicP1,
   };
 }
 
+function restoreCustomRows(category, rows) {
+  const list = document.getElementById(category + '-custom-list');
+  if (!list) return;
+  list.innerHTML = '';
+  customRowCounters[category] = 0;
+  (rows || []).forEach(row => addCustomRow(category, row));
+}
+
+function restoreCritCounters(counters) {
+  (counters || []).forEach((count, i) => {
+    if (!CRIT[i] || !CRIT[i].counter) return;
+    const labelEl = document.getElementById(`c-${i}-label`);
+    const priceEl = document.getElementById(`c-${i}-price`);
+    const minusBtn = document.getElementById(`c-${i}-minus`);
+    const plusBtn  = document.getElementById(`c-${i}-plus`);
+    const n = Math.max(1, Math.min(count, CRIT[i].maxCount || 3));
+    if (labelEl) labelEl.textContent = n + ' шт.';
+    if (priceEl) priceEl.textContent = fmt(CRIT[i].price * n);
+    if (minusBtn) minusBtn.disabled = n <= 1;
+    if (plusBtn)  plusBtn.disabled  = n >= (CRIT[i].maxCount || 3);
+  });
+}
+
+function applyFilledClasses() {
+  // Применяет filled/field-empty к полям экспертизы после программной установки значений
+  ['exp-vname','exp-region','exp-candidates','exp-extra'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const v = !!el.value.trim();
+    el.classList.toggle('filled', v);
+    el.classList.toggle('field-empty', !v);
+  });
+  ['exp-competition','exp-deadline'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('filled', !!el.value);
+    el.classList.toggle('field-empty', !el.value);
+  });
+  // exp-co-type
+  const coType = document.getElementById('exp-co-type');
+  if (coType) {
+    coType.classList.toggle('filled', !!coType.value);
+    coType.classList.toggle('field-empty', !coType.value);
+  }
+  // exp-co-name — намеренно без filled (CSS его обнуляет), только field-empty
+  const coName = document.getElementById('exp-co-name');
+  if (coName) {
+    coName.classList.toggle('field-empty', !coName.value.trim());
+    coName.classList.remove('filled');
+  }
+  // co-result — зелёный если имя есть
+  const coResult = document.getElementById('exp-co-result');
+  if (coResult && coName && coName.value.trim()) {
+    coResult.classList.add('filled');
+  } else if (coResult) {
+    coResult.classList.remove('filled');
+  }
+}
+
 function setState(state) {
   if (!state) return;
+  // 1. Экспертиза
   if (state.exp) setExpState(state.exp);
+  // 2. Тариф менеджера
+  if (state.mgrTariff) selectManagerTariff(state.mgrTariff);
+  // 3. Кол-во сотрудников и скидки
   if (state.ptStaff !== undefined) { document.getElementById('pt-staff').value = state.ptStaff || '1'; onStaffCountChange(); }
+  if (state.discCustom !== undefined) {
+    const dc = document.getElementById('mgr-disc-custom');
+    if (dc) dc.value = state.discCustom;
+  }
+  // 4. Чекбоксы
   (state.base  || []).forEach((v,i) => { const el = document.getElementById(`b-${i}`);  if(el) el.checked = !!v; });
   (state.crit  || []).forEach((v,i) => { const el = document.getElementById(`c-${i}`);  if(el) el.checked = !!v; });
   (state.extra || []).forEach((v,i) => { const el = document.getElementById(`e-${i}`);  if(el) el.checked = !!v; });
+  // 5. Счётчики (языки, навыки)
+  if (state.critCounters) restoreCritCounters(state.critCounters);
+  // 6. Кастомные строки
+  restoreCustomRows('base',  state.customBase);
+  restoreCustomRows('crit',  state.customCrit);
+  restoreCustomRows('extra', state.customExtra);
+  // 7. Массовый подбор
   if (state.mass) {
     if (state.mass.level)  document.getElementById('m-level').value  = state.mass.level;
     if (state.mass.staff)  document.getElementById('m-staff').value  = state.mass.staff;
     if (state.mass.cands)  document.getElementById('m-cands').value  = state.mass.cands;
     if (state.mass.ratio && document.getElementById('m-ratio')) document.getElementById('m-ratio').value = state.mass.ratio;
+    if (state.mass.modeSelected)   massModeSelected   = state.mass.modeSelected;
+    if (state.mass.tariffSelected) massTariffSelected = state.mass.tariffSelected;
     updateStaffStyle();
     updateLevelStyle();
     updateCandsStyle();
   }
-  // Restore collapse state (only collapse if explicitly saved as collapsed)
+  // 8. Визуальные классы filled/field-empty
+  applyFilledClasses();
+  // 9. Состояние свёрнутости
   if (state.calcCollapsed === true && !calcCollapsed) {
     toggleCalcCollapse();
   } else if (state.calcCollapsed === false && calcCollapsed) {
     toggleCalcCollapse();
   }
-  // Restore magic P1 LAST — must come after onStaffCountChange/onDiscountChange which reset it to null
+  // 10. Magic P1 — ПОСЛЕ onStaffCountChange/onDiscountChange которые сбрасывают его в null
   if (state.mgrMagicP1 !== undefined && state.mgrMagicP1 !== null) {
     mgrMagicP1 = state.mgrMagicP1;
   }
@@ -2837,8 +2954,9 @@ async function api(params, _attempt) {
   try {
     if (isWrite) {
       // POST: action в URL, остальные данные в теле как form-urlencoded
-      // (text/plain не триггерит CORS preflight в Apps Script)
-      const body = new URLSearchParams(params).toString();
+      // URLSearchParams кодирует пробелы как '+', но Apps Script не декодирует их обратно.
+      // Заменяем '+' на '%20' чтобы пробелы правильно декодировались на сервере.
+      const body = new URLSearchParams(params).toString().replace(/\+/g, '%20');
       res = await fetch(SCRIPT_URL, {
         method:  'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -2972,19 +3090,25 @@ async function restoreCompanyFromList(items) {
   if (!coData) return;
   suppressAutoSave = true;
   try {
-    if (coData.coType) {
-      const coTypeEl = document.getElementById('exp-co-type');
-      if (coTypeEl) {
-        coTypeEl.value = coData.coType;
-        coTypeEl.classList.toggle('field-empty', !coData.coType);
-        coTypeEl.classList.toggle('filled', !!coData.coType);
-      }
+    const coTypeEl = document.getElementById('exp-co-type');
+    const coNameEl = document.getElementById('exp-co-name');
+    const coResult = document.getElementById('exp-co-result');
+    if (coData.coType && coTypeEl) {
+      coTypeEl.value = coData.coType;
+      coTypeEl.classList.remove('field-empty');
+      coTypeEl.classList.add('filled');
     }
-    if (coData.coName !== undefined) {
-      const coNameEl = document.getElementById('exp-co-name');
-      if (coNameEl) coNameEl.value = coData.coName;
+    if (coData.coName !== undefined && coNameEl) {
+      coNameEl.value = coData.coName;
+      const hasName = !!coData.coName.trim();
+      coNameEl.classList.toggle('field-empty', !hasName);
+      coNameEl.classList.remove('filled'); // exp-co-name намеренно без зелёного (см. CSS)
     }
     updateCompany();
+    // Применяем filled к result-блоку (зелёный фон результирующей строки)
+    if (coResult && coData.coName && coData.coName.trim()) {
+      coResult.classList.add('filled');
+    }
     // Показываем кнопку «Скопировать ссылку» если данные компании загружены
     const copyBtn = document.getElementById('btn-copy-link');
     if (copyBtn) copyBtn.style.display = 'inline-flex';
@@ -3561,16 +3685,6 @@ async function loadVacanciesList() {
 }
 
 async function createNewVacancy() {
-  // Если currentId уже есть (например, от сохранения полей компании на вкладке Вакансий)
-  // и вакансия ещё не открыта — просто переходим в неё, не создаём новую
-  if (currentId && !vacancyMode) {
-    vacancyMode = true;
-    ['tab-expertise','tab-tochechny','tab-massovy'].forEach(t => {
-      document.getElementById(t).style.display = '';
-    });
-    switchTab('expertise');
-    return;
-  }
   // Если уже открыта пустая вакансия — просто показываем её
   if (currentId && vacancyMode) {
     const exp = getExpState();
@@ -3646,10 +3760,11 @@ function resetCalculator() {
   });
   EXTRA.forEach((item,i) => { const el = document.getElementById(`e-${i}`); if (el) el.checked = !!item.checked; });
 
-  // Свои позиции (свободный ввод)
+  // Свои позиции (свободный ввод) — сбрасываем и счётчики ID
   ['base','crit','extra'].forEach(cat => {
     const list = document.getElementById(cat + '-custom-list');
     if (list) list.innerHTML = '';
+    customRowCounters[cat] = 0;
   });
 
   // Кол-во сотрудников и тариф
@@ -3736,6 +3851,8 @@ async function loadData(id) {
         }
         calcTotal();
         massCalc();
+        // Применяем визуальные классы после программной установки значений
+        applyFilledClasses();
       } finally {
         suppressAutoSave = false;
       }
