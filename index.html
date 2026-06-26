@@ -1281,7 +1281,12 @@ function remainWord(n) {
 
 let vacancyMode = false; // true = внутри вакансии
 
-function openVacancy(id) {
+async function openVacancy(id) {
+  if (_navigating) return; // блокируем повторные клики
+  _navigating = true;
+  try {
+  // Ждём завершения сохранения компании перед переходом
+  await waitForCompanySave();
   // Сбрасываем состояние перед загрузкой новой вакансии, чтобы не оставались данные предыдущей
   resetCalculator();
   currentId = id;
@@ -1290,6 +1295,9 @@ function openVacancy(id) {
     document.getElementById(t).style.display = '';
   });
   loadData(id); // loadData сам вызовет switchTab с сохранённой вкладкой
+  } finally {
+    _navigating = false;
+  }
 }
 
 function showTabCat() {
@@ -1301,7 +1309,18 @@ function hideTabCat() {
   if (cat) cat.classList.remove('running');
 }
 
-function closeVacancy() {
+async function closeVacancy() {
+  // Сбрасываем pending-таймер — будем сохранять немедленно
+  if (autoSaveTimer !== null) {
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = null;
+  }
+
+  // Запоминаем currentId ДО сброса vacancyMode,
+  // чтобы runAutoSave/saveData знали что это вакансия
+  const savingId = currentId;
+  const wasVacancyMode = true; // мы точно были в режиме вакансии
+
   vacancyMode = false;
   const coType = document.getElementById('exp-co-type');
   if (coType && !coType.value) { coType.classList.add('field-empty'); coType.classList.remove('filled'); }
@@ -1309,26 +1328,41 @@ function closeVacancy() {
     document.getElementById(t).style.display = 'none';
   });
 
-  const doClose = () => { hideTabCat(); switchTab('vacancies'); };
+  // Если вакансия точно пустая — сохранять нечего, сразу переходим
+  if (!savingId && isVacancyEmpty()) {
+    switchTab('vacancies');
+    return;
+  }
 
-  if (autoSaveTimer !== null) {
-    // Есть отложенное сохранение — запускаем немедленно и ждём
-    clearTimeout(autoSaveTimer);
-    autoSaveTimer = null;
-    setSaveIndicator('saving');
-    showTabCat();
-    runAutoSave().finally(() => {
-      const waitDone = () => { if (isSaving) { setTimeout(waitDone, 50); return; } doClose(); };
-      waitDone();
-    });
-  } else if (isSaving) {
-    // Уже идёт сохранение — ждём завершения
-    setSaveIndicator('saving');
-    showTabCat();
-    const waitDone = () => { if (isSaving) { setTimeout(waitDone, 50); return; } doClose(); };
-    waitDone();
-  } else {
-    doClose();
+  // Показываем котика и сохраняем
+  setSaveIndicator('saving');
+  showTabCat();
+
+  try {
+    if (isSaving) {
+      // Уже идёт запрос — ждём его завершения
+      await new Promise(r => {
+        const check = () => { if (!isSaving) r(); else setTimeout(check, 50); };
+        check();
+      });
+    } else {
+      // Запускаем сохранение напрямую через saveData,
+      // не через runAutoSave (чтобы не споткнуться о его guard-условия)
+      isSaving = true;
+      try {
+        await saveData(true);
+      } finally {
+        isSaving = false;
+      }
+    }
+  } finally {
+    hideTabCat();
+    setSaveIndicator('saved');
+    // Небольшая пауза чтобы пользователь увидел «Сохранено», потом переходим
+    setTimeout(() => {
+      setSaveIndicator('idle');
+      switchTab('vacancies');
+    }, 600);
   }
 }
 
@@ -2965,7 +2999,7 @@ async function api(params, _attempt) {
         redirect: 'follow',
       });
     } else {
-      const url = SCRIPT_URL + '?' + new URLSearchParams(params).toString();
+      const url = SCRIPT_URL + '?' + new URLSearchParams(params).toString().replace(/\+/g, '%20');
       res = await fetch(url, { signal: controller.signal, redirect: 'follow' });
     }
   } catch (err) {
@@ -3045,14 +3079,22 @@ async function runCompanySave() {
   if (isCompanySaving) return;
   isCompanySaving = true;
   setSaveIndicator('saving');
+  showTabCat(); // котик бежит пока сохраняется компания
   try {
     const exp = getExpState();
-    const coData = JSON.stringify({ coType: exp.coType, coName: exp.coName });
+    const coDataObj = { coType: exp.coType, coName: exp.coName };
+    const coData = JSON.stringify(coDataObj);
     let result;
     if (companyRecordId) {
       result = await api({ action: 'save', id: companyRecordId, vacancy: COMPANY_VACANCY_NAME, author: '', data: coData, summary: '{}' });
     } else {
-      if (window._creatingCompany) return;
+      if (window._creatingCompany) {
+        // уже создаётся — ждём и повторим
+        isCompanySaving = false;
+        hideTabCat();
+        companySaveTimer = setTimeout(runCompanySave, 500);
+        return;
+      }
       window._creatingCompany = true;
       try {
         result = await api({ action: 'create', vacancy: COMPANY_VACANCY_NAME, author: '', data: coData, summary: '{}', project_id: PROJECT_ID });
@@ -3063,30 +3105,23 @@ async function runCompanySave() {
         companyRecordId = result.id;
       }
     }
+    if (result && result.success) {
+      cachedCompanyData = coDataObj; // обновляем кеш после успешного сохранения
+    }
     setSaveIndicator(result && result.success ? 'saved' : 'error');
   } catch(e) {
     setSaveIndicator('error');
   } finally {
     isCompanySaving = false;
+    hideTabCat();
   }
 }
 
-// Восстанавливает данные компании из списка вакансий (вызывается после loadVacanciesList)
-async function restoreCompanyFromList(items) {
-  const companyItem = items.find(item => item.vacancy === COMPANY_VACANCY_NAME);
-  if (!companyItem) return;
-  companyRecordId = companyItem.id;
-  // data может отсутствовать в ответе list — загружаем отдельно
-  let coData = null;
-  try {
-    if (companyItem.data) {
-      coData = JSON.parse(companyItem.data);
-    } else {
-      // list не вернул data — подгружаем через get
-      const full = await api({ action: 'get', id: companyItem.id });
-      if (full && full.success && full.data) coData = JSON.parse(full.data);
-    }
-  } catch(e) {}
+// Кеш данных компании — восстанавливается мгновенно без сетевого запроса
+let cachedCompanyData = null;
+
+// Применяет данные компании к DOM
+function applyCompanyData(coData) {
   if (!coData) return;
   suppressAutoSave = true;
   try {
@@ -3102,20 +3137,48 @@ async function restoreCompanyFromList(items) {
       coNameEl.value = coData.coName;
       const hasName = !!coData.coName.trim();
       coNameEl.classList.toggle('field-empty', !hasName);
-      coNameEl.classList.remove('filled'); // exp-co-name намеренно без зелёного (см. CSS)
+      coNameEl.classList.remove('filled');
     }
     updateCompany();
-    // Применяем filled к result-блоку (зелёный фон результирующей строки)
     if (coResult && coData.coName && coData.coName.trim()) {
       coResult.classList.add('filled');
     }
-    // Показываем кнопку «Скопировать ссылку» если данные компании загружены
     const copyBtn = document.getElementById('btn-copy-link');
     if (copyBtn) copyBtn.style.display = 'inline-flex';
     updateHeaderLink();
   } finally {
     suppressAutoSave = false;
   }
+}
+
+// Восстанавливает данные компании из списка вакансий (вызывается после loadVacanciesList)
+async function restoreCompanyFromList(items) {
+  const companyItem = items.find(item => item.vacancy === COMPANY_VACANCY_NAME);
+  if (!companyItem) {
+    // Нет записи на сервере — применяем из кеша если есть
+    if (cachedCompanyData) applyCompanyData(cachedCompanyData);
+    return;
+  }
+  companyRecordId = companyItem.id;
+
+  // Сначала применяем кеш мгновенно (без задержки)
+  if (cachedCompanyData) {
+    applyCompanyData(cachedCompanyData);
+  }
+
+  // Потом грузим актуальные данные с сервера
+  let coData = null;
+  try {
+    if (companyItem.data) {
+      coData = JSON.parse(companyItem.data);
+    } else {
+      const full = await api({ action: 'get', id: companyItem.id });
+      if (full && full.success && full.data) coData = JSON.parse(full.data);
+    }
+  } catch(e) {}
+  if (!coData) return;
+  cachedCompanyData = coData; // обновляем кеш
+  applyCompanyData(coData);
 }
 
 async function runAutoSave() {
@@ -3168,6 +3231,25 @@ function setSaveIndicator(state) {
   });
 }
 
+// Проверяет, изменил ли пользователь хоть что-то в вакансии
+function isVacancyEmpty() {
+  const exp = getExpState();
+  if (exp.vname || exp.coName || exp.region || exp.candidates || exp.competition || exp.deadline || exp.extra) return false;
+  if (exp.salaries && exp.salaries.some(s => s.amount > 0 || s.note)) return false;
+  const hasBase  = BASE.some((_,i)  => document.getElementById(`b-${i}`)?.checked);
+  const hasCrit  = CRIT.some((_,i)  => document.getElementById(`c-${i}`)?.checked);
+  const hasExtra = EXTRA.some((item,i) => { const el = document.getElementById(`e-${i}`); return el && el.checked && !item.free && !item.checked; });
+  if (hasBase || hasCrit || hasExtra) return false;
+  const hasCustom = ['base','crit','extra'].some(cat => {
+    const c = document.getElementById(cat+'-custom-list');
+    return c && c.querySelector('.row-check:checked');
+  });
+  if (hasCustom) return false;
+  const mCands = document.getElementById('m-cands');
+  if (mCands && mCands.value) return false;
+  return true;
+}
+
 // Возвращает true при успешном сохранении, false при ошибке
 async function saveData(silent) {
   const exp = getExpState();
@@ -3179,6 +3261,8 @@ async function saveData(silent) {
     if (currentId) {
       result = await api({action:'save', id:currentId, vacancy, author:'', data, summary});
     } else {
+      // Не создаём запись если вакансия полностью пустая
+      if (isVacancyEmpty()) return false;
       if (window._creatingVacancy) {
         pendingSave = true;
         return false;
@@ -3676,6 +3760,10 @@ async function loadVacanciesList() {
     renderVacAggregate();
     hint.style.display = items.length ? 'none' : '';
     if (!items.length) hint.textContent = 'Пока нет сохранённых вакансий — нажмите «+», чтобы создать первую';
+    // Показываем статус «Сохранено» на вкладке вакансий если проект существует
+    if (new URLSearchParams(location.search).get('project')) {
+      setSaveIndicator('saved');
+    }
   } catch (e) {
     hint.textContent = 'Не удалось загрузить список вакансий';
     hint.style.display = '';
@@ -3684,7 +3772,34 @@ async function loadVacanciesList() {
   }
 }
 
+// Ждёт завершения сохранения компании (если оно в процессе)
+let _navigating = false; // глобальная блокировка навигации во время сохранения
+
+async function waitForCompanySave() {
+  // Если нечего ждать — выходим мгновенно
+  if (companySaveTimer === null && !isCompanySaving) return;
+
+  // Показываем котика пока ждём
+  showTabCat();
+  setSaveIndicator('saving');
+  try {
+    if (companySaveTimer !== null) {
+      clearTimeout(companySaveTimer);
+      companySaveTimer = null;
+      await runCompanySave();
+    } else {
+      await new Promise(r => {
+        const check = () => { if (!isCompanySaving) r(); else setTimeout(check, 50); };
+        check();
+      });
+    }
+  } finally {
+    hideTabCat();
+  }
+}
+
 async function createNewVacancy() {
+  if (_navigating) return; // блокируем повторные клики
   // Если уже открыта пустая вакансия — просто показываем её
   if (currentId && vacancyMode) {
     const exp = getExpState();
@@ -3696,16 +3811,21 @@ async function createNewVacancy() {
       return;
     }
   }
+  _navigating = true;
+  try {
+  // Ждём завершения сохранения компании перед переходом
+  await waitForCompanySave();
   resetCalculator();
   vacancyMode = true;
   ['tab-expertise','tab-tochechny','tab-massovy'].forEach(t => {
     document.getElementById(t).style.display = '';
   });
   switchTab('expertise');
-  // Сразу создаём запись, чтобы вакансия существовала и все правки писались в неё
-  setSaveIndicator('saving');
-  const ok = await saveData(true);
-  setSaveIndicator(ok ? 'saved' : 'error');
+  // НЕ создаём запись сразу — только когда пользователь что-то заполнит
+  // (пустые вакансии не сохраняются)
+  } finally {
+    _navigating = false;
+  }
 }
 
 async function deleteVacancy(id) {
@@ -3807,7 +3927,8 @@ function resetCalculator() {
   } finally {
     suppressAutoSave = false;
   }
-  setSaveIndicator('idle');
+  // Сбрасываем индикатор только если не на вкладке вакансий (там он управляется отдельно)
+  if (currentTab !== 'vacancies') setSaveIndicator('idle');
 }
 
 function updateHeaderLink() {
