@@ -1162,10 +1162,12 @@ const BASE = [
 const CRIT = [
   {name:"Узкопрофильный опыт работы", price:5000, tip:"Опыт работы в узкой сфере. Например, нужен маркетолог с опытом работы на пищевом производстве."},
   {name:"Узкопрофильный навык (1 шт.)", price:7000, tip:"Требуется конкретный узкопрофильный навык или владение специфическим инструментом/программой, которыми обладают далеко не все кандидаты в этой сфере. Например, менеджер, который должен работать именно в Bitrix24, или маркетолог, который должен работать именно в Яндекс.Директ. Можно включить до 3 навыков — каждый учитывается отдельно.", counter:true, maxCount:3},
-  {name:"Опыт работы на аналогичной должности от 6 месяцев", price:3000, tip:"Опыт работы не обязательно в сфере вакансии, а на аналогичной должности — от 6 месяцев."},
-  {name:"Опыт работы на аналогичной должности от 2 лет", price:5000, tip:"Опыт работы не обязательно в сфере вакансии, а на аналогичной должности — от 2 лет."},
-  {name:"Опыт работы на аналогичной должности от 3 лет", price:7000, tip:"Опыт работы не обязательно в сфере вакансии, а на аналогичной должности — от 3 лет."},
-  {name:"Опыт работы на аналогичной должности от 5 лет", price:10000, tip:"Опыт работы не обязательно в сфере вакансии, а на аналогичной должности — от 5 лет."},
+  {name:"Опыт работы на аналогичной должности", price:3000, tip:"Учитывается опыт работы не обязательно в сфере вакансии, а именно на аналогичной должности. Выберите требуемый стаж кнопками «−» и «+».", tiers:[
+    {label:"от 1 года", price:3000},
+    {label:"от 2 лет",  price:5000},
+    {label:"от 3 лет",  price:7000},
+    {label:"от 5 лет",  price:10000},
+  ]},
   {name:"Высшее образование", price:5000, tip:"Проставляется, если вакансия требует наличия высшего образования в любой области."},
   {name:"Узкопрофильное образование (высшее или среднее)", price:10000, tip:"Проставляется, если вакансия требует высшего или среднего образования в конкретной узкой области — например, химическая технология, нефтегазовое дело, ядерная физика, биотехнологии.\n\nЕсли требуется, например, просто «техническое» или, например, просто «юридическое образование» — это не является узкой сферой."},
   {name:"Холодные продажи", price:5000, tip:"По большей части касается специалистов в сфере продаж, которым нужно самостоятельно искать клиентов."},
@@ -1779,7 +1781,11 @@ function buildList(arr, prefix, containerId, exclusive) {
     div.className = 'row';
     const tipHtml = item.tip ? `<button class="tip-btn" type="button" onclick="event.stopPropagation(); showTip('tip-${prefix}-${i}', this)">?</button>` : '';
 
-    if (item.counter) {
+    if (item.tiers) {
+      // Tier-selector row (e.g. work experience) — +/- steps through levels
+      const t0 = item.tiers[0];
+      div.innerHTML = `<input type="checkbox" class="row-check" id="${prefix}-${i}" onchange="${changeHandler}" ${item.checked ? 'checked' : ''}><label for="${prefix}-${i}" class="row-name">${item.name} <div class="row-counter" style="display:inline-flex;vertical-align:middle;margin-left:6px"><button type="button" onclick="changeTier('${prefix}',${i},-1)" id="${prefix}-${i}-minus" disabled>−</button><span id="${prefix}-${i}-label" data-tier="0" style="font-size:12px;color:var(--text3);min-width:56px;text-align:center">${t0.label}</span><button type="button" onclick="changeTier('${prefix}',${i},1)" id="${prefix}-${i}-plus">+</button></div></label><span class="row-price" id="${prefix}-${i}-price">${fmt(t0.price)}</span>${tipHtml}`;
+    } else if (item.counter) {
       // Counter row (e.g. languages)
       div.innerHTML = `<input type="checkbox" class="row-check" id="${prefix}-${i}" onchange="${changeHandler}" ${item.checked ? 'checked' : ''}><label for="${prefix}-${i}" class="row-name">${item.name.replace('(1 шт.)','').trim()} <div class="row-counter" style="display:inline-flex;vertical-align:middle;margin-left:6px"><button type="button" onclick="changeCounter('${prefix}',${i},-1)" id="${prefix}-${i}-minus" disabled>−</button><span id="${prefix}-${i}-label" style="font-size:12px;color:var(--text3);min-width:28px;text-align:center">1 шт.</span><button type="button" onclick="changeCounter('${prefix}',${i},1)" id="${prefix}-${i}-plus">+</button></div></label><span class="row-price" id="${prefix}-${i}-price">${fmt(item.price)}</span>${tipHtml}`;
     } else {
@@ -1826,6 +1832,37 @@ function changeCounter(prefix, i, delta) {
 function getCounterValue(prefix, i) {
   const el = document.getElementById(`${prefix}-${i}-label`);
   return el ? parseInt(el.textContent) : 1;
+}
+
+function changeTier(prefix, i, delta) {
+  const item = prefix === 'b' ? BASE[i] : prefix === 'c' ? CRIT[i] : EXTRA[i];
+  if (!item || !item.tiers) return;
+  const labelEl  = document.getElementById(`${prefix}-${i}-label`);
+  const minusBtn = document.getElementById(`${prefix}-${i}-minus`);
+  const plusBtn  = document.getElementById(`${prefix}-${i}-plus`);
+  const priceEl  = document.getElementById(`${prefix}-${i}-price`);
+  const checkbox = document.getElementById(`${prefix}-${i}`);
+  let idx = labelEl ? (parseInt(labelEl.dataset.tier) || 0) : 0;
+  idx = Math.max(0, Math.min(item.tiers.length - 1, idx + delta));
+  const tier = item.tiers[idx];
+  if (labelEl) { labelEl.dataset.tier = idx; labelEl.textContent = tier.label; }
+  if (minusBtn) minusBtn.disabled = idx <= 0;
+  if (plusBtn)  plusBtn.disabled  = idx >= item.tiers.length - 1;
+  if (priceEl) priceEl.textContent = fmt(tier.price);
+  if (checkbox) checkbox.checked = true;
+  onEdit();
+}
+
+function getTierIndex(prefix, i) {
+  const el = document.getElementById(`${prefix}-${i}-label`);
+  return el ? (parseInt(el.dataset.tier) || 0) : 0;
+}
+
+// Цена критерия с учётом счётчика и уровней (tiers)
+function getCritPrice(item, prefix, i) {
+  if (item.tiers) { const t = item.tiers[getTierIndex(prefix, i)] || item.tiers[0]; return t.price; }
+  if (item.counter) return item.price * getCounterValue(prefix, i);
+  return item.price;
 }
 buildList(BASE,  'b', 'base-list', true);
 buildList(CRIT,  'c', 'crit-list');
@@ -1881,7 +1918,9 @@ function getSummary() {
         massPayLabel = allEv&&Math.floor(s/bs)>0?`50% предоплата, далее за каждые ${bs} кандидатов`:'50% предоплата, далее поэтапная оплата';
       } else {
         const rem = massCands % bs;
-        const rn=rem%10===1&&rem%100!==11?'кандидата':[2,3,4].includes(rem%10)&&![12,13,14].includes(rem%100)?'кандидата':'кандидатов';massPayLabel = rem > 0 ? (massCands <= bs + rem ? `Предоплата за ${bs} кандидатов, далее за последних ${rem} ${rn}` : `Предоплата за каждые ${bs} кандидатов, далее за последних ${rem} ${rn}`) : `Предоплата за каждые ${bs} кандидатов`;
+        const rn=rem%10===1&&rem%100!==11?'кандидата':[2,3,4].includes(rem%10)&&![12,13,14].includes(rem%100)?'кандидата':'кандидатов';
+        const posled=rem%10===1&&rem%100!==11?'последнего':'последних';
+        massPayLabel = rem > 0 ? (massCands <= bs + rem ? `Предоплата за ${bs} кандидатов, далее за ${posled} ${rem} ${rn}` : `Предоплата за каждые ${bs} кандидатов, далее за ${posled} ${rem} ${rn}`) : `Предоплата за каждые ${bs} кандидатов`;
       }
     }
     massPayMode = massTariffSelected;
@@ -1934,6 +1973,10 @@ function getCustomRowsState(category) {
 
 function getCritCounters() {
   return CRIT.map((item, i) => {
+    if (item.tiers) {
+      const el = document.getElementById(`c-${i}-label`);
+      return el ? (parseInt(el.dataset.tier) || 0) + 1 : 1; // 1-based индекс уровня
+    }
     if (!item.counter) return 1;
     const el = document.getElementById(`c-${i}-label`);
     return el ? parseInt(el.textContent) || 1 : 1;
@@ -1977,11 +2020,23 @@ function restoreCustomRows(category, rows) {
 
 function restoreCritCounters(counters) {
   (counters || []).forEach((count, i) => {
-    if (!CRIT[i] || !CRIT[i].counter) return;
+    if (!CRIT[i]) return;
     const labelEl = document.getElementById(`c-${i}-label`);
     const priceEl = document.getElementById(`c-${i}-price`);
     const minusBtn = document.getElementById(`c-${i}-minus`);
     const plusBtn  = document.getElementById(`c-${i}-plus`);
+    if (CRIT[i].tiers) {
+      const tiers = CRIT[i].tiers;
+      let idx = (parseInt(count) || 1) - 1;
+      idx = Math.max(0, Math.min(tiers.length - 1, idx));
+      const t = tiers[idx];
+      if (labelEl) { labelEl.dataset.tier = idx; labelEl.textContent = t.label; }
+      if (priceEl) priceEl.textContent = fmt(t.price);
+      if (minusBtn) minusBtn.disabled = idx <= 0;
+      if (plusBtn)  plusBtn.disabled  = idx >= tiers.length - 1;
+      return;
+    }
+    if (!CRIT[i].counter) return;
     const n = Math.max(1, Math.min(count, CRIT[i].maxCount || 3));
     if (labelEl) labelEl.textContent = n + ' шт.';
     if (priceEl) priceEl.textContent = fmt(CRIT[i].price * n);
@@ -2099,8 +2154,7 @@ function calcTotal() {
   const baseSum  = bases.reduce((s,x) => s + x.price, 0);
   const critSum  = crits.reduce((s,x) => {
     const i = CRIT.indexOf(x);
-    const count = x.counter ? getCounterValue('c', i) : 1;
-    return s + x.price * count;
+    return s + getCritPrice(x, 'c', i);
   }, 0);
   const extraSum = extras.filter(x=>!x.free).reduce((s,x) => s + x.price, 0);
   const baseCustomItems  = getCustomItems('base');
@@ -2444,9 +2498,11 @@ function updateLevelStyle() {
   if (sel.value === '') {
     sel.style.borderColor = '#f0e4a0';
     sel.style.background  = '#fffdf0';
+    sel.style.color       = '';
   } else {
-    sel.style.borderColor = '';
-    sel.style.background  = '';
+    sel.style.borderColor = '#a8d9bc';
+    sel.style.background  = '#f0faf4';
+    sel.style.color       = '#065f46';
   }
 }
 
@@ -2609,9 +2665,14 @@ function renderSmeta(bases, crits, extras, subtotal) {
     html += `<div class="smeta-section"><div class="smeta-sec-title">Усложняющие критерии</div>`;
     crits.forEach(x => {
       const i = CRIT.indexOf(x);
-      const count = x.counter ? getCounterValue('c', i) : 1;
-      const name = x.counter ? x.name.replace('(1 шт.)', '').trim() + (count > 1 ? ` (${count} шт.)` : '') : x.name;
-      html += `<div class="smeta-item"><span class="smeta-item-name">${name}</span><span class="smeta-item-price">${fmt(x.price * count)}</span></div>`;
+      if (x.tiers) {
+        const t = x.tiers[getTierIndex('c', i)] || x.tiers[0];
+        html += `<div class="smeta-item"><span class="smeta-item-name">${x.name} (${t.label})</span><span class="smeta-item-price">${fmt(t.price)}</span></div>`;
+      } else {
+        const count = x.counter ? getCounterValue('c', i) : 1;
+        const name = x.counter ? x.name.replace('(1 шт.)', '').trim() + (count > 1 ? ` (${count} шт.)` : '') : x.name;
+        html += `<div class="smeta-item"><span class="smeta-item-name">${name}</span><span class="smeta-item-price">${fmt(x.price * count)}</span></div>`;
+      }
     });
     critCustomItems.forEach(x => { html += `<div class="smeta-item"><span class="smeta-item-name">${x.name}</span><span class="smeta-item-price">${fmt(x.price)}</span></div>`; });
     html += `</div>`;
@@ -2843,18 +2904,20 @@ function renderMassTariffSelect(level, cands, discount, forcedMode) {
   ] : [
     { id: 'per10', label: (() => {
       function cn(n){return n%10===1&&n%100!==11?'кандидата':[2,3,4].includes(n%10)&&![12,13,14].includes(n%100)?'кандидата':'кандидатов';}
+      function posled(n){return n%10===1&&n%100!==11?'последнего':'последних';}
       const r=cands%10;
       if(cands===10) return 'Предоплата за 10 кандидатов';
       if(r===0) return 'Предоплата за каждые 10 кандидатов';
-      if(cands<=10+r) return `Предоплата за 10 кандидатов, далее за последних ${r} ${cn(r)}`;
-      return `Предоплата за каждые 10 кандидатов, далее за последних ${r} ${cn(r)}`;
+      if(cands<=10+r) return `Предоплата за 10 кандидатов, далее за ${posled(r)} ${r} ${cn(r)}`;
+      return `Предоплата за каждые 10 кандидатов, далее за ${posled(r)} ${r} ${cn(r)}`;
     })(), batch: 10, avail: cands >= 10 },
     { id: 'per20', label: (() => {
       function cn(n){return n%10===1&&n%100!==11?'кандидата':[2,3,4].includes(n%10)&&![12,13,14].includes(n%100)?'кандидата':'кандидатов';}
+      function posled(n){return n%10===1&&n%100!==11?'последнего':'последних';}
       const r=cands%20;
       if(r===0) return 'Предоплата за каждые 20 кандидатов';
-      if(cands<=20+r) return `Предоплата за 20 кандидатов, далее за последних ${r} ${cn(r)}`;
-      return `Предоплата за каждые 20 кандидатов, далее за последних ${r} ${cn(r)}`;
+      if(cands<=20+r) return `Предоплата за 20 кандидатов, далее за ${posled(r)} ${r} ${cn(r)}`;
+      return `Предоплата за каждые 20 кандидатов, далее за ${posled(r)} ${r} ${cn(r)}`;
     })(), batch: 20, avail: cands >= 40 },
     { id: 'half10', label: (() => { const f=Math.floor(cands/2),s=cands-f,allEv=(cands%2===0)&&(s%10===0),cnt=Math.floor(s/10); return allEv&&cnt>0?(cnt===1?'50% предоплата, далее за 10 кандидатов':'50% предоплата, далее за каждые 10 кандидатов'):'50% предоплата, далее поэтапная оплата'; })(), batch: 10, half: true, avail: cands >= 22 || halfPaymentAmt >= 39000 },
     { id: 'half20', label: (() => { const f=Math.floor(cands/2),s=cands-f,allEv=(cands%2===0)&&(s%20===0),cnt=Math.floor(s/20); return allEv&&cnt>0?(cnt===1?'50% предоплата, далее за 20 кандидатов':'50% предоплата, далее за каждые 20 кандидатов'):'50% предоплата, далее поэтапная оплата'; })(), batch: 20, half: true, avail: cands >= 40 },
@@ -2889,7 +2952,8 @@ function renderMassTariffSelect(level, cands, discount, forcedMode) {
       if (fullBatches_lbl <= 1) {
         if (rem_lbl > 0 && fullBatches_lbl === 1) {
           const plurC = (n) => n % 10 === 1 && n % 100 !== 11 ? n + ' кандидата' : [2,3,4].includes(n%10) && ![12,13,14].includes(n%100) ? n + ' кандидата' : n + ' кандидатов';
-          const labelText = `Предоплата за ${plurC(pm.batch)}, далее за последних ${plurC(rem_lbl)}`;
+          const posled = (n) => n % 10 === 1 && n % 100 !== 11 ? 'последнего' : 'последних';
+          const labelText = `Предоплата за ${plurC(pm.batch)}, далее за ${posled(rem_lbl)} ${plurC(rem_lbl)}`;
           sublabel = `${fmt(ppc * pm.batch)} за ${plurC(pm.batch)} + ${fmt(ppc * rem_lbl)} за ${plurC(rem_lbl)}`;
           pm = {...pm, label: labelText};
         } else {
@@ -2938,6 +3002,7 @@ function renderMassSmeta(level, staff, cands, payMode, discount) {
   const pluralCandsFn = (n) => [2,3,4].includes(n%10) && ![12,13,14].includes(n%100) ? n+' кандидата' : n+(n%10===1&&n%100!==11?' кандидата':' кандидатов');
   // Dynamic payLabel based on actual breakdown
   function candNoun(n){return n%10===1&&n%100!==11?'кандидата':[2,3,4].includes(n%10)&&![12,13,14].includes(n%100)?'кандидата':'кандидатов';}
+  function posledNoun(n){return n%10===1&&n%100!==11?'последнего':'последних';}
   function makeDynLabel(mode, cands, bsz) {
     if (mode === 'full_prepay') return '100% предоплата';
     if (mode === 'under10') return `Предоплата за ${pluralCandsFn(cands)}`;
@@ -2956,8 +3021,8 @@ function renderMassSmeta(level, staff, cands, payMode, discount) {
     const rem = cands % bsz;
     if (rem === 0) return cands === bsz ? `Предоплата за ${bsz} кандидатов` : `Предоплата за каждые ${bsz} кандидатов`;
     // Match payModes label format exactly
-    if (cands <= bsz + rem) return `Предоплата за ${bsz} кандидатов, далее за последних ${rem} ${candNoun(rem)}`;
-    return `Предоплата за каждые ${bsz} кандидатов, далее за последних ${rem} ${candNoun(rem)}`;
+    if (cands <= bsz + rem) return `Предоплата за ${bsz} кандидатов, далее за ${posledNoun(rem)} ${rem} ${candNoun(rem)}`;
+    return `Предоплата за каждые ${bsz} кандидатов, далее за ${posledNoun(rem)} ${rem} ${candNoun(rem)}`;
   }
   const isHalf    = payMode === 'half10' || payMode === 'half20';
   const batchSize = payMode === 'per20' || payMode === 'half20' ? 20 : payMode === 'per10' || payMode === 'half10' ? 10 : 0;
@@ -3971,10 +4036,19 @@ function resetCalculator() {
     const el = document.getElementById(`c-${i}`); if (el) el.checked = false;
     const label = document.getElementById(`c-${i}-label`);
     if (label) {
-      label.textContent = '1 шт.';
-      const priceEl = document.getElementById(`c-${i}-price`); if (priceEl) priceEl.textContent = fmt(CRIT[i].price);
-      const minus = document.getElementById(`c-${i}-minus`); if (minus) minus.disabled = true;
-      const plus  = document.getElementById(`c-${i}-plus`);  if (plus)  plus.disabled  = false;
+      if (CRIT[i].tiers) {
+        const t0 = CRIT[i].tiers[0];
+        label.dataset.tier = 0;
+        label.textContent = t0.label;
+        const priceEl = document.getElementById(`c-${i}-price`); if (priceEl) priceEl.textContent = fmt(t0.price);
+        const minus = document.getElementById(`c-${i}-minus`); if (minus) minus.disabled = true;
+        const plus  = document.getElementById(`c-${i}-plus`);  if (plus)  plus.disabled  = false;
+      } else {
+        label.textContent = '1 шт.';
+        const priceEl = document.getElementById(`c-${i}-price`); if (priceEl) priceEl.textContent = fmt(CRIT[i].price);
+        const minus = document.getElementById(`c-${i}-minus`); if (minus) minus.disabled = true;
+        const plus  = document.getElementById(`c-${i}-plus`);  if (plus)  plus.disabled  = false;
+      }
     }
   });
   EXTRA.forEach((item,i) => { const el = document.getElementById(`e-${i}`); if (el) el.checked = !!item.checked; });
