@@ -2810,10 +2810,71 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 // ==================== API ====================
-async function api(params) {
-  const url = SCRIPT_URL + '?' + new URLSearchParams(params).toString();
-  const res = await fetch(url);
-  return res.json();
+async function api(params, _attempt) {
+  _attempt = _attempt || 1;
+  const MAX_ATTEMPTS = 3;
+  const TIMEOUT_MS   = 25000;
+
+  // Лёгкие запросы (list/get/delete) — GET, данные в URL
+  // Тяжёлые (create/save) — POST, данные в теле, чтобы не обрезался URL
+  const isWrite = params.action === 'create' || params.action === 'save';
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+  let res;
+  try {
+    if (isWrite) {
+      // POST: action в URL, остальные данные в теле как form-urlencoded
+      // (text/plain не триггерит CORS preflight в Apps Script)
+      const body = new URLSearchParams(params).toString();
+      res = await fetch(SCRIPT_URL, {
+        method:  'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body,
+        signal:  controller.signal,
+        redirect: 'follow',
+      });
+    } else {
+      const url = SCRIPT_URL + '?' + new URLSearchParams(params).toString();
+      res = await fetch(url, { signal: controller.signal, redirect: 'follow' });
+    }
+  } catch (err) {
+    clearTimeout(timer);
+    if (_attempt < MAX_ATTEMPTS) {
+      setSaveIndicator('retry');
+      await new Promise(r => setTimeout(r, 2000 * _attempt));
+      return api(params, _attempt + 1);
+    }
+    throw err;
+  }
+  clearTimeout(timer);
+
+  if (!res.ok && _attempt < MAX_ATTEMPTS) {
+    setSaveIndicator('retry');
+    await new Promise(r => setTimeout(r, 2000 * _attempt));
+    return api(params, _attempt + 1);
+  }
+
+  let json;
+  try { json = await res.json(); }
+  catch (e) {
+    // Apps Script иногда отдаёт HTML-ошибку вместо JSON
+    if (_attempt < MAX_ATTEMPTS) {
+      setSaveIndicator('retry');
+      await new Promise(r => setTimeout(r, 2000 * _attempt));
+      return api(params, _attempt + 1);
+    }
+    throw new Error('Invalid JSON response');
+  }
+
+  if (json.error && params.action !== 'delete' && params.action !== 'get' && _attempt < MAX_ATTEMPTS) {
+    setSaveIndicator('retry');
+    await new Promise(r => setTimeout(r, 2000 * _attempt));
+    return api(params, _attempt + 1);
+  }
+
+  return json;
 }
 
 // ==================== АВТОСОХРАНЕНИЕ ====================
@@ -2827,7 +2888,7 @@ function scheduleAutoSave() {
   if (!vacancyMode && !currentId) return;  // нет активной вакансии — нечего сохранять
   setSaveIndicator('pending');
   clearTimeout(autoSaveTimer);
-  autoSaveTimer = setTimeout(runAutoSave, 600);
+  autoSaveTimer = setTimeout(runAutoSave, 1200);
 }
 
 async function runAutoSave() {
@@ -2846,6 +2907,9 @@ async function runAutoSave() {
   if (pendingSave) {
     pendingSave = false;
     scheduleAutoSave();
+  } else if (!ok) {
+    // при ошибке — повторная попытка через 10 сек (тихо, без смены индикатора)
+    autoSaveTimer = setTimeout(runAutoSave, 10000);
   }
 }
 
@@ -2854,6 +2918,7 @@ function setSaveIndicator(state) {
   const map = {
     pending: { t: 'Изменения не сохранены', c: 'si-pending' },
     saving:  { t: 'Сохранение…',            c: 'si-saving' },
+    retry:   { t: 'Повтор сохранения…',     c: 'si-saving' },
     saved:   { t: 'Все изменения сохранены', c: 'si-saved' },
     error:   { t: 'Ошибка сохранения',       c: 'si-error' },
     idle:    { t: '',                        c: '' },
