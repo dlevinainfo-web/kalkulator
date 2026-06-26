@@ -1391,6 +1391,7 @@ async function _closeVacancyInner() {
   setSaveIndicator('saving');
   showTabCat();
 
+  let saveOk = false;
   try {
     if (isSaving) {
       // Уже идёт запрос — ждём его завершения
@@ -1402,27 +1403,58 @@ async function _closeVacancyInner() {
       if (pendingSave) {
         pendingSave = false;
         isSaving = true;
-        try { await saveData(true); } finally { isSaving = false; }
+        try { saveOk = await saveData(true); } finally { isSaving = false; }
+      } else {
+        // Сейв уже выполнился — но мог завершиться ошибкой (см. runAutoSave -> setSaveIndicator('error')).
+        // Раз dirty ещё не сброшен, значит последний сейв не удался — пробуем сохранить ещё раз.
+        saveOk = !dirty;
+        if (!saveOk) {
+          isSaving = true;
+          try { saveOk = await saveData(true); } finally { isSaving = false; }
+        }
       }
     } else {
       // Запускаем сохранение напрямую через saveData,
       // не через runAutoSave (чтобы не споткнуться о его guard-условия)
       isSaving = true;
       try {
-        await saveData(true);
+        saveOk = await saveData(true);
       } finally {
         isSaving = false;
       }
     }
+
+    // Если не получилось — повторяем ещё пару раз с небольшой паузой, прежде чем сдаться.
+    // Уходить со страницы с несохранёнными изменениями нельзя — пользователь их потеряет.
+    let retries = 0;
+    while (!saveOk && retries < 2) {
+      retries++;
+      setSaveIndicator('retry');
+      await new Promise(r => setTimeout(r, 1500));
+      isSaving = true;
+      try { saveOk = await saveData(true); } finally { isSaving = false; }
+    }
   } finally {
-    dirty = false;
-    // Показываем «Сохранено», котика прячем — switchTab запустит его снова для загрузки списка
+    // Гасим автотаймер ещё раз: пока мы сохраняли выше, scheduleAutoSave мог
+    // быть вызван повторно (например, из runAutoSave при ошибке) и поставить новый таймер.
+    if (autoSaveTimer !== null) {
+      clearTimeout(autoSaveTimer);
+      autoSaveTimer = null;
+    }
     hideTabCat();
-    setSaveIndicator('saved');
-    // Небольшая пауза чтобы пользователь увидел «Сохранено», потом переходим
-    await new Promise(r => setTimeout(r, 600));
-    setSaveIndicator('idle');
-    await switchTab('vacancies');
+    if (saveOk) {
+      dirty = false;
+      setSaveIndicator('saved');
+      await new Promise(r => setTimeout(r, 600));
+      setSaveIndicator('idle');
+      await switchTab('vacancies');
+    } else {
+      // Честно показываем ошибку и НЕ уходим со страницы — пользователь видит проблему
+      // и может попробовать снова, вместо того чтобы тихо потерять несохранённые данные.
+      setSaveIndicator('error');
+      dirty = true;
+      alert('Не удалось сохранить изменения. Проверьте подключение к интернету и попробуйте ещё раз — переход на вкладку «Вакансии» отменён, чтобы не потерять данные.');
+    }
   }
 }
 
@@ -3338,6 +3370,9 @@ async function runAutoSave() {
   console.log('[runAutoSave] start, isSaving=', isSaving, 'vacancyMode=', vacancyMode, 'currentId=', currentId);
   if (isSaving) { pendingSave = true; return; }
   if (!vacancyMode && !currentId) return;
+  // Если вакансия уже закрыта (closeVacancy завершился) и изменений не осталось —
+  // это «зомби»-таймер от предыдущей попытки, сохранять уже нечего.
+  if (!vacancyMode && !dirty) return;
   isSaving = true;
   setSaveIndicator('saving');
   let ok = false;
@@ -3588,23 +3623,27 @@ function renderVacTable() {
         firstPayVal = fmt(s.pointP1Actual != null ? s.pointP1Actual : Math.round(final * 0.5)); // 50%
       }
       const isFullPrepay = s.pointTariff === 'max';
-      const rightCol = `<div style="font-size:10.5px;color:#1e40af;font-weight:600;margin-bottom:2px">1-й платёж</div>
-          <div style="font-size:14px;font-weight:700;color:#1e40af">${firstPayVal}</div>
-          <div style="font-size:10.5px;color:var(--text3);margin-top:10px;margin-bottom:2px">Итоговая стоимость</div>
-          <div style="font-size:14px;font-weight:700;color:#065f46">${fmt(final)}</div>`;
-      html += `<div style="border-bottom:1px solid var(--border);padding:.85rem 0;display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
-        <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:700;margin-bottom:6px">${escapeHtml(x.name)}</div>
-          <div style="font-size:12px;color:var(--text2);line-height:1.8">
-            <div>Сотрудников: <b>${s.staffCount}</b></div>
-            <div>Тариф: <b>${s.pointTariffName || '—'}</b></div>
-            <div>Стоимость без скидок: <b>${fmt(cost)}</b></div>
-            <div>Скидки: <b>${discLabel}</b></div>
+      const rightCol = `<div style="font-size:10.5px;color:#1e40af;font-weight:600;margin-bottom:2px;white-space:nowrap">1-й платёж</div>
+          <div style="font-size:14px;font-weight:700;color:#1e40af;white-space:nowrap">${firstPayVal}</div>
+          <div style="font-size:10.5px;color:var(--text3);margin-top:10px;margin-bottom:2px;white-space:nowrap">Итоговая стоимость</div>
+          <div style="font-size:14px;font-weight:700;color:#065f46;white-space:nowrap">${fmt(final)}</div>`;
+      html += `<div style="border-bottom:1px solid var(--border);padding:.85rem 0">
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:700;margin-bottom:6px">${escapeHtml(x.name)}</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.8">
+              <div>Сотрудников: <b>${s.staffCount}</b></div>
+              <div>Тариф: <b>${s.pointTariffName || '—'}</b></div>
+              <div>Стоимость без скидок: <b>${fmt(cost)}</b></div>
+              <div>Скидки: <b>${discLabel}</b></div>
+            </div>
           </div>
-          ${payScheduleHtml}
+          <div style="text-align:right;flex-shrink:0;padding-top:2px;white-space:nowrap">
+            ${rightCol}
+          </div>
         </div>
-        <div style="text-align:right;flex-shrink:0;padding-top:2px">
-          ${rightCol}
+        <div style="width:100%">
+          ${payScheduleHtml}
         </div>
       </div>`;
     });
@@ -3666,32 +3705,34 @@ function renderVacTable() {
         if (rem > 0) scheduleHtml += `<div style="font-size:11.5px;margin-top:1px">Платёж ${fullBatches + 1} · Платёж перед предоставлением ${remainWord(rem)} ${candsGenPl(rem)} — <b>${fmt(Math.round(ppc * rem))}</b></div>`;
       }
 
-      html += `<div style="border-bottom:1px solid var(--border);padding:.85rem 0;display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
-        <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:700;margin-bottom:6px">${escapeHtml(x.name)}</div>
-          <div style="font-size:12px;color:var(--text2);line-height:1.8">
-            <div>Сотрудников: <b>${s.massStaff || '—'}</b></div>
-            <div>Кандидатов: <b>${s.massCands}</b></div>
-            <div>Уровень: <b>${levelName}</b></div>
-            <div>Тариф: <b>${s.massTariffName || '—'}</b></div>
-            <div>Стоимость 1 кандидата: <b>${fmt(ppc)}</b></div>
-            ${massDisc > 0 ? `<div>Стоимость 1 кандидата со скидкой −${Math.round(massDisc*100)}%: <b style="color:#065f46">${fmt(s.massPpcDiscounted || Math.round(ppc * (1 - massDisc)))}</b></div>` : ''}
+      html += `<div style="border-bottom:1px solid var(--border);padding:.85rem 0">
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:700;margin-bottom:6px">${escapeHtml(x.name)}</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.8">
+              <div>Сотрудников: <b>${s.massStaff || '—'}</b></div>
+              <div>Кандидатов: <b>${s.massCands}</b></div>
+              <div>Уровень: <b>${levelName}</b></div>
+              <div>Тариф: <b>${s.massTariffName || '—'}</b></div>
+              <div>Стоимость 1 кандидата: <b>${fmt(ppc)}</b></div>
+              ${massDisc > 0 ? `<div>Стоимость 1 кандидата со скидкой −${Math.round(massDisc*100)}%: <b style="color:#065f46">${fmt(s.massPpcDiscounted || Math.round(ppc * (1 - massDisc)))}</b></div>` : ''}
+            </div>
           </div>
-          <div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">
-            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:2px">Порядок оплаты</div>
-            <div style="font-size:11.5px;color:var(--text2);margin-bottom:6px">${payLabel}</div>
-            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:4px">График платежей</div>
-            <div style="color:var(--text2)">${scheduleHtml}</div>
+          <div style="text-align:right;flex-shrink:0;padding-top:2px;white-space:nowrap">
+            ${batchSize === 0
+              ? `<div style="font-size:10.5px;color:var(--text3);margin-bottom:2px">Полная сумма</div>
+            <div style="font-size:14px;font-weight:700;color:#065f46">${fmt(discountedCost)}</div>`
+              : `<div style="font-size:10.5px;color:var(--text3);margin-bottom:2px">1-й платёж</div>
+            <div style="font-size:14px;font-weight:700;color:#065f46">${fmt(firstPayment)}</div>
+            <div style="font-size:10.5px;color:var(--text3);margin-top:10px;margin-bottom:2px">Полная сумма</div>
+            <div style="font-size:14px;font-weight:700;color:#065f46">${fmt(discountedCost)}</div>`}
           </div>
         </div>
-        <div style="text-align:right;flex-shrink:0;padding-top:2px">
-          ${batchSize === 0
-            ? `<div style="font-size:10.5px;color:var(--text3);margin-bottom:2px">Полная сумма</div>
-          <div style="font-size:14px;font-weight:700;color:#065f46">${fmt(discountedCost)}</div>`
-            : `<div style="font-size:10.5px;color:var(--text3);margin-bottom:2px">1-й платёж</div>
-          <div style="font-size:14px;font-weight:700;color:#065f46">${fmt(firstPayment)}</div>
-          <div style="font-size:10.5px;color:var(--text3);margin-top:10px;margin-bottom:2px">Полная сумма</div>
-          <div style="font-size:14px;font-weight:700;color:#065f46">${fmt(discountedCost)}</div>`}
+        <div style="width:100%;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:2px">Порядок оплаты</div>
+          <div style="font-size:11.5px;color:var(--text2);margin-bottom:6px">${payLabel}</div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:4px">График платежей</div>
+          <div style="color:var(--text2)">${scheduleHtml}</div>
         </div>
       </div>`;
     });
