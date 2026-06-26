@@ -1093,20 +1093,28 @@
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwTB9CsIjNYLH1HD6sSUpOAgS3p7p_ra3AlMyvf95rbFg3nafQyxn4R2_VLea-MSk7d/exec';
 
-// Project ID — уникальный для каждого «рабочего пространства»
+// Project ID — единый идентификатор рабочего пространства.
+// При заходе без ?project= генерируем, но в URL не пишем сразу —
+// запишем только когда будет первое сохранение (см. saveData).
 function getProjectId() {
   const params = new URLSearchParams(location.search);
   let pid = params.get('project');
   if (!pid) {
-    // Генерируем новый project_id и вписываем в URL
     pid = Math.random().toString(36).slice(2, 10);
-    const newParams = new URLSearchParams(location.search);
-    newParams.set('project', pid);
-    try { history.replaceState(null, '', '?' + newParams.toString()); } catch(e) {}
   }
   return pid;
 }
 const PROJECT_ID = getProjectId();
+
+// Записываем ?project= в URL (один раз, при первом сохранении)
+function ensureProjectInUrl() {
+  const params = new URLSearchParams(location.search);
+  if (!params.get('project')) {
+    const newParams = new URLSearchParams();
+    newParams.set('project', PROJECT_ID);
+    try { history.replaceState(null, '', '?' + newParams.toString()); } catch(e) {}
+  }
+}
 
 // ==================== ДАННЫЕ ТОЧЕЧНОГО ====================
 const BASE = [
@@ -1181,9 +1189,9 @@ let vacanciesData = {};
 let selectedVacancyIds = new Set();
 
 function copyLink() {
-  const url = PROJECT_ID && currentId
-    ? location.href.split('?')[0] + '?project=' + PROJECT_ID + '&id=' + currentId
-    : location.href;
+  // Единая ссылка на проект — без &id=, список вакансий всегда доступен по ?project=
+  const base = location.href.split('?')[0];
+  const url = base + '?project=' + PROJECT_ID;
 
   const showCopiedAnimation = () => {
     document.querySelectorAll('#btn-copy-link, .copy-link-bottom').forEach(btn => {
@@ -2892,7 +2900,8 @@ async function saveData(silent) {
       }
       if (result && result.success) {
         currentId = result.id;
-        safeReplaceState('?id=' + currentId);
+        // Устанавливаем единый ?project= URL (один раз) — ?id= больше не используем
+        ensureProjectInUrl();
         const copyBtn = document.getElementById('btn-copy-link'); if (copyBtn) copyBtn.style.display = 'inline-flex';
       }
     }
@@ -3378,6 +3387,17 @@ async function loadVacanciesList() {
 }
 
 async function createNewVacancy() {
+  // Если уже открыта пустая вакансия — не создаём дубль, просто показываем её
+  if (currentId && vacancyMode) {
+    const exp = getExpState();
+    const isEmpty = !exp.vname && !exp.coName && !exp.region && !exp.candidates &&
+      !exp.competition && !exp.deadline &&
+      (!exp.salaries || exp.salaries.length === 0) && !exp.extra;
+    if (isEmpty) {
+      switchTab('expertise');
+      return;
+    }
+  }
   resetCalculator();
   vacancyMode = true;
   ['tab-expertise','tab-tochechny','tab-massovy'].forEach(t => {
@@ -3474,7 +3494,8 @@ function resetCalculator() {
   updateCandsStyle();
 
   currentId = null;
-  safeReplaceState(location.pathname);
+  // Сохраняем ?project= в URL — не сбрасываем до голого pathname
+  ensureProjectInUrl();
   updateHeaderLink();
   const copyBtnH = document.getElementById('btn-copy-link'); if (copyBtnH) copyBtnH.style.display = 'none';
   calcTotal();
@@ -3491,7 +3512,9 @@ function resetCalculator() {
 }
 
 function updateHeaderLink() {
-  const show = currentId ? 'inline-flex' : 'none';
+  // Показываем кнопку «Скопировать ссылку» как только PROJECT_ID попал в URL
+  const projectInUrl = new URLSearchParams(location.search).get('project');
+  const show = projectInUrl ? 'inline-flex' : 'none';
   const copyBtn = document.getElementById('btn-copy-link');
   if (copyBtn) copyBtn.style.display = show;
   document.querySelectorAll('.copy-link-bottom').forEach(b => b.style.display = show);
@@ -3530,7 +3553,8 @@ async function loadData(id) {
       switchTab(targetTab);
       updateHeaderLink();
       const copyBtn = document.getElementById('btn-copy-link'); if (copyBtn) copyBtn.style.display = 'inline-flex';
-      safeReplaceState('?id=' + currentId);
+      // Перезаписываем URL: вместо ?id= показываем ?project= (единая ссылка)
+      ensureProjectInUrl();
       setSaveIndicator('saved');
     } else {
       calcTotal();
@@ -3615,8 +3639,10 @@ function handleGlobalChange(e) {
   scheduleAutoSave();
 }
 
-const urlId = new URLSearchParams(location.search).get('id');
+const urlParams = new URLSearchParams(location.search);
+const urlId = urlParams.get('id');
 if (urlId) {
+  // Прямая ссылка на вакансию (?id=) — загружаем её, потом переключаемся на ?project=
   loadData(urlId);
 } else {
   calcTotal();
